@@ -6186,15 +6186,6 @@
       "file": "\\src\\nightcordplugins\\whosWatching\\index.tsx"
     },
     {
-      "name": "WordBomb",
-      "descriptions": [
-        "Assistant BombParty/WordBomb avec overlay persistant, IA intégrée et alphabet track."
-      ],
-      "settingKeys": [],
-      "translationKeys": [],
-      "file": "\\src\\nightcordplugins\\wordBomb\\index.tsx"
-    },
-    {
       "name": "Youtube in NightCord",
       "descriptions": [
         "Watch YouTube in Discord. Search, Dynamic Island, Watching Together."

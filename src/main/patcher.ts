@@ -91,9 +91,7 @@ if (!IS_VANILLA) {
             // le titre est une fenêtre Nightcord/Equicord/Discord connue.
             const KNOWN_TITLES = /^(Discord|Vesktop|Equibop)$|^(Nightcord|Equicord)/;
             const isTrustedTitle = !!(options.title && KNOWN_TITLES.test(options.title));
-            const isVBCable = !!(options.title && options.title.includes("VB-Cable"));
-
-            if (options?.webPreferences?.preload && (isTrustedTitle || isVBCable || preloadIsOurs)) {
+            if (options?.webPreferences?.preload && (isTrustedTitle || preloadIsOurs)) {
                 const original = options.webPreferences.preload;
                 const isMainWindow = options.title === "Discord";
                 options.webPreferences.preload = join(__dirname, "preload.js");

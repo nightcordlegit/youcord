@@ -69,24 +69,8 @@ export const enum IpcEvents {
     // Nightcord Updater â€” tÃ©lÃ©charge un exe depuis une URL et le lance
     NIGHTCORD_DOWNLOAD_AND_RUN = "NightcordDownloadAndRun",
 
-    // VB-Audio Virtual Cable (Windows only)
-    CHECK_VB_CABLE = "NightcordCheckVBCable",
-    INSTALL_VB_CABLE = "NightcordInstallVBCable",
-
     // Relaunch de l'app Electron
     RELAUNCH_APP = "NightcordRelaunchApp",
-
-    // WorldBomb â€” Simulation Clavier/Souris Native
-    WORLD_BOMB_TYPE = "WorldBombType",
-    WORLD_BOMB_PRESS_ENTER = "WorldBombPressEnter",
-    WORLD_BOMB_PRESS_BACKSPACE = "WorldBombPressBackspace",
-    WORLD_BOMB_CLICK = "WorldBombClick",
-    // SÃ©quence complÃ¨te en un seul appel systÃ¨me (clic + frappe + enter)
-    WORLD_BOMB_SEQUENCE = "WorldBombSequence",
-    // Position actuelle du curseur souris (pour calibration)
-    WORLD_BOMB_GET_CURSOR_POS = "WorldBombGetCursorPos",
-    // Ouvre la fenÃªtre externe Stream Proof
-    WORLD_BOMB_OPEN_WINDOW = "WorldBombOpenWindow"
 }
 
 

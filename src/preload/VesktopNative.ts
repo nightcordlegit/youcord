@@ -148,11 +148,4 @@ export const VesktopNative = {
         respond: (response: IpcResponse) => ipcRenderer.send(IpcEvents.IPC_COMMAND, response)
     },
 
-    // WorldBomb — exposé ici pour être accessible via window.VencordNative.worldBomb dans le renderer
-    worldBomb: {
-        sequence: (word: string, lps: number, humanChance: number, targetX: number = -1, targetY: number = -1) =>
-            invoke(IpcEvents.WORLD_BOMB_SEQUENCE, word, lps, humanChance, targetX, targetY),
-        getCursorPos: (): Promise<{ x: number; y: number; }> =>
-            invoke(IpcEvents.WORLD_BOMB_GET_CURSOR_POS),
-    },
 };
