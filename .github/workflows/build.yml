@@ -72,6 +72,7 @@ jobs:
 
             - name: Upload Equicord Stable
               run: |
+                  gh release create latest --title "latest" --notes "Latest nightly build" || true
                   gh release upload latest --clobber dist/release/*
 
             - name: Upload Plugin JSONs to Equibored repo
