@@ -165,7 +165,7 @@ const getJSON = phin.defaults({
 });
 
 async function downloadDist() {
-    log("Fetching latest release information...");
+    log(`Fetching latest release from ${RELEASE_API}...`);
     let assetUrl;
     let nightcordVersion;
     try {
@@ -186,7 +186,7 @@ async function downloadDist() {
     }
 
     const tmpZip = path.join(remote.app.getPath("temp"), "nightcord-dist.zip");
-    log(`Downloading Nightcord ${nightcordVersion} package...`);
+    log(`Downloading Nightcord ${nightcordVersion} package from ${assetUrl}...`);
     try {
         await downloadFileAsync(assetUrl, tmpZip, (percent, downloaded, total) => {
             const dlMB = (downloaded / (1024 * 1024)).toFixed(1);
