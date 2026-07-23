@@ -480,7 +480,7 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
             "tab-quests-active": channelId === "__quests__" && hasActiveQuests,
             wider: settings.store.widerTabsAndBookmarks
         })}
-        key={index}
+        key={id}
         ref={ref}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}

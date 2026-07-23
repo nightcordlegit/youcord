@@ -105,6 +105,8 @@ let ytContainer: HTMLDivElement | null = null;
 let ytInterval: any = null;
 let activeVideoRect: DOMRect | null = null;
 let iframeMode: "fullscreen" | "island" | "hidden" = "hidden";
+let onMessageHandler: ((event: MessageEvent) => void) | null = null;
+let onWatchTogetherHandler: ((e: CustomEvent) => void) | null = null;
 
 function updateIframePosition() {
     if (!ytContainer) return;
@@ -156,7 +158,7 @@ function initYoutubePlayer() {
 
     updateIframePosition();
 
-    window.addEventListener("message", event => {
+    onMessageHandler = (event: MessageEvent) => {
         const allowedOrigins = ["https://www.youtube-nocookie.com", "https://www.youtube.com", "https://www.googlevideo.com"];
         if (!allowedOrigins.includes(event.origin)) return;
         try {
@@ -190,7 +192,9 @@ function initYoutubePlayer() {
                 }
             }
         } catch { }
-    });
+    };
+
+    window.addEventListener("message", onMessageHandler!);
 }
 
 function startProgressLoop() {
@@ -683,7 +687,7 @@ export default definePlugin({
         clearRichPresence();
         rpcUnsub = playerState.subscribe(() => updateRichPresence());
 
-        window.addEventListener("youtube-watch-together", (e: any) => {
+        onWatchTogetherHandler = (e: any) => {
             const ytId = e.detail?.ytId;
             if (!ytId) return;
             Native.resolveVideoDetails(ytId).then(res => {
@@ -694,7 +698,8 @@ export default definePlugin({
                     </ModalRoot>
                 ));
             }).catch(console.error);
-        });
+        };
+        window.addEventListener("youtube-watch-together", onWatchTogetherHandler);
     },
 
     stop() {
@@ -702,5 +707,7 @@ export default definePlugin({
         stopProgressLoop();
         if (rpcUnsub) { rpcUnsub(); rpcUnsub = null; }
         clearRichPresence();
+        if (onMessageHandler) { window.removeEventListener("message", onMessageHandler); onMessageHandler = null; }
+        if (onWatchTogetherHandler) { window.removeEventListener("youtube-watch-together", onWatchTogetherHandler); onWatchTogetherHandler = null; }
     },
 });

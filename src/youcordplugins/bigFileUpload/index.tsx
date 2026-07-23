@@ -253,8 +253,8 @@ function SettingsComponent(props: { setValue(v: any): void; }) {
 
                     <Forms.FormDivider />
                     <Forms.FormTitle>Custom Uploader Arguments</Forms.FormTitle>
-                    {Object.entries(customUploaderStore.get().args).map(([key, value], index) => (
-                        <div key={index}>
+                    {Object.entries(customUploaderStore.get().args).map(([key, value]) => (
+                        <div key={key}>
                             <TextInput type="text" value={key} placeholder="Argument Key"
                                 onChange={(newKey: string) => handleArgChange(key, newKey, value as string)} className={Margins.bottom16} />
                             <TextInput type="text" value={value as string} placeholder="Argument Value"
@@ -264,8 +264,8 @@ function SettingsComponent(props: { setValue(v: any): void; }) {
 
                     <Forms.FormDivider />
                     <Forms.FormTitle>Headers</Forms.FormTitle>
-                    {Object.entries(customUploaderStore.get().headers).map(([key, value], index) => (
-                        <div key={index}>
+                    {Object.entries(customUploaderStore.get().headers).map(([key, value]) => (
+                        <div key={key}>
                             <TextInput type="text" value={key} placeholder="Header Key"
                                 onChange={(newKey: string) => handleHeaderChange(key, newKey, value as string)} className={Margins.bottom16} />
                             <TextInput type="text" value={value as string} placeholder="Header Value"

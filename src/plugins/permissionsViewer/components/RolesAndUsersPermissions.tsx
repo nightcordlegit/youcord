@@ -95,7 +95,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
 
                             return (
                                 <div
-                                    key={index}
+                                    key={permission.id}
                                     className={cl("modal-list-item-btn")}
                                     onClick={() => selectItem(index)}
                                     role="button"

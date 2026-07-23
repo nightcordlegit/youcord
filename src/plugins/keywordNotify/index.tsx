@@ -127,7 +127,7 @@ function ListedIds({ listIds, setListIds }) {
 
     const elements = values.map((currentValue: string, index: number) => {
         return (
-            <Flex key={index} flexDirection="row" style={{ marginBottom: "5px" }}>
+            <Flex key={currentValue} flexDirection="row" style={{ marginBottom: "5px" }}>
                 <div style={{ flexGrow: 1 }}>
                     <TextInput
                         placeholder="ID"

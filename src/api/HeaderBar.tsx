@@ -8,7 +8,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import { filters, find, findComponentByCodeLazy } from "@webpack";
-import { Clickable, Popout, Tooltip, useEffect, useRef,useState } from "@webpack/common";
+import { Clickable, Popout, Tooltip, useEffect, useMemo, useRef, useState } from "@webpack/common";
 import { openYouCordModal } from "@youcordplugins/compactMode/YouCordModal";
 import type { ComponentType, JSX, MouseEventHandler, ReactNode } from "react";
 
@@ -77,13 +77,20 @@ export function HeaderBarButton(props: HeaderBarButtonProps & { ref?: React.RefO
         logger.error(`HeaderBarButton missing component for tooltip=${tooltip}: Tooltip=${!!Tooltip}, Clickable=${!!Clickable}, Icon=${!!Icon}`);
     }
 
+    const headerBtnStyle = useMemo(() => ({
+        width: iconSize,
+        boxSizing: "content-box",
+        justifyContent: "center",
+        cursor: "pointer",
+    }), [iconSize]);
+
     return (
         <Tooltip text={tooltip ?? ""} position={position} shouldShow={tooltip != null}>
             {({ onMouseEnter, onMouseLeave }) => (
                 <Clickable
                     {...{ innerRef: ref } as any}
                     className={classes(HeaderBarClasses.clickable, "youcord-header-btn", className)}
-                    style={{ width: iconSize, boxSizing: "content-box", justifyContent: "center", cursor: "pointer" }}
+                    style={headerBtnStyle}
                     onClick={onClick}
                     onContextMenu={onContextMenu}
                     onMouseEnter={onMouseEnter}

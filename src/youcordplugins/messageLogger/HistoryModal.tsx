@@ -74,7 +74,7 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
 
                     {timestamps.map((timestamp, index) => (
                         <TabBar.Item
-                            key={index}
+                            key={timestamp}
                             className="vc-settings-tab-bar-item"
                             id={index}
                         >

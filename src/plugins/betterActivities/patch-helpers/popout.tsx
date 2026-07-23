@@ -92,14 +92,14 @@ export function ShowAllActivitiesComponent({ activity, user, ...props }: Readonl
                     {activities.map((activity, index) =>
                         index === 0 ? (
                             <ActivityView
-                                key={index}
+                                key={`${activity.application_id ?? activity.type}-${index}`}
                                 activity={activity}
                                 user={user}
                                 currentUser={currentUser}
                                 {...props}
                             />) : (
                             <ActivityView
-                                key={index}
+                                key={`${activity.application_id ?? activity.type}-${index}`}
                                 activity={activity}
                                 user={user}
                                 application={getActivityApplication(activity)}

@@ -21,7 +21,7 @@ export default function CharSelectModal({ modalProps, setCharacter }: { modalPro
                 c.character.toLowerCase().includes(s)
             ) {
                 return (
-                    <img key={index} onClick={() => { modalProps.onClose(); setCharacter(index); }} src={`https://st.ayaka.one/img/${c.img}`} srcSet={`https://st.ayaka.one/img/${c.img}`} loading="lazy" />
+                    <img key={c.id} onClick={() => { modalProps.onClose(); setCharacter(index); }} src={`https://st.ayaka.one/img/${c.img}`} srcSet={`https://st.ayaka.one/img/${c.img}`} loading="lazy" />
                 );
             }
 

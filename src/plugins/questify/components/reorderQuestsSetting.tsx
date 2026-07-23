@@ -132,7 +132,7 @@ export function ReorderQuestsSetting(): JSX.Element {
             <SettingsSubheader> Status Order </SettingsSubheader>
             <SettingsRow>
                 {questOrder.map((status, index) => (
-                    <SettingsRowItem key={index}>
+                    <SettingsRowItem key={status}>
                         <SettingsSelect
                             label={`${positionLabels[index]}:`}
                             options={questStatusManaOptions}
