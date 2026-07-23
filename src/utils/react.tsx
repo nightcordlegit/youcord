@@ -118,8 +118,13 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
             });
 
         return () => void (isAlive = false);
+    // `opts` is rebuilt via Object.assign on every render, so it (and `factory`,
+    // usually an inline arg) is never referentially stable. Including them here
+    // reruns this effect on every render; the effect unconditionally calls
+    // setState when !state.pending, so every use of useAwaiter would infinite-loop
+    // (this is what froze the Themes tab — it calls useAwaiter for getThemesDir).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [...opts.deps, factory, opts]);
+    }, opts.deps);
 
     return [state.value, state.error, state.pending];
 }
@@ -180,6 +185,10 @@ export function useCleanupEffect(
     effect: () => void,
     deps?: React.DependencyList
 ): void {
+    // `effect` is almost always an inline function at the call site, so a new
+    // reference every render; including it here would rerun the effect (and its
+    // cleanup) every render regardless of `deps`. Not currently called anywhere,
+    // but kept correct rather than left as a landmine for the next caller.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => effect, [...(deps ?? []), effect]);
+    useEffect(() => effect, deps ?? []);
 }
