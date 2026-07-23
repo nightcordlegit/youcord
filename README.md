@@ -10,6 +10,11 @@
 [![Platform](https://img.shields.io/badge/platform-Windows-3b82f6.svg?logo=windows&logoColor=white)](https://github.com/nightcordlegit/youcord)
 [![Website](https://img.shields.io/badge/website-youcord.fr-5865F2?logo=googlechrome&logoColor=white)](https://youcord.fr)
 
+[![Stars](https://img.shields.io/github/stars/nightcordlegit/youcord?style=for-the-badge&logo=github&color=gold)](https://github.com/nightcordlegit/youcord/stargazers)
+[![Downloads](https://img.shields.io/github/downloads/nightcordlegit/youcord/total?style=for-the-badge&logo=windows&color=3b82f6)](https://github.com/nightcordlegit/youcord/releases)
+[![Commits](https://img.shields.io/github/commit-activity/m/nightcordlegit/youcord?style=for-the-badge&logo=git&color=a855f7)](https://github.com/nightcordlegit/youcord/commits/main)
+[![Release](https://img.shields.io/github/v/release/nightcordlegit/youcord?style=for-the-badge&logo=github&color=22c55e)](https://github.com/nightcordlegit/youcord/releases/latest)
+
 ---
 
 </div>
