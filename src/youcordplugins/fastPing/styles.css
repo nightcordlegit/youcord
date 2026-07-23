@@ -1,6 +1,7 @@
 .fastping-popover {
     position: fixed;
     z-index: 9999;
+
     /* On passe à -115% pour le monter encore plus */
     transform: translate(-50%, -115%); 
     animation: fastping-pop-in 0.12s ease-out;
@@ -14,9 +15,9 @@
     padding: 6px 12px;
     background: var(--background-floating, #111214);
     color: var(--text-normal, #fff);
-    border: 1px solid var(--background-modifier-accent, rgba(255, 255, 255, 0.12));
+    border: 1px solid var(--background-modifier-accent, rgb(255 255 255 / 12%));
     border-radius: 6px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 8px 20px rgb(0 0 0 / 45%);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -36,11 +37,14 @@
 @keyframes fastping-pop-in {
     from {
         opacity: 0;
+
         /* Le point de départ suit le mouvement (-105%) */
         transform: translate(-50%, -105%);
     }
+
     to {
         opacity: 1;
+
         /* Doit correspondre exactement au transform de .fastping-popover */
         transform: translate(-50%, -115%);
     }

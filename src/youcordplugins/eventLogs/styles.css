@@ -21,20 +21,20 @@
 }
 
 .el-filter-btn {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgb(255 255 255 / 5%);
     border: 1.5px solid transparent;
     border-radius: 6px;
     padding: 4px 10px;
     font-size: 12px;
     cursor: pointer;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgb(255 255 255 / 50%);
     transition: all .1s;
     font-family: inherit;
 }
 
 .el-filter-btn:hover {
-    border-color: rgba(88, 101, 242, 0.5);
-    color: rgba(255, 255, 255, 0.85);
+    border-color: rgb(88 101 242 / 50%);
+    color: rgb(255 255 255 / 85%);
 }
 
 .el-filter-btn--active {
@@ -55,8 +55,8 @@
 }
 
 .el-guild-select {
-    background: rgba(0, 0, 0, 0.25);
-    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    background: rgb(0 0 0 / 25%);
+    border: 1.5px solid rgb(255 255 255 / 8%);
     border-radius: 8px;
     color: #fff;
     padding: 6px 10px;
@@ -69,7 +69,7 @@
 }
 
 .el-guild-select:hover {
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: rgb(255 255 255 / 20%);
 }
 
 .el-guild-select option {
@@ -79,8 +79,8 @@
 
 .el-search-input {
     flex: 1;
-    background: rgba(0, 0, 0, 0.25);
-    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    background: rgb(0 0 0 / 25%);
+    border: 1.5px solid rgb(255 255 255 / 8%);
     border-radius: 8px;
     color: #fff;
     padding: 6px 10px;
@@ -91,17 +91,17 @@
 }
 
 .el-search-input:focus {
-    border-color: rgba(255, 255, 255, 0.22);
+    border-color: rgb(255 255 255 / 22%);
 }
 
 .el-search-input::placeholder {
-    color: rgba(255, 255, 255, 0.3);
+    color: rgb(255 255 255 / 30%);
 }
 
 .el-clear {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgb(255 255 255 / 40%);
     cursor: pointer;
     font-size: 12px;
     font-family: inherit;
@@ -109,8 +109,8 @@
 }
 
 .el-clear-all {
-    background: rgba(237, 66, 69, .08);
-    border: 1px solid rgba(237, 66, 69, .25);
+    background: rgb(237 66 69 / 8%);
+    border: 1px solid rgb(237 66 69 / 25%);
     border-radius: 6px;
     padding: 4px 10px;
     font-size: 12px;
@@ -121,7 +121,7 @@
 }
 
 .el-clear-all:hover {
-    background: rgba(237, 66, 69, .18);
+    background: rgb(237 66 69 / 18%);
 }
 
 /* Liste */
@@ -132,7 +132,7 @@
     max-height: 360px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+    scrollbar-color: rgb(255 255 255 / 12%) transparent;
 }
 
 .el-list::-webkit-scrollbar {
@@ -140,13 +140,13 @@
 }
 
 .el-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgb(255 255 255 / 12%);
     border-radius: 2px;
 }
 
 .el-empty {
     text-align: center;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgb(255 255 255 / 40%);
     font-size: 13px;
     padding: 32px 0;
 }
@@ -171,7 +171,7 @@
 }
 
 .el-row:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: rgb(255 255 255 / 4%);
 }
 
 .el-left {
@@ -223,24 +223,24 @@
 }
 
 .el-sep {
-    color: rgba(255, 255, 255, 0.25);
+    color: rgb(255 255 255 / 25%);
     font-size: 10px;
 }
 
 .el-channel {
-    color: rgba(255, 255, 255, 0.45);
+    color: rgb(255 255 255 / 45%);
     font-size: 10px;
 }
 
 .el-guild {
-    color: rgba(255, 255, 255, 0.3);
+    color: rgb(255 255 255 / 30%);
     font-size: 10px;
 }
 
 .el-time {
     margin-left: auto;
     flex-shrink: 0;
-    color: rgba(255, 255, 255, 0.3);
+    color: rgb(255 255 255 / 30%);
     font-size: 10px;
 }
 
@@ -254,27 +254,27 @@
 }
 
 .el-msg--deleted {
-    background: rgba(237, 66, 69, .08);
+    background: rgb(237 66 69 / 8%);
     border-left: 2px solid #ed4245;
-    color: rgba(255, 255, 255, .85);
+    color: rgb(255 255 255 / 85%);
 }
 
 .el-msg--before {
-    background: rgba(237, 66, 69, .06);
+    background: rgb(237 66 69 / 6%);
     border-left: 2px solid #ed4245;
-    color: rgba(255, 255, 255, .85);
+    color: rgb(255 255 255 / 85%);
 }
 
 .el-msg--after {
-    background: rgba(59, 165, 92, .06);
+    background: rgb(59 165 92 / 6%);
     border-left: 2px solid #3ba55c;
-    color: rgba(255, 255, 255, .85);
+    color: rgb(255 255 255 / 85%);
 }
 
 .el-msg-label {
     font-weight: 700;
     font-size: 10px;
-    color: rgba(255, 255, 255, .35);
+    color: rgb(255 255 255 / 35%);
     flex-shrink: 0;
 }
 
@@ -286,8 +286,8 @@
 
 .el-content-text {
     font-size: 11px;
-    color: rgba(255, 255, 255, .45);
-    background: rgba(0, 0, 0, .15);
+    color: rgb(255 255 255 / 45%);
+    background: rgb(0 0 0 / 15%);
     border-radius: 3px;
     padding: 2px 6px;
 }
@@ -300,16 +300,16 @@
     gap: 6px;
     padding-top: 6px;
     font-size: 12px;
-    color: rgba(255, 255, 255, .4);
+    color: rgb(255 255 255 / 40%);
 }
 
 .el-pagination button {
-    background: rgba(255, 255, 255, .06);
-    border: 1px solid rgba(255, 255, 255, .08);
+    background: rgb(255 255 255 / 6%);
+    border: 1px solid rgb(255 255 255 / 8%);
     border-radius: 5px;
     padding: 3px 9px;
     cursor: pointer;
-    color: rgba(255, 255, 255, .7);
+    color: rgb(255 255 255 / 70%);
     font-size: 11px;
     font-family: inherit;
     transition: background .1s;
@@ -321,5 +321,5 @@
 }
 
 .el-pagination button:not(:disabled):hover {
-    background: rgba(255, 255, 255, .1);
+    background: rgb(255 255 255 / 10%);
 }

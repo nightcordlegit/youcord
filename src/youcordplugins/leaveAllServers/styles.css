@@ -12,15 +12,15 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(0, 0, 0, 0.25);
-    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    background: rgb(0 0 0 / 25%);
+    border: 1.5px solid rgb(255 255 255 / 8%);
     border-radius: 8px;
     padding: 8px 12px;
     transition: border-color 0.15s;
 }
 
 .las-search-bar:focus-within {
-    border-color: rgba(255, 255, 255, 0.25);
+    border-color: rgb(255 255 255 / 25%);
 }
 
 .las-search-input {
@@ -34,13 +34,13 @@
 }
 
 .las-search-input::placeholder {
-    color: rgba(255, 255, 255, 0.35);
+    color: rgb(255 255 255 / 35%);
 }
 
 .las-search-clear {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgb(255 255 255 / 40%);
     cursor: pointer;
     font-size: 12px;
     padding: 0 2px;
@@ -49,7 +49,7 @@
 }
 
 .las-search-clear:hover {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgb(255 255 255 / 80%);
 }
 
 /* ── Labels ── */
@@ -59,15 +59,15 @@
     font-weight: 700 !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: rgba(255, 255, 255, 0.5) !important;
+    color: rgb(255 255 255 / 50%) !important;
 }
 
 /* ── Boutons Tout / Aucun ── */
 .las-mini-btn {
-    background: rgba(255, 255, 255, 0.07);
-    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    background: rgb(255 255 255 / 7%);
+    border: 1.5px solid rgb(255 255 255 / 10%);
     border-radius: 4px;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgb(255 255 255 / 60%);
     font-size: 11px;
     font-weight: 600;
     padding: 3px 10px;
@@ -77,9 +77,9 @@
 }
 
 .las-mini-btn:hover:not(:disabled) {
-    border-color: rgba(255, 255, 255, 0.25);
+    border-color: rgb(255 255 255 / 25%);
     color: #fff;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgb(255 255 255 / 12%);
 }
 
 .las-mini-btn:disabled {
@@ -95,15 +95,15 @@
     max-height: 260px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    scrollbar-color: rgb(255 255 255 / 15%) transparent;
 }
 
 .las-guild-list::-webkit-scrollbar { width: 4px; }
-.las-guild-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 2px; }
+.las-guild-list::-webkit-scrollbar-thumb { background: rgb(255 255 255 / 15%); border-radius: 2px; }
 
 .las-empty {
     text-align: center;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgb(255 255 255 / 40%);
     font-size: 13px;
     padding: 16px;
 }
@@ -117,16 +117,16 @@
     cursor: pointer;
     border: 1.5px solid transparent;
     transition: all 0.1s;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgb(255 255 255 / 4%);
 }
 
 .las-guild-row:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgb(255 255 255 / 8%);
 }
 
 .las-guild-row--selected {
     border-color: #ed4245;
-    background: rgba(237, 66, 69, 0.1);
+    background: rgb(237 66 69 / 10%);
 }
 
 .las-avatar {
@@ -141,7 +141,7 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: rgba(237, 66, 69, 0.35);
+    background: rgb(237 66 69 / 35%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -166,8 +166,8 @@
     font-weight: 700;
     padding: 2px 6px;
     border-radius: 4px;
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.4);
+    background: rgb(255 255 255 / 8%);
+    color: rgb(255 255 255 / 40%);
     flex-shrink: 0;
     letter-spacing: 0.4px;
 }
@@ -186,9 +186,9 @@
     font-size: 13px;
 }
 
-.las-status--running { background: rgba(250, 166, 26, 0.12); color: #faa61a; }
-.las-status--done    { background: rgba(59, 165, 92, 0.12);  color: #3ba55c; }
-.las-status--error   { background: rgba(237, 66, 69, 0.12);  color: #ed4245; }
+.las-status--running { background: rgb(250 166 26 / 12%); color: #faa61a; }
+.las-status--done    { background: rgb(59 165 92 / 12%);  color: #3ba55c; }
+.las-status--error   { background: rgb(237 66 69 / 12%);  color: #ed4245; }
 
 /* ── Footer info ── */
 .las-footer-info {
@@ -196,7 +196,7 @@
     align-items: center;
     gap: 8px;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgb(255 255 255 / 40%);
 }
 
 .las-safe-note {

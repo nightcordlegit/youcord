@@ -1,4 +1,4 @@
-﻿/*
+/*
  * YouCord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -658,7 +658,7 @@
 }
 
 @keyframes vc-illegalcord-dynamic-island-notification-avatar {
-    from {
+    0% {
         opacity: 0;
         transform: scale(.3) rotate(-20deg);
     }
@@ -736,22 +736,22 @@
 }
 
 .vc-illegalcord-dynamic-island-volume-slider {
-    -webkit-appearance: none;
     appearance: none;
     width: 100%;
     height: 3px;
-    background: linear-gradient(to right, var(--brand-500) 0%, var(--brand-500) var(--value-percent, 0%), rgba(255, 255, 255, 0.12) var(--value-percent, 0%), rgba(255, 255, 255, 0.12) 100%);
+    background: linear-gradient(to right, var(--brand-500) 0%, var(--brand-500) var(--value-percent, 0%), rgb(255 255 255 / 12%) var(--value-percent, 0%), rgb(255 255 255 / 12%) 100%);
     border-radius: 99px;
     cursor: pointer;
     outline: none;
     transition: height 0.12s, background 0.12s;
-    margin: 8px 0 2px 0;
+    margin: 8px 0 2px;
 }
+
 .vc-illegalcord-dynamic-island-volume-slider:hover {
     height: 5px;
 }
+
 .vc-illegalcord-dynamic-island-volume-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
     appearance: none;
     width: 14px;
     height: 14px;
@@ -760,6 +760,7 @@
     cursor: pointer;
     margin-top: -5px;
 }
+
 .vc-illegalcord-dynamic-island-volume-slider::-webkit-slider-runnable-track {
     height: 100%;
     border-radius: 99px;
@@ -769,20 +770,24 @@
 .vc-illegalcord-dynamic-island-voice-participants-list::-webkit-scrollbar {
     width: 4px;
 }
+
 .vc-illegalcord-dynamic-island-voice-participants-list::-webkit-scrollbar-track {
     background: transparent;
 }
+
 .vc-illegalcord-dynamic-island-voice-participants-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgb(255 255 255 / 15%);
     border-radius: 99px;
 }
+
 .vc-illegalcord-dynamic-island-voice-participants-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgb(255 255 255 / 30%);
 }
 
 .vc-illegalcord-dynamic-island-participant-row {
     background: transparent;
 }
+
 .vc-illegalcord-dynamic-island-participant-row:hover {
     background: var(--background-modifier-hover);
 }

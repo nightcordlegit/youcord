@@ -62,7 +62,7 @@
 }
 
 .vc-switch-checked .vc-switch-thumb rect {
-    fill: var(--switch-thumb-background-selected-default, #ffffff);
+    fill: var(--switch-thumb-background-selected-default, #fff);
 }
 
 .vc-switch-input {

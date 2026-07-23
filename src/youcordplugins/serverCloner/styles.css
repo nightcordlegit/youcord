@@ -1,12 +1,11 @@
-﻿/* Server Cloner â€” YouCord plugin styles */
+/* Server Cloner â€” YouCord plugin styles */
 
 .sc-log-area {
     background: var(--background-secondary);
     border-radius: 8px;
     padding: 12px 14px;
     max-height: 250px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden auto;
     font-size: 12px;
     font-family: var(--font-code);
     color: var(--text-muted);
@@ -18,13 +17,15 @@
 }
 .sc-log-area::-webkit-scrollbar { width: 4px; }
 .sc-log-area::-webkit-scrollbar-track { background: transparent; border-radius: 4px; }
+
 .sc-log-area::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thin-thumb, rgba(255, 255, 255, 0.15));
+    background: var(--scrollbar-thin-thumb, rgb(255 255 255 / 15%));
     border-radius: 4px;
     min-height: 40px;
 }
+
 .sc-log-area::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-thin-thumb, rgba(255, 255, 255, 0.25));
+    background: var(--scrollbar-thin-thumb, rgb(255 255 255 / 25%));
 }
 .sc-log-area .sc-log-ok { color: var(--text-positive); }
 .sc-log-area .sc-log-err { color: var(--text-danger); }
@@ -39,6 +40,7 @@
     overflow: hidden;
     margin-top: 12px;
 }
+
 .sc-progress-fill {
     height: 100%;
     background: var(--brand-500);

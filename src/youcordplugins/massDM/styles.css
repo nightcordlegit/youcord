@@ -36,8 +36,8 @@
 .mdm-textarea-main {
     width: 100%;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgb(255 255 255 / 10%);
+    background: rgb(0 0 0 / 20%);
     color: #fff;
     padding: 12px;
     font-family: inherit;
@@ -51,7 +51,7 @@
 .mdm-textarea-main:focus {
     outline: none;
     border-color: var(--brand-experiment);
-    background: rgba(0, 0, 0, 0.25);
+    background: rgb(0 0 0 / 25%);
 }
 
 .mdm-mention-hint {
@@ -62,7 +62,7 @@
     background: var(--background-secondary-alt);
     border: 1px solid var(--brand-experiment);
     border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 15px rgb(0 0 0 / 40%);
     z-index: 100;
     overflow: hidden;
     cursor: pointer;
@@ -104,7 +104,7 @@
     font-weight: 700;
     color: #fff;
     background: var(--background-primary);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgb(255 255 255 / 6%);
 }
 
 .mdm-content {
@@ -125,7 +125,7 @@
 .mdm-textarea {
     width: 100%;
     background: var(--background-tertiary);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgb(255 255 255 / 8%);
     border-radius: 8px;
     padding: 10px 12px;
     color: #fff;
@@ -138,7 +138,7 @@
 }
 
 .mdm-textarea:focus {
-    border-color: rgba(255, 255, 255, 0.25);
+    border-color: rgb(255 255 255 / 25%);
 }
 
 .mdm-friend-list {
@@ -184,7 +184,7 @@
 .mdm-no-friends {
     padding: 20px;
     text-align: center;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgb(255 255 255 / 50%);
     font-size: 14px;
 }
 
@@ -214,7 +214,7 @@
 }
 
 .mdm-stats-pct {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgb(255 255 255 / 60%);
     font-size: 13px;
 }
 
@@ -268,7 +268,6 @@
 }
 
 @keyframes mdm-pulse {
-
     0%,
     100% {
         opacity: 1;
@@ -310,6 +309,6 @@
 
 .mdm-delay-input::-webkit-inner-spin-button,
 .mdm-delay-input::-webkit-outer-spin-button {
-    -webkit-appearance: none;
+    appearance: none;
     margin: 0;
 }

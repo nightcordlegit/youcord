@@ -8,7 +8,7 @@
     max-height: min(84vh, 900px) !important;
     border-radius: 18px !important;
     overflow: hidden !important;
-    box-shadow: 0 28px 72px rgba(0, 0, 0, 0.55) !important;
+    box-shadow: 0 28px 72px rgb(0 0 0 / 55%) !important;
     border: 1px solid var(--background-modifier-accent) !important;
 }
 
@@ -50,11 +50,10 @@
 
 .nai-panel .nai-scroll {
     flex: 1 1 auto;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden auto;
     min-height: 0;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+    scrollbar-color: rgb(255 255 255 / 10%) transparent;
 }
 
 .nai-panel .nai-scroll::-webkit-scrollbar {
@@ -66,12 +65,12 @@
 }
 
 .nai-panel .nai-scroll::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgb(255 255 255 / 10%);
     border-radius: 3px;
 }
 
 .nai-panel .nai-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgb(255 255 255 / 20%);
 }
 
 /* ── Header ──────────────────────────────────────────────────────────────────── */
@@ -103,7 +102,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 0 16px rgba(88, 101, 242, 0.35);
+    box-shadow: 0 0 16px rgb(88 101 242 / 35%);
 }
 
 .nai-header-info {
@@ -127,14 +126,14 @@
 }
 
 .nai-header-badge {
-    background: rgba(88, 101, 242, 0.18);
+    background: rgb(88 101 242 / 18%);
     color: #7289da;
     font-size: 10px;
     font-weight: 700;
     padding: 2px 7px;
     border-radius: 10px;
     letter-spacing: 0.4px;
-    border: 1px solid rgba(88, 101, 242, 0.25);
+    border: 1px solid rgb(88 101 242 / 25%);
 }
 
 .nai-header-status {
@@ -154,7 +153,7 @@
 
 .nai-dot--on {
     background: #23a55a;
-    box-shadow: 0 0 5px rgba(35, 165, 90, 0.7);
+    box-shadow: 0 0 5px rgb(35 165 90 / 70%);
     animation: nai-pulse 2.5s ease-in-out infinite;
 }
 
@@ -163,7 +162,6 @@
 }
 
 @keyframes nai-pulse {
-
     0%,
     100% {
         opacity: 1;
@@ -204,15 +202,14 @@
 
 .nai-scroll {
     flex: 1 1 auto;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden auto;
     padding: 0 !important;
     min-height: 0;
     isolation: isolate;
     position: relative;
     z-index: 0;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+    scrollbar-color: rgb(255 255 255 / 10%) transparent;
 }
 
 .nai-scroll::-webkit-scrollbar {
@@ -224,12 +221,12 @@
 }
 
 .nai-scroll::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgb(255 255 255 / 10%);
     border-radius: 3px;
 }
 
 .nai-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgb(255 255 255 / 20%);
 }
 
 .nai-messages {
@@ -281,8 +278,8 @@
 }
 
 .nai-chip {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgb(255 255 255 / 5%) !important;
+    border: 1px solid rgb(255 255 255 / 10%) !important;
     border-radius: 20px;
     padding: 7px 15px;
     font-size: 13px;
@@ -297,10 +294,10 @@
 
 .nai-chip:hover {
     background: var(--background-modifier-hover);
-    border-color: rgba(88, 101, 242, 0.6);
+    border-color: rgb(88 101 242 / 60%);
     color: var(--header-primary);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(88, 101, 242, 0.15);
+    box-shadow: 0 4px 12px rgb(88 101 242 / 15%);
 }
 
 .nai-chip--link {
@@ -344,7 +341,7 @@
 
 .nai-msg--assistant .nai-msg-avatar {
     background: linear-gradient(135deg, #5865F2 0%, #EB459E 100%);
-    color: #ffffff;
+    color: #fff;
     border: none;
 }
 
@@ -426,7 +423,6 @@
 }
 
 @keyframes nai-bob {
-
     0%,
     60%,
     100% {
@@ -451,8 +447,8 @@
     position: absolute;
     top: 8px;
     right: 10px;
-    background: rgba(88, 101, 242, 0.18);
-    border: 1px solid rgba(88, 101, 242, 0.35);
+    background: rgb(88 101 242 / 18%);
+    border: 1px solid rgb(88 101 242 / 35%);
     border-radius: 6px;
     color: #7289da;
     font-size: 11px;
@@ -465,7 +461,7 @@
 }
 
 .nai-copy-btn:hover {
-    background: rgba(88, 101, 242, 0.35);
+    background: rgb(88 101 242 / 35%);
     color: #fff;
 }
 
@@ -480,7 +476,7 @@
     border-radius: 8px;
     padding: 11px 14px;
     overflow-x: auto;
-    font-family: "Consolas", "JetBrains Mono", "Monaco", monospace;
+    font-family: Consolas, "JetBrains Mono", Monaco, monospace;
     font-size: 13px;
     line-height: 1.5;
     margin: 5px 0;
@@ -490,7 +486,7 @@
     background: var(--background-secondary-alt, #1e1f22);
     border-radius: 4px;
     padding: 1px 5px;
-    font-family: "Consolas", "JetBrains Mono", "Monaco", monospace;
+    font-family: Consolas, "JetBrains Mono", Monaco, monospace;
     font-size: 13px;
     border: 1px solid var(--background-modifier-accent);
 }
@@ -519,7 +515,7 @@
 
 .nai-input-box:focus-within {
     border-color: #5865F2;
-    box-shadow: 0 0 0 2.5px rgba(88, 101, 242, 0.18);
+    box-shadow: 0 0 0 2.5px rgb(88 101 242 / 18%);
 }
 
 .nai-input-box--disabled {
@@ -562,12 +558,12 @@
     justify-content: center;
     flex-shrink: 0;
     transition: all 0.15s;
-    box-shadow: 0 2px 8px rgba(88, 101, 242, 0.35);
+    box-shadow: 0 2px 8px rgb(88 101 242 / 35%);
 }
 
 .nai-send:hover:not(.nai-send--off) {
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(88, 101, 242, 0.5);
+    box-shadow: 0 4px 14px rgb(88 101 242 / 50%);
 }
 
 .nai-send--off {
@@ -580,7 +576,7 @@
 .nai-spin {
     width: 15px;
     height: 15px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgb(255 255 255 / 30%);
     border-top-color: white;
     border-radius: 50%;
     animation: nai-spin 0.65s linear infinite;
@@ -610,7 +606,7 @@
 
 .nai-attach-btn:hover:not(:disabled) {
     color: #5865F2;
-    background: rgba(88, 101, 242, 0.1);
+    background: rgb(88 101 242 / 10%);
 }
 
 .nai-attach-btn:disabled {
@@ -631,8 +627,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background: rgba(88, 101, 242, 0.12);
-    border: 1px solid rgba(88, 101, 242, 0.3);
+    background: rgb(88 101 242 / 12%);
+    border: 1px solid rgb(88 101 242 / 30%);
     border-radius: 8px;
     padding: 4px 8px 4px 4px;
     max-width: 180px;
@@ -687,7 +683,7 @@
     max-height: 200px;
     object-fit: contain;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgb(255 255 255 / 8%);
     cursor: zoom-in;
     display: block;
 }
@@ -696,8 +692,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgb(255 255 255 / 6%);
+    border: 1px solid rgb(255 255 255 / 10%);
     border-radius: 6px;
     padding: 5px 10px;
     font-size: 12px;

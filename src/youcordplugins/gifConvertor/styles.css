@@ -5,22 +5,18 @@
     position: fixed;
     z-index: 9999;
     width: 340px;
-
-    background: rgba(15, 15, 20, 0.92);
+    background: rgb(15 15 20 / 92%);
     backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgb(255 255 255 / 8%);
     border-radius: 16px;
     box-shadow:
-        0 4px 40px rgba(0, 0, 0, 0.6),
-        0 0 0 1px rgba(88, 101, 242, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.07);
-
+        0 4px 40px rgb(0 0 0 / 60%),
+        0 0 0 1px rgb(88 101 242 / 12%),
+        inset 0 1px 0 rgb(255 255 255 / 7%);
     padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-
     animation: nc-gifconv-enter 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
@@ -43,7 +39,6 @@
     text-transform: uppercase;
     color: var(--header-primary, #fff);
     background: linear-gradient(90deg, #5865f2, #a78bfa);
-    -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
@@ -59,15 +54,16 @@
     align-items: center;
     transition: color 0.15s, background 0.15s;
 }
+
 .nc-gifconv-close:hover {
     color: #fff;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgb(255 255 255 / 8%);
 }
 
 /* ── Drop zone ───────────────────────────────────────────────────────────── */
 .nc-gifconv-dropzone {
     position: relative;
-    border: 2px dashed rgba(88, 101, 242, 0.4);
+    border: 2px dashed rgb(88 101 242 / 40%);
     border-radius: 12px;
     padding: 28px 20px;
     display: flex;
@@ -77,7 +73,7 @@
     gap: 8px;
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s;
-    background: rgba(88, 101, 242, 0.04);
+    background: rgb(88 101 242 / 4%);
     text-align: center;
     min-height: 130px;
     overflow: hidden;
@@ -86,7 +82,7 @@
 .nc-gifconv-dropzone:hover,
 .nc-gifconv-dropzone.nc-gifconv-drag-over {
     border-color: #5865f2;
-    background: rgba(88, 101, 242, 0.1);
+    background: rgb(88 101 242 / 10%);
 }
 
 .nc-gifconv-dropzone.nc-gifconv-drag-over::after {
@@ -94,7 +90,7 @@
     position: absolute;
     inset: 0;
     border-radius: 10px;
-    background: linear-gradient(135deg, rgba(88, 101, 242, 0.15), rgba(167, 139, 250, 0.08));
+    background: linear-gradient(135deg, rgb(88 101 242 / 15%), rgb(167 139 250 / 8%));
     animation: nc-gifconv-pulse 1.5s ease-in-out infinite;
     pointer-events: none;
 }
@@ -109,6 +105,7 @@
     opacity: 0.8;
     transition: transform 0.2s;
 }
+
 .nc-gifconv-dropzone:hover .nc-gifconv-dropzone-icon,
 .nc-gifconv-dropzone.nc-gifconv-drag-over .nc-gifconv-dropzone-icon {
     transform: translateY(-3px) scale(1.1);
@@ -139,7 +136,7 @@
 .nc-gifconv-spinner {
     width: 36px;
     height: 36px;
-    border: 3px solid rgba(88, 101, 242, 0.2);
+    border: 3px solid rgb(88 101 242 / 20%);
     border-top-color: #5865f2;
     border-radius: 50%;
     animation: nc-gifconv-spin 0.8s linear infinite;
@@ -167,10 +164,10 @@
     max-width: 100%;
     max-height: 180px;
     border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgb(255 255 255 / 8%);
     object-fit: contain;
     image-rendering: pixelated;
-    background: rgba(0,0,0,0.3);
+    background: rgb(0 0 0 / 30%);
 }
 
 .nc-gifconv-preview-label {
@@ -199,16 +196,16 @@
 .nc-gifconv-btn-primary {
     background: linear-gradient(135deg, #5865f2, #7c3aed);
     color: #fff;
-    box-shadow: 0 2px 10px rgba(88, 101, 242, 0.4);
+    box-shadow: 0 2px 10px rgb(88 101 242 / 40%);
 }
 .nc-gifconv-btn-primary:hover { filter: brightness(1.1); }
 
 .nc-gifconv-btn-secondary {
-    background: rgba(255, 255, 255, 0.07);
+    background: rgb(255 255 255 / 7%);
     color: var(--header-primary, #fff);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgb(255 255 255 / 10%);
 }
-.nc-gifconv-btn-secondary:hover { background: rgba(255,255,255,0.12); }
+.nc-gifconv-btn-secondary:hover { background: rgb(255 255 255 / 12%); }
 
 .nc-gifconv-btn:disabled {
     opacity: 0.4;
@@ -222,7 +219,7 @@
     color: var(--text-danger, #f04747);
     text-align: center;
     padding: 8px;
-    background: rgba(240, 71, 71, 0.1);
+    background: rgb(240 71 71 / 10%);
     border-radius: 8px;
-    border: 1px solid rgba(240, 71, 71, 0.2);
+    border: 1px solid rgb(240 71 71 / 20%);
 }

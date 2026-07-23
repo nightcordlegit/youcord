@@ -1,4 +1,4 @@
-﻿/*
+/*
  * YouCord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -61,7 +61,7 @@
 }
 
 .vc-stereo-installer-warning p {
-    color: var(--text-normal, #ffffff) !important;
+    color: var(--text-normal, #fff) !important;
 }
 
 .vc-stereo-installer-method2-note {
@@ -75,7 +75,7 @@
 }
 
 .vc-stereo-installer-method2-note p {
-    color: var(--text-normal, #ffffff) !important;
+    color: var(--text-normal, #fff) !important;
 }
 
 .vc-stereo-installer-info {
@@ -92,7 +92,7 @@
     gap: 12px;
     align-items: center;
     padding: 12px;
-    border: 1px solid currentColor;
+    border: 1px solid currentcolor;
     border-radius: 8px;
     background: var(--background-secondary);
 }
@@ -102,7 +102,7 @@
 }
 
 .vc-stereo-installer-install-status h3 {
-    color: currentColor;
+    color: currentcolor;
 }
 
 .vc-stereo-installer-install-status-installed {
@@ -118,7 +118,7 @@
 }
 
 .vc-stereo-installer-install-status p {
-    color: var(--text-normal, #ffffff) !important;
+    color: var(--text-normal, #fff) !important;
 }
 
 .vc-stereo-installer-info-line {
@@ -146,7 +146,7 @@
 .vc-stereo-installer-root input,
 .vc-stereo-installer-root select,
 .vc-stereo-installer-root option {
-    color: var(--text-normal, #ffffff) !important;
+    color: var(--text-normal, #fff) !important;
 }
 
 .vc-stereo-installer-log-panel {
@@ -191,7 +191,7 @@
 }
 
 .vc-stereo-installer-log::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-thin-thumb, rgba(255, 255, 255, 0.2));
+    background-color: var(--scrollbar-thin-thumb, rgb(255 255 255 / 20%));
     border-radius: 4px;
 }
 
@@ -253,7 +253,7 @@
 }
 
 .vc-stereo-installer-log-line-info .vc-stereo-installer-log-message {
-    color: var(--text-normal, #ffffff) !important;
+    color: var(--text-normal, #fff) !important;
 }
 
 .vc-stereo-installer-log-header p {
@@ -267,7 +267,9 @@
 }
 
 /* ========================================== */
+
 /* BRUTE FORCE COLOR FIX FOR STEREOINSTALLER */
+
 /* ========================================== */
 
 /* Force white/light text color on every standard element */
@@ -284,7 +286,7 @@
 .vc-stereo-installer-root h4,
 .vc-stereo-installer-root h5,
 .vc-stereo-installer-root h6 {
-    color: #ffffff !important;
+    color: #fff !important;
 }
 
 /* Specific styling for warnings, method2 notes, and status labels to be slightly grey or use theme variables */
@@ -343,5 +345,5 @@
 }
 
 .vc-stereo-installer-log-line-info .vc-stereo-installer-log-message {
-    color: var(--text-normal, #ffffff) !important;
+    color: var(--text-normal, #fff) !important;
 }

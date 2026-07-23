@@ -40,7 +40,7 @@
     background: #1f2126;
     border-radius: 28px;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgb(255 255 255 / 10%);
 }
 
 .vc-vmsg-preview-container {
@@ -75,7 +75,7 @@
     font-weight: 700 !important;
     font-size: 14px !important;
     letter-spacing: 0.02em !important;
-    border: 1px solid rgba(255,255,255,0.09) !important;
+    border: 1px solid rgb(255 255 255 / 9%) !important;
     box-shadow: none !important;
 }
 
@@ -125,9 +125,9 @@
     place-items: center;
     width: 36px;
     height: 36px;
-    background: rgba(255,255,255,0.08);
+    background: rgb(255 255 255 / 8%);
     border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgb(255 255 255 / 8%);
     color: var(--text-normal);
     cursor: pointer;
 }
@@ -137,7 +137,7 @@
 }
 
 .vc-vmsg-download-icon:hover {
-    background: rgba(255,255,255,0.12);
+    background: rgb(255 255 255 / 12%);
 }
 
 .vc-vmsg-download-wrap {
@@ -166,8 +166,6 @@
     opacity: 0.8;
     margin: 0 0.5em;
     font-size: 80%;
-
-
     font-family: var(--font-code);
 }
 

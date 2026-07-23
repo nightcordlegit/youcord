@@ -1,4 +1,4 @@
-﻿/*
+/*
  * YouCord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -66,8 +66,8 @@
 }
 
 .vc-saveprofile-card.has-theme .vc-saveprofile-avatar-container {
-    box-shadow: 0 0 0 6px rgba(17, 18, 20, 0.85);
-    background: rgba(17, 18, 20, 0.85);
+    box-shadow: 0 0 0 6px rgb(17 18 20 / 85%);
+    background: rgb(17 18 20 / 85%);
 }
 
 .vc-saveprofile-avatar {
@@ -92,7 +92,7 @@
 .vc-saveprofile-card:not(.has-theme) .vc-saveprofile-card-body {
     background: var(--background-floating);
     margin: 0;
-    padding: 36px 16px 16px 16px;
+    padding: 36px 16px 16px;
     border-radius: 0 0 12px 12px;
 }
 
@@ -101,10 +101,10 @@
 }
 
 .vc-saveprofile-card.has-theme .vc-saveprofile-card-body {
-    background: rgba(17, 18, 20, 0.85);
+    background: rgb(17 18 20 / 85%);
     margin: 8px;
     margin-top: 12px;
-    padding: 36px 12px 12px 12px;
+    padding: 36px 12px 12px;
     border-radius: 8px;
 }
 
@@ -117,7 +117,7 @@
 .vc-saveprofile-name {
     font-size: 16px;
     font-weight: 700;
-    color: #ffffff !important;
+    color: #fff !important;
 }
 
 .vc-saveprofile-badge {
@@ -127,13 +127,13 @@
     padding: 3px 10px;
     border-radius: 16px;
     border: 1px solid var(--brand-500, #5865f2);
-    background: rgba(88, 101, 242, 0.1);
+    background: rgb(88 101 242 / 10%);
     color: var(--brand-500, #5865f2) !important;
     font-size: 11px;
     font-weight: 600;
     line-height: 1;
     pointer-events: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 4px rgb(0 0 0 / 15%);
 }
 
 .vc-saveprofile-status {
@@ -177,7 +177,7 @@
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgb(255 255 255 / 20%);
 }
 
 .vc-saveprofile-card-actions {

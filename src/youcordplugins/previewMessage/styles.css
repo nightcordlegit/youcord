@@ -14,12 +14,12 @@
 
 .pm-card {
     background: var(--background-floating, #18191c);
-    border: 1px solid var(--background-modifier-accent, rgba(255,255,255,0.08));
+    border: 1px solid var(--background-modifier-accent, rgb(255 255 255 / 8%));
     border-radius: 12px;
     padding: 12px 14px;
     min-width: 260px;
     max-width: 340px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 45%), 0 2px 8px rgb(0 0 0 / 30%);
     backdrop-filter: blur(10px);
 }
 
@@ -29,7 +29,7 @@
     gap: 8px;
     margin-bottom: 8px;
     padding-bottom: 8px;
-    border-bottom: 1px solid var(--background-modifier-accent, rgba(255,255,255,0.07));
+    border-bottom: 1px solid var(--background-modifier-accent, rgb(255 255 255 / 7%));
 }
 
 .pm-avatar {
@@ -85,6 +85,7 @@
     line-height: 1.45;
     color: var(--text-normal, #dcddde);
     word-break: break-word;
+
     /* clamp to 2 lines */
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -114,7 +115,7 @@
 .pm-reply {
     margin-top: 10px;
     padding-top: 10px;
-    border-top: 1px solid var(--background-modifier-accent, rgba(255,255,255,0.07));
+    border-top: 1px solid var(--background-modifier-accent, rgb(255 255 255 / 7%));
 }
 
 .pm-reply-input {

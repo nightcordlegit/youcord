@@ -1,4 +1,4 @@
-﻿/*
+/*
  * YouCord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -61,8 +61,7 @@
 
 .vc-client-diagnostics-table {
     display: block;
-    overflow-x: auto;
-    overflow-y: visible;
+    overflow: auto visible;
     width: 100%;
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
@@ -443,7 +442,7 @@
 .vc-client-diagnostics-monitor-results::-webkit-scrollbar-thumb,
 .vc-client-diagnostics-surface-list::-webkit-scrollbar-thumb,
 .vc-client-diagnostics-snippet-code::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-thin-thumb, rgba(255, 255, 255, 0.2));
+    background-color: var(--scrollbar-thin-thumb, rgb(255 255 255 / 20%));
     border-radius: 4px;
 }
 
