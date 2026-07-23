@@ -164,9 +164,9 @@ export async function resolveTrack(
 
 // â”€â”€â”€ Listening Together â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Electron : intercept navigation events on BrowserWindow
-// Browser extension : intercept clicks on <a> tags pointing to youcord.st/listen
+// Browser extension : intercept clicks on <a> tags pointing to youcord.app/listen
 
-const LISTEN_URL_PREFIX = "https://youcord.st/listen?";
+const LISTEN_URL_PREFIX = "https://youcord.app/listen?";
 
 export function setupListeningTogetherHandler(_?: any): void {
     // no-op

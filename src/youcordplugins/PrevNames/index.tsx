@@ -10,8 +10,6 @@ import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { IconUtils,Menu, React, useCallback, useEffect, useState } from "@webpack/common";
 
-import { domain } from "../../../DOMAIN.json";
-
 const PresenceStore = findByPropsLazy("getStatus", "isMobileOnline");
 const AuthStore = findByPropsLazy("getToken");
 
@@ -26,9 +24,7 @@ function useUserStatus(userId: string): UserStatus {
         const update = () => {
             try { setStatus(PresenceStore.getStatus(userId) ?? "offline"); } catch {}
         };
-        // PresenceStore dispatches on flux — poll on mount is enough for a modal
         update();
-        // Optional: subscribe if PresenceStore exposes an addChangeListener
         if (typeof PresenceStore.addChangeListener === "function") {
             PresenceStore.addChangeListener(update);
             return () => PresenceStore.removeChangeListener?.(update);
@@ -46,9 +42,7 @@ const STATUS_COLOR: Record<UserStatus, string> = {
     offline:   "#80848e",
 };
 
-// ─── API ──────────────────────────────────────────────────────────────────────
-
-const API_BASE = `https://api.${domain}/api`;
+const API_BASE = "";
 
 interface PrevNameEntry {
     timestamp: number;

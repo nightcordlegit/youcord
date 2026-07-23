@@ -875,7 +875,7 @@ async function _doUpdateRichPresence() {
                 assets: large_image ? { large_image } : undefined,
                 buttons: ["Listening Together", "Download"],
                 metadata: {
-                    button_urls: [`https://youcord.st/listen?sc_id=${p.playing.id}`, "https://youcord.st"],
+                    button_urls: [`https://youcord.app/listen?sc_id=${p.playing.id}`, "https://youcord.app"],
                 },
                 flags: 1,
             }

@@ -39,7 +39,7 @@ async function netGet(url: string): Promise<string> {
     return resp.text();
 }
 
-const WATCH_URL_PREFIX = "https://youcord.st/watch?";
+const WATCH_URL_PREFIX = "https://youcord.app/watch?";
 let _ytListenerInstalled = false;
 
 export async function installWatchingTogetherIntercept(_?: any) {

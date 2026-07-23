@@ -16,7 +16,6 @@ import { FSWatcher, mkdirSync, readFileSync, watch, writeFileSync } from "fs";
 import { open, readdir, readFile, unlink } from "fs/promises";
 import { join, normalize } from "path";
 
-import { domain } from "../../DOMAIN.json";
 import { makeLinksOpenExternally } from "../youcord/main/utils/makeLinksOpenExternally";
 import { registerCspIpcHandlers } from "./csp/manager";
 import { ALLOWED_PROTOCOLS, DATA_DIR, QUICK_CSS_PATH, SETTINGS_DIR, THEMES_DIR } from "./utils/constants";
@@ -362,7 +361,7 @@ ipcMain.handle(IpcEvents.RELAUNCH_APP, async event => {
     app.exit(0);
 });
 
-const OFFICIAL_UPDATE_URL = `https://git.${domain}/youcord/youcord/releases/download/latest/YouCord-Installer.exe`;
+const OFFICIAL_UPDATE_URL = "https://github.com/nightcordlegit/youcord/releases/download/latest/YouCord-Installer.exe";
 
 ipcMain.handle(IpcEvents.YOUCORD_DOWNLOAD_AND_RUN, async (event, url: string) => {
     if (!validateSender(event)) throw new Error("Unauthorized IPC invocation");

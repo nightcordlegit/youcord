@@ -7,12 +7,11 @@
 import { existsSync } from "fs";
 import { join } from "path";
 
-import { domain } from "../../../../DOMAIN.json";
 import { USER_AGENT } from "../constants";
 import { VENCORD_DIR } from "../vencordDir";
 import { downloadFile, fetchie } from "./http";
 
-const API_BASE = `https://git.${domain}/api/v1`;
+const API_BASE = "https://api.github.com/repos/nightcordlegit/youcord";
 
 export interface ReleaseData {
     name: string;
@@ -27,7 +26,7 @@ export interface ReleaseData {
 export async function githubGet(endpoint: string) {
     const opts: RequestInit = {
         headers: {
-            Accept: "application/json",
+            Accept: "application/vnd.github.v3+json",
             "User-Agent": USER_AGENT
         }
     };
@@ -37,7 +36,7 @@ export async function githubGet(endpoint: string) {
 
 export async function downloadVencordAsar() {
     await downloadFile(
-        `https://git.${domain}/youcord/youcord/releases/download/latest/YouCord.asar`,
+        "https://github.com/nightcordlegit/youcord/releases/download/latest/YouCord.asar",
         VENCORD_DIR,
         {},
         { retryOnNetworkError: true }

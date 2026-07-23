@@ -21,7 +21,6 @@ import { Settings } from "Vencord";
 
 import { PluginMeta } from "~plugins";
 
-import { domain } from "../../../../../DOMAIN.json";
 import { openPluginModal } from "./PluginModal";
 import { getTutorialVideoName } from "./tutorialList";
 
@@ -133,7 +132,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         // through the mapping instead of assuming they are identical. Also always
         // URL-encode the segment since some filenames contain spaces (e.g. "Fake Voice Option.mp4").
         const videoName = getTutorialVideoName(plugin.name) ?? plugin.name;
-        const videoUrl = `https://git.${domain}/youcord/youcord-tutorials/raw/branch/main/videos/${encodeURIComponent(videoName)}.mp4`;
+        const videoUrl = `https://raw.githubusercontent.com/nightcordlegit/youcord-tutorials/main/videos/${encodeURIComponent(videoName)}.mp4`;
         openModal(props => (
             <ModalRoot {...props} size={ModalSize.DYNAMIC} className="nc-tutorial-modal">
                 <ModalHeader separator={false}>

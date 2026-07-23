@@ -16,7 +16,7 @@ const INJECT_SHIM_PROGRESS = 98;
 const RESTART_DISCORD_PROGRESS = 100;
 
 
-const RELEASE_API = `https://api.github.com/repos/youcordlegit/youcord/releases/latest`;
+const RELEASE_API = `https://api.github.com/repos/nightcordlegit/youcord/releases/latest`;
 const DIST_ZIP = "youcord-dist.zip";
 const distDir = path.join(process.env.LOCALAPPDATA, "YouCord", "dist");
 

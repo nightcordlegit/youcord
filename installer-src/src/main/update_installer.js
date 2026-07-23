@@ -2,7 +2,6 @@
 import phin from "phin";
 const semverGreaterThan = require("semver/functions/gt");
 const {version} = require("../../package.json");
-const {domain} = require("../../../DOMAIN.json"); 
 
 const getJSON = phin.defaults({
     method: "GET",
@@ -11,14 +10,14 @@ const getJSON = phin.defaults({
     followRedirects: true
 });
 
- 
+const GITHUB_LATEST_URL = "https://api.github.com/repos/nightcordlegit/youcord/releases/latest";
+
 export default async function () {
-    const downloadUrl = `https://source.${domain}/api/v1/repos/youcord/youcord/releases/latest`;
     console.info(`YouCord Installer ${version}`);
 
     try {
-        const response = await getJSON(downloadUrl);
-        const latestRelease = response.body[0];
+        const response = await getJSON(GITHUB_LATEST_URL);
+        const latestRelease = response.body;
         const latestVersion = latestRelease.tag_name;
 
         if (semverGreaterThan(latestVersion, version)) {
@@ -36,7 +35,7 @@ export default async function () {
                 await shell.openExternal(latestRelease.html_url);
                 process.exit(0);
             }
-            
+
         }
         else {
             console.info(`The installer is up to date.`);

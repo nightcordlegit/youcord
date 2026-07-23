@@ -22,8 +22,6 @@ import { JSX } from "react";
 
 import plugins, { ExcludedPlugins } from "~plugins";
 
-import { domain } from "../../../DOMAIN.json";
-
 export function ChatPluginCard({ url, description }: { url: string, description: string; }) {
     const pluginNameFromUrl = decodeURIComponent(new URL(url).pathname.split("/")[2]);
     const pluginNameNoSpaces = pluginNameFromUrl?.toLowerCase().replace(/\s+/g, "");
@@ -175,7 +173,7 @@ export const PluginCards = ErrorBoundary.wrap(function PluginCards({ message }: 
             // Find ActionRow by presence of nested components (same pattern as Equibot check above)
             const actionRow = containerComponents.find((c: any) => c?.components);
             const pluginUrl = actionRow?.components?.[0]?.url;
-            if (pluginUrl?.startsWith(`https://${domain}/plugins/`)) {
+            if (pluginUrl?.startsWith("https://github.com/nightcordlegit/youcord/plugins/")) {
                 const pluginNameFromUrl = decodeURIComponent(new URL(pluginUrl).pathname.split("/")[2]);
                 const pluginNameNoSpaces = pluginNameFromUrl?.toLowerCase().replace(/\s+/g, "");
                 const actualPluginName =

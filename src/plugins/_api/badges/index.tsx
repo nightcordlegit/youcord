@@ -30,7 +30,6 @@ import { ContextMenuApi, FluxDispatcher, Menu, Toasts, UserStore } from "@webpac
 
 import Plugins, { PluginMeta } from "~plugins";
 
-import { domain } from "../../../../DOMAIN.json";
 import { EquicordTranslatorModal, GenericBadgeModal } from "./modals";
 
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
@@ -97,7 +96,7 @@ async function loadBadges(url: string, noCache = false) {
 async function loadAllBadges(noCache = false) {
     const vencordBadges = await loadBadges("https://badges.vencord.dev/badges.json", noCache).catch(() => ({}));
     const equicordBadges = await loadBadges("https://badge.equicord.org/badges.json", noCache).catch(() => ({}));
-    const youcordBadges = await loadBadges(`https://api.${domain}/badges`, noCache).catch(() => ({}));
+    const youcordBadges = await loadBadges("https://raw.githubusercontent.com/nightcordlegit/youcord/main/badges.json", noCache).catch(() => ({}));
     const illegalcordBadges = await loadBadges("https://raw.githubusercontent.com/ImHisako/ImHisako/refs/heads/main/Images/badges.json", noCache).catch(() => ({}));
 
     DonorBadges = vencordBadges;

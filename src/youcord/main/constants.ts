@@ -8,7 +8,6 @@ import { app } from "electron";
 import { existsSync, mkdirSync } from "fs";
 import { dirname, join } from "path";
 
-import { domain } from "../../../DOMAIN.json";
 import { CommandLine } from "./cli";
 
 const YouCordDir = dirname(process.execPath);
@@ -32,7 +31,7 @@ export const VENCORD_QUICKCSS_FILE = join(VENCORD_SETTINGS_DIR, "quickCss.css");
 export const VENCORD_SETTINGS_FILE = join(VENCORD_SETTINGS_DIR, "settings.json");
 export const VENCORD_THEMES_DIR = join(DATA_DIR, "themes");
 
-export const USER_AGENT = `YouCord/${app.getVersion()} (https://git.${domain}/youcord/youcord)`;
+export const USER_AGENT = `YouCord/${app.getVersion()} (https://github.com/nightcordlegit/youcord)`;
 
 // dimensions shamelessly stolen from Discord Desktop :3
 export const MIN_WIDTH = 940;

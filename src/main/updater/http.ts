@@ -12,12 +12,9 @@ import { app,ipcMain } from "electron";
 import { rmSync,writeFileSync } from "original-fs";
 import { join } from "path";
 
-import { domain } from "../../../DOMAIN.json";
 import { serializeErrors } from "./common";
 
-const GITEA_BASE = `https://source.${domain}`;
-const API_BASE = `${GITEA_BASE}/api/v1/repos/youcord/youcord`;
-const REPO_URL = `${GITEA_BASE}/youcord/youcord`;
+const GITHUB_API = "https://api.github.com/repos/nightcordlegit/youcord";
 declare const VERSION: string;
 const CURRENT_VERSION = `v${VERSION}`;
 const ZIP_FILE = "youcord-dist.zip";
@@ -27,9 +24,9 @@ let pendingVersion: string | null = null;
 let isApplying = false;
 
 async function githubGet<T = any>(endpoint: string): Promise<T> {
-    return fetchJson<T>(API_BASE + endpoint, {
+    return fetchJson<T>(GITHUB_API + endpoint, {
         headers: {
-            Accept: "application/json",
+            Accept: "application/vnd.github.v3+json",
             "User-Agent": VENCORD_USER_AGENT
         }
     });
@@ -93,7 +90,7 @@ async function applyUpdates(): Promise<boolean> {
         const tmpExtract = join(app.getPath("temp"), `youcord-extract-${Date.now()}`);
 
         return await new Promise<boolean>((resolve, reject) => {
-            // Step 1 â€” extract zip to temp folder
+            // Step 1 — extract zip to temp folder
             const psExtract = `Expand-Archive -LiteralPath '${zipPath}' -DestinationPath '${tmpExtract}' -Force`;
             exec(`powershell -NoProfile -NonInteractive -Command "${psExtract}"`, err => {
                 if (err) {
@@ -101,7 +98,7 @@ async function applyUpdates(): Promise<boolean> {
                     return reject(new Error("ZIP extraction failed: " + err.message));
                 }
 
-                // Step 2 â€” copy extracted files into dist/desktop/ (= __dirname), overwriting existing ones
+                // Step 2 — copy extracted files into dist/desktop/ (= __dirname), overwriting existing ones
                 const psMove = `Copy-Item -Path '${tmpExtract}\\*' -Destination '${destPath}' -Recurse -Force`;
                 exec(`powershell -NoProfile -NonInteractive -Command "${psMove}"`, err2 => {
                     // Cleanup temp files regardless of outcome
@@ -123,7 +120,7 @@ async function applyUpdates(): Promise<boolean> {
     }
 }
 
-ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => REPO_URL));
+ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => "https://github.com/nightcordlegit/youcord"));
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(getUpdates));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors(fetchUpdates));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));
