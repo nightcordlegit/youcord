@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+// DO NOT REMOVE UNLESS YOU WISH TO FACE THE WRATH OF THE CIRCULAR DEPENDENCY DEMON!!!!!!!
+import "~plugins";
 console.log("%c[YouCord]", "color: #5865f2; font-weight: bold;", "Injection successful! Starting services...");
 
 export * as Api from "./api";
