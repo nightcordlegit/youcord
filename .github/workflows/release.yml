@@ -59,6 +59,13 @@ jobs:
       - name: Build YouCord Installer
         shell: pwsh
         run: |
+          # Sync installer version with release tag
+          $tag = "$env:GITHUB_REF" -replace '^refs/tags/v', ''
+          $pkg = Get-Content "installer-src/package.json" -Raw | ConvertFrom-Json
+          $pkg.version = $tag
+          $pkg | ConvertTo-Json -Depth 10 | Set-Content "installer-src/package.json"
+          Write-Host "Installer version set to $tag"
+
           Push-Location installer-src
           npm install --legacy-peer-deps
           npm run compile
