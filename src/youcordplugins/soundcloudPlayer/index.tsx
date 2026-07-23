@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -150,7 +150,7 @@ async function searchTracks(query: string, clientId: string): Promise<ScTrack[]>
 async function getStreamUrl(streamUrl: string, clientId: string): Promise<string> {
     if (!streamUrl) throw new Error("Stream URL not found");
 
-    // Si c'est dÃ©jÃ  une URL de stream finale ou HLS directe
+    // Si c'est dÃ©jÃ  une URL de stream finale ou HLS directe
     if (streamUrl.includes("cf-hls-media") || streamUrl.includes("cf-media")) {
         return streamUrl;
     }

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
@@ -85,7 +85,7 @@ if (!IS_VANILLA) {
             // Toute fenÃªtre crÃ©Ã©e par Discord avec son propre preload ou un preload tiers est laissÃ©e intacte.
             const ourPreload = join(__dirname, "preload.js");
             const preloadIsOurs = options.webPreferences.preload === ourPreload;
-            // Exception : la fenÃªtre principale Discord a un preload Ã  elle (l'original Discord),
+            // Exception : la fenÃªtre principale Discord a un preload Ã  elle (l'original Discord),
             // et c'est prÃ©cisÃ©ment ce qu'on veut remplacer â€” donc on accepte aussi le cas oÃ¹
             // le titre est une fenÃªtre YouCord/Equicord/Discord connue.
             const KNOWN_TITLES = /^(Discord|Vesktop|Equibop)$|^(YouCord|Equicord)/;
@@ -285,8 +285,8 @@ if (!IS_VANILLA) {
 
     // â”€â”€ Neutralisation de DISCORD_WINDOW_TOGGLE_FULLSCREEN â”€â”€
     //
-    // PROBLÃˆME RACINE : Discord Ã©met cet IPC automatiquement Ã  chaque dÃ©marrage
-    // ET Ã  chaque rechargement de thÃ¨me pour "synchroniser" son Ã©tat interne.
+    // PROBLÃˆME RACINE : Discord Ã©met cet IPC automatiquement Ã  chaque dÃ©marrage
+    // ET Ã  chaque rechargement de thÃ¨me pour "synchroniser" son Ã©tat interne.
     // L'ancien handler faisait `win.setFullScreen(!win.isFullScreen())` â€” un toggle
     // aveugle. RÃ©sultat : fenÃªtre maximisÃ©e + isFullScreen()=false â†’ setFullScreen(true)
     // â†’ overlay OS fullscreen â†’ tous les inputs bloquÃ©s, app figÃ©e. F11 sortait du
@@ -295,8 +295,8 @@ if (!IS_VANILLA) {
     //
     // SOLUTION : on intercepte le handler Discord et on le remplace par un no-op
     // complet. Le fullscreen utilisateur est dÃ©sormais gÃ©rÃ© exclusivement via F11
-    // interceptÃ© dans before-input-event ci-dessus â€” ce qui est Ã  la fois plus propre
-    // et impossible Ã  dÃ©clencher accidentellement par Discord.
+    // interceptÃ© dans before-input-event ci-dessus â€” ce qui est Ã  la fois plus propre
+    // et impossible Ã  dÃ©clencher accidentellement par Discord.
     {
         const _originalHandle = electron.ipcMain.handle.bind(electron.ipcMain);
         const FULLSCREEN_CHANNEL = "DISCORD_WINDOW_TOGGLE_FULLSCREEN";

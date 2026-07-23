@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -19,9 +19,9 @@ function detectSource(json: any): "equicord" | "vencord" | "youcord" | "unknown"
     const plugins = settings.plugins || {};
     const pluginNames = Object.keys(plugins);
 
-    // Plugins spÃ©cifiques Ã  Equicord
+    // Plugins spÃ©cifiques Ã  Equicord
     if (pluginNames.some(p => ["EquicordHelper", "EquicordCSS"].includes(p))) return "equicord";
-    // Plugins spÃ©cifiques Ã  YouCord
+    // Plugins spÃ©cifiques Ã  YouCord
     if (pluginNames.some(p => ["YouCordHelper", "equicordHelper"].includes(p))) return "youcord";
     // Fallback : si le fichier contient des clÃ©s Vencord communes
     if (pluginNames.length > 0) return "vencord";
@@ -37,7 +37,7 @@ function cleanForYouCord(json: any): any {
 
     if (!settings?.plugins) return cleaned;
 
-    // Supprimer les plugins propres Ã  Equicord/Vencord qui n'existent pas dans YouCord
+    // Supprimer les plugins propres Ã  Equicord/Vencord qui n'existent pas dans YouCord
     const legacyOnlyPlugins = ["EquicordHelper", "EquicordCSS", "VencordHelper"];
     for (const name of legacyOnlyPlugins) {
         delete settings.plugins[name];

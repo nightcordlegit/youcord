@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -95,7 +95,7 @@ export async function loadOwnHiddenBadgeSources(userId: string) {
         const result = await getOwnPluginConfig(PLUGIN_KEY, token);
         const hidden: BadgeSource[] = Array.isArray(result?.config?.settings?.hidden) ? result.config.settings.hidden : [];
 
-        // La version cloud a prioritÃ© si elle existe (et on met Ã  jour le local)
+        // La version cloud a prioritÃ© si elle existe (et on met Ã  jour le local)
         if (result?.config?.settings?.hidden !== undefined) {
             myHiddenSources = hidden;
             localStorage.setItem("youcord_hidden_badges", JSON.stringify(hidden));

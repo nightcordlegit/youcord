@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -254,7 +254,7 @@ function MassDMModal({ rootProps }: { rootProps: any; }) {
                 )}
                 {idle && (
                     <p className={`mdm-warn ${Margins.top16}`}>
-                        âš ï¸ Will be sent to <strong>{friends.length - excludedIds.size} friends</strong> â€”{" "}
+                        âš ï¸ Will be sent to <strong>{friends.length - excludedIds.size} friends</strong> â€”{" "}
                         {editingDelay ? (
                             <input
                                 ref={delayInputRef}

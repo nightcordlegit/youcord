@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -298,7 +298,7 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
         activeRef.current = true;
 
         // Sur Discord Desktop, getUserMedia fonctionne mieux que startLocalAudioRecording
-        // car le module discord_voice peut refuser si Discord utilise dÃ©jÃ  le micro.
+        // car le module discord_voice peut refuser si Discord utilise dÃ©jÃ  le micro.
         // On tente getUserMedia en premier et on fall back sur native si Ã§a Ã©choue.
         console.log("[VoiceDictation] Using getUserMedia");
         try {

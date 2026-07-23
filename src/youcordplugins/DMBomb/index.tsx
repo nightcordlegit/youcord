@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -184,7 +184,7 @@ function DMBombModal({ rootProps, guildId }: { rootProps: any; guildId: string; 
                             rows={5}
                         />
                         <p className="dmb-warn">
-                            âš ï¸ Intensive botting can get your account banned. Delay:{" "}
+                            âš ï¸ Intensive botting can get your account banned. Delay:{" "}
                             {editingDelay ? (
                                 <input
                                     className="dmb-delay-input"

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -34,7 +34,7 @@ const settings = definePluginSettings({
                 gap: "12px",
                 color: "#FFFFFF"
             }}>
-                <span style={{ fontSize: "24px" }}>âš ï¸</span>
+                <span style={{ fontSize: "24px" }}>âš ï¸</span>
                 <div>
                     <div style={{ fontWeight: "bold", color: "var(--status-warning)" }}>API Key Required</div>
                     <div style={{ fontSize: "13px", marginTop: "4px" }}>
@@ -170,7 +170,7 @@ LATEST MESSAGE : "${message.content}"
 
 RÃˆGLES DE COMPORTEMENT (CRUCIAL) :
 1. RÃ‰PONSES COURTES : Fais des rÃ©ponses concises (1 ou 2 phrases max). Ne fais pas de longs paragraphes.
-2. DISCRÃ‰TION DES INFOS : N'utilise mes infos personnelles (ex: Paris) que si c'est pertinent. Ne ramÃ¨ne pas tout Ã  Paris Ã  chaque message.
+2. DISCRÃ‰TION DES INFOS : N'utilise mes infos personnelles (ex: Paris) que si c'est pertinent. Ne ramÃ¨ne pas tout Ã  Paris Ã  chaque message.
 3. STYLE Ã‰CRIT NATUREL : Ã€ l'Ã©crit, on ne dit pas "heu..." ou "attends" quand on calcule. On donne juste le rÃ©sultat ou on continue la phrase. Supprime toute trace d'hÃ©sitation orale.
 4. HUMAIN : Parle comme un pote sur Discord (langage SMS lÃ©ger autorisÃ© si mon style le permet).
 
@@ -187,7 +187,7 @@ RÃ©ponds de maniÃ¨re naturelle. NE RENVOIE QUE LE TEXTE DE TA RÃ‰PONSE.`;
         });
 
         if (reply && !reply.startsWith("âŒ")) {
-            // DÃ©lai rÃ©aliste : base fixe + temps proportionnel Ã  la longueur du message
+            // DÃ©lai rÃ©aliste : base fixe + temps proportionnel Ã  la longueur du message
             const baseDelay = Math.floor(Math.random() * (settings.store.delayMax - settings.store.delayMin + 1) + settings.store.delayMin);
             const extraDelay = reply.length > 100 ? 2 : 0; // +2s si message long
             const totalDelay = (baseDelay + extraDelay) * 1000;

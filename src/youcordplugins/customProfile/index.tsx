@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -1263,7 +1263,7 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                     alignItems: "flex-start",
                     gap: 10,
                 }}>
-                    <span style={{ fontSize: 18, flexShrink: 0 }}>âš ï¸</span>
+                    <span style={{ fontSize: 18, flexShrink: 0 }}>âš ï¸</span>
                     <span style={{ color: "var(--text-warning, #faa61a)", fontSize: 13, lineHeight: 1.4 }}>
                         {t("This requires Discord authorization. Once enabled, everyone using YouCord will be able to see your Custom Profile, and you will be able to see theirs.")}
                     </span>
@@ -1395,7 +1395,7 @@ function CPDMNotice({ userId }: { userId: string; }) {
             alignItems: "flex-start",
             gap: 10,
         }}>
-            <span style={{ fontSize: 18, flexShrink: 0 }}>âš ï¸</span>
+            <span style={{ fontSize: 18, flexShrink: 0 }}>âš ï¸</span>
             <div style={{ flex: 1 }}>
                 <span style={{ color: "var(--text-warning, #faa61a)", fontWeight: 600, fontSize: 13 }}>
                     {t("WARNING â€” This user has CustomProfile enabled. Their profile has been modified.")}
@@ -1880,7 +1880,7 @@ export default definePlugin({
 
                 // On s'assure que les badges originaux sont Ã©crasÃ©s dans le profil
                 merged.publicFlags = (storedData.badgeFlags != null) ? storedData.badgeFlags : profile.publicFlags;
-                merged.badges = []; // Force Discord Ã  recalculer la liste Ã  partir de publicFlags et premiumType
+                merged.badges = []; // Force Discord Ã  recalculer la liste Ã  partir de publicFlags et premiumType
             } else if (isEnabled && storedData.nitro === false) {
                 // Si Nitro simulation est OFF, on force la suppression des badges simulÃ©s
                 merged.premiumType = profile.premiumType ?? 0;

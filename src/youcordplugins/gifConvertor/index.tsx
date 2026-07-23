@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -274,7 +274,7 @@ function GifConvertorPopover({ position, onClose }: PopoverProps) {
                         </span>
                     </div>
                     {stage === "error" && (
-                        <div className="nc-gifconv-error">âš  {errorMsg}</div>
+                        <div className="nc-gifconv-error">âš  {errorMsg}</div>
                     )}
                 </>
             )}

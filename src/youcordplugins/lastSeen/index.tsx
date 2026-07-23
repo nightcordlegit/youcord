@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -67,11 +67,11 @@ function formatDate(ts: number): string {
     yesterday.setDate(now.getDate() - 1);
     const isYesterday = date.toDateString() === yesterday.toDateString();
 
-    if (isToday) return lang === "fr" ? `Aujourd'hui Ã  ${timeStr}` : `Today at ${timeStr}`;
-    if (isYesterday) return lang === "fr" ? `Hier Ã  ${timeStr}` : `Yesterday at ${timeStr}`;
+    if (isToday) return lang === "fr" ? `Aujourd'hui Ã  ${timeStr}` : `Today at ${timeStr}`;
+    if (isYesterday) return lang === "fr" ? `Hier Ã  ${timeStr}` : `Yesterday at ${timeStr}`;
 
     const dateStr = date.toLocaleDateString(locale, { day: "numeric", month: "short" });
-    return lang === "fr" ? `Le ${dateStr} Ã  ${timeStr}` : `${dateStr} at ${timeStr}`;
+    return lang === "fr" ? `Le ${dateStr} Ã  ${timeStr}` : `${dateStr} at ${timeStr}`;
 }
 
 // â”€â”€ Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

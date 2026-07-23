@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -105,7 +105,7 @@ export async function importSettings(data: string, type: BackupType = "all", clo
     }
 }
 
-// Champs sensibles Ã  ne jamais exporter
+// Champs sensibles Ã  ne jamais exporter
 const SENSITIVE_PLUGIN_KEYS = new Set([
     "apiKey",
     "groqApiKey",

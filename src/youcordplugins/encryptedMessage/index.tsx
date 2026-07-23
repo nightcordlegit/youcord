@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -15,22 +15,22 @@ import { t } from "../autoTranslateYouCord";
 const MARKER = "\u200B\u200C\u200D";
 
 const NOISE_CHARSETS = [
-    "Â§Â¤Â¦Â¶â€ â€¡â€¢â€°â„¢Â©Â®",
+    "Â§Â¤Â¦Â¶â€ â€¡â€¢â€°â„¢Â©Â®",
     "Î±Î²Î³Î´ÎµÎ¶Î·Î¸Î¹ÎºÎ»Î¼",
-    "â•”â•—â•šâ•â•‘â•â•¬â• â•£â•¦â•©â”¼",
+    "â•”â•—â•šâ•â•‘â•â•¬â• â•£â•¦â•©â”¼",
     "â–‘â–’â–“â–ˆâ–„â–€â–â–Œâ—†â—‡â—‹â—",
     "âˆ€âˆ‚âˆƒâˆ…âˆ†âˆ‡âˆˆâˆâˆ‘âˆžâˆâˆš",
-    "â‘ â‘¡â‘¢â‘£â‘¤â‘¥â‘¦â‘§â‘¨â‘©â‘ª",
+    "â‘ â‘¡â‘¢â‘£â‘¤â‘¥â‘¦â‘§â‘¨â‘©â‘ª",
     "â’¶ â’· â’¸ â’¹ â’º â’» â’¼ â’½ â’¾ â’¿ â“€".replace(/ /g, ""),
-    "â™ â™£â™¦â™¥â™¤â™§â™¢â™¡â˜…â˜†âœ¦",
+    "â™ â™£â™¦â™¥â™¤â™§â™¢â™¡â˜…â˜†âœ¦",
     "â™ˆâ™‰â™Šâ™‹â™Œâ™â™Žâ™â™â™‘â™’â™“",
     "â˜€â˜â˜‚â˜ƒâ¿â€ââ‚âƒâ„â…",
     "âš€âšâš‚âšƒâš„âš…â—â—‘â—’â—“â—”",
     "â–²â–³â–´â–µâ–¶â–·â–¸â–¹â–ºâ–»â–¼â–½",
     "âŠ•âŠ–âŠ—âŠ˜âŠ™âŠšâŠ›âŠœâŠâŠžâŠŸ",
     "â†â†’â†‘â†“â†”â†•â†–â†—â†˜â†™â†šâ†›",
-    "âŒÂ¬âˆšâˆ›âˆœâˆâˆžâˆŸâˆ âˆ¡âˆ¢âˆ£",
-    "â‚ â‚¡â‚¢â‚£â‚¤â‚¥â‚¦â‚§â‚¨â‚©â‚ªâ‚«",
+    "âŒÂ¬âˆšâˆ›âˆœâˆâˆžâˆŸâˆ âˆ¡âˆ¢âˆ£",
+    "â‚ â‚¡â‚¢â‚£â‚¤â‚¥â‚¦â‚§â‚¨â‚©â‚ªâ‚«",
     "â™©â™ªâ™«â™¬â™­â™®â™¯â—Šâ™¦â—ˆâ—‡",
     "â‰ˆâ‰‰â‰Šâ‰‹â‰Œâ‰â‰Žâ‰â‰â‰‘â‰’â‰“",
     "âŠ›âŠ•âŠ—âŠ˜âŠ™âŠšâŠœâŠâŠžâŠŸâŸ",
@@ -298,7 +298,7 @@ const userContextPatch = (children: any) => {
         const channelId = SelectedChannelStore.getChannelId();
         if (!channelId) return;
 
-        // On cherche le bon endroit pour insÃ©rer le menu (Ã  la fin gÃ©nÃ©ralement)
+        // On cherche le bon endroit pour insÃ©rer le menu (Ã  la fin gÃ©nÃ©ralement)
         children.push(
             <Menu.MenuGroup key="nc-encryption-user-group">
                 <Menu.MenuItem
@@ -312,7 +312,7 @@ const userContextPatch = (children: any) => {
                             if (!m.content || !isEncrypted(m.content)) continue;
                             const setter = DecryptionSetters.get(m.id);
                             if (setter) {
-                                // Si on a dÃ©jÃ  un setter (le composant est rendu)
+                                // Si on a dÃ©jÃ  un setter (le composant est rendu)
                                 const found = autoDecrypt(m.content);
                                 if (found !== null) {
                                     setter(found.text);

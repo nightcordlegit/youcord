@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -125,7 +125,7 @@ function injectMacOsButtons() {
     container.appendChild(btnMin);
     container.appendChild(btnMax);
 
-    // Pousser les icÃ´nes Discord Ã  gauche pour ne pas se chevaucher
+    // Pousser les icÃ´nes Discord Ã  gauche pour ne pas se chevaucher
     pushToolbarLeft();
 
     // Focus / unfocus

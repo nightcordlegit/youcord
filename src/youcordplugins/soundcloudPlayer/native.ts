@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -73,7 +73,7 @@ export async function fetchSoundCloudClientId(_?: any): Promise<string | null> {
             try {
                 const js = await netGet(jsUrl);
 
-                // Patterns mis Ã  jour pour 2024/2025
+                // Patterns mis Ã  jour pour 2024/2025
                 const patterns = [
                     /client_id\s*:\s*"([a-zA-Z0-9]{32})"/,
                     /client_id\s*=\s*"([a-zA-Z0-9]{32})"/,
