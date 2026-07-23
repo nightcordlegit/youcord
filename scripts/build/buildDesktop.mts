@@ -8,7 +8,6 @@ import { execSync } from "child_process";
 import { BuildContext, BuildOptions, context } from "esbuild";
 import { copyFile } from "fs/promises";
 import * as path from "path";
-import { obfuscateDistJs } from "./obfuscate.mjs";
 
 import vencordDep from "./vencordDep.mjs";
 import { includeDirPlugin } from "./includeDirPlugin.mts";
@@ -116,8 +115,4 @@ if (watch) {
 		}
 	}
 
-	// Post-build obfuscation (disabled in dev mode)
-	if (!isDev) {
-		await obfuscateDistJs();
-	}
 }

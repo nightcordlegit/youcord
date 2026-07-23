@@ -184,16 +184,6 @@ require(path.join(__dirname, "dist", "desktop", "patcher.js"));
     console.log(`[youcord] Build terminÃ© -> ${outDir}`);
 }
 
-function obfuscateDesktop() {
-    // Obfuscation lÃ©gÃ¨re pour la protection intellectuelle de base sans casser les perfs
-    const obfArgs = ["--compact", "true", "--simplify", "true", "--string-array", "true"];
-    const files = ["patcher.js", "preload.js", "renderer.js"];
-    for (const f of files) {
-        const fp = join(__dirname, "dist", "desktop", f);
-        if (!existsSync(fp)) continue;
-        try { execSync(`npx javascript-obfuscator "${fp}" --output "${fp}" ${obfArgs.join(" ")}`, { stdio: "ignore" }); } catch (e) { }
-    }
-}
 
 // â”€â”€â”€ Execution du build â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -201,7 +191,7 @@ if (require.main === module) {
     killYouCord();
     const discord = findDiscordApp();
     buildEquicord();
-    // obfuscateDesktop(); // Optionnel pour l'open source
+
     buildYouCordFromDiscord(discord);
 }
 
