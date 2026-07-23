@@ -53,7 +53,7 @@ function useDiscordUser(userId: string) {
             });
             return;
         }
-        fetch(`https://discord.com/api/v9/users/${userId}`, {
+        fetch(`https://discord.com/api/v10/users/${userId}`, {
             headers: { Authorization: (window as any).token ?? "" }
         })
             .then(r => r.json())
