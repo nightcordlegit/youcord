@@ -37,7 +37,7 @@ jobs:
         run: pnpm generatePluginJson plugins.json
 
       - name: Commit and push plugins.json
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update plugins.json [skip ci]"
           file_pattern: plugins.json
