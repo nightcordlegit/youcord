@@ -38,12 +38,18 @@ const asarPath = (fsExistsSync(_asarFromInjector) && !fsStatSync(_asarFromInject
     ? _asarFromInjector
     : _asarFromResources;
 
-const discordPkg = require(join(asarPath, "package.json"));
-require.main!.filename = join(asarPath, discordPkg.main);
+// _app.asar may not exist in standalone builds (macOS DMG/zip)
+const asarExists = fsExistsSync(asarPath);
+if (asarExists) {
+    const discordPkg = require(join(asarPath, "package.json"));
+    require.main!.filename = join(asarPath, discordPkg.main);
+}
 if (IS_VESKTOP || IS_EQUIBOP) require.main!.filename = join(dirname(injectorPath), "..", "..", "package.json");
 
-// @ts-expect-error Untyped method? Dies from cringe
-app.setAppPath(asarPath);
+if (asarExists) {
+    // @ts-expect-error Untyped method? Dies from cringe
+    app.setAppPath(asarPath);
+}
 
 if (!IS_VANILLA) {
     const settings = RendererSettings.store;
