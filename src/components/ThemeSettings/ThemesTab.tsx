@@ -90,6 +90,10 @@ const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue &
 
 const cl = classNameFactory("vc-settings-theme-");
 
+function fetchWithTimeout(url: string, timeoutMs = 10000) {
+    return fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
+}
+
 enum ThemeFilter {
     All = "all",
     Online = "online",
@@ -107,7 +111,7 @@ const filterOptions = [
 ];
 
 function Validator({ link, onValidate }: { link: string; onValidate: (valid: boolean) => void; }) {
-    const [res, err, pending] = useAwaiter(() => fetch(link).then(res => {
+    const [res, err, pending] = useAwaiter(() => fetchWithTimeout(link).then(res => {
         if (res.status > 300) throw `${res.status} ${res.statusText}`;
         const contentType = res.headers.get("Content-Type");
         if (!contentType?.startsWith("text/css") && !contentType?.startsWith("text/plain")) {
@@ -377,6 +381,7 @@ function ThemesTab() {
     const fileInputRef = useState<HTMLInputElement | null>(null)[1];
     const [currentThemeLink, setCurrentThemeLink] = useState("");
     const [themeLinkValid, setThemeLinkValid] = useState(false);
+    const [initError, setInitError] = useState<string | null>(null);
     const [userThemes, setUserThemes] = useState<ThemeHeader[] | null>(null);
     const [onlineThemes, setOnlineThemes] = useState<(UserThemeHeader & { link: string; })[] | null>(null);
     const [themeNames, setThemeNames] = useState<Record<string, string>>(() => {
@@ -483,7 +488,7 @@ function ThemesTab() {
         const themes = await Promise.all(
             settings.themeLinks.map(async link => {
                 try {
-                    const res = await fetch(link);
+                    const res = await fetchWithTimeout(link);
                     if (!res.ok) throw new Error(`Failed to fetch ${link}`);
                     const css = await res.text();
                     return { ...getThemeInfo(css, link), link };
@@ -498,20 +503,25 @@ function ThemesTab() {
 
     // Migrate old theme library URLs on mount and when themeLinks change
     useEffect(() => {
-        const newLinks = settings.themeLinks.map(link => {
-            if (link.startsWith("https://discord-themes.com/api")) {
-                return link.replace("https://discord-themes.com/api", "https://themes.equicord.org/api");
+        try {
+            const newLinks = settings.themeLinks.map(link => {
+                if (link.startsWith("https://discord-themes.com/api")) {
+                    return link.replace("https://discord-themes.com/api", "https://themes.equicord.org/api");
+                }
+                return link;
+            });
+            const changed = newLinks.some((link, i) => link !== settings.themeLinks[i]);
+            if (changed) {
+                settings.themeLinks = newLinks;
+                return;
             }
-            return link;
-        });
-        const changed = newLinks.some((link, i) => link !== settings.themeLinks[i]);
-        if (changed) {
-            settings.themeLinks = newLinks;
-            return;
-        }
 
-        refreshLocalThemes();
-        refreshOnlineThemes();
+            refreshLocalThemes();
+            refreshOnlineThemes();
+        } catch (e) {
+            console.error("Theme initialization failed:", e);
+            setInitError(String(e));
+        }
     }, [settings.themeLinks]);
 
     function onThemeLinkEnabledChange(link: string, enabled: boolean) {
@@ -656,6 +666,13 @@ function ThemesTab() {
     return (
         <SettingsTab>
             <CspErrorCard />
+
+            {initError && (
+                <ErrorCard className={Margins.top16}>
+                    <Heading className={Margins.bottom8}>Initialization Error</Heading>
+                    <Paragraph>Failed to load themes: {initError}</Paragraph>
+                </ErrorCard>
+            )}
 
             <Heading className={Margins.top16}>{t("Theme Management")}</Heading>
             <Paragraph className={Margins.bottom16}>

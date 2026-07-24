@@ -287,29 +287,32 @@ export const Settings = SettingsStore.store;
  */
 export function useSettings(paths?: UseSettings<Settings>[]) {
     const [, forceUpdate] = React.useReducer(() => ({}), {});
+    const pathsRef = React.useRef(paths);
+    pathsRef.current = paths;
 
     useEffect(() => {
-        if (paths) {
-            paths.forEach(p => {
-                if (p.endsWith(".*")) {
-                    SettingsStore.addPrefixChangeListener(p.slice(0, -2), forceUpdate);
+        const p = pathsRef.current;
+        if (p) {
+            p.forEach(path => {
+                if (path.endsWith(".*")) {
+                    SettingsStore.addPrefixChangeListener(path.slice(0, -2), forceUpdate);
                 } else {
-                    SettingsStore.addChangeListener(p, forceUpdate);
+                    SettingsStore.addChangeListener(path, forceUpdate);
                 }
             });
 
-            return () => paths.forEach(p => {
-                if (p.endsWith(".*")) {
-                    SettingsStore.removePrefixChangeListener(p.slice(0, -2), forceUpdate);
+            return () => p.forEach(path => {
+                if (path.endsWith(".*")) {
+                    SettingsStore.removePrefixChangeListener(path.slice(0, -2), forceUpdate);
                 } else {
-                    SettingsStore.removeChangeListener(p, forceUpdate);
+                    SettingsStore.removeChangeListener(path, forceUpdate);
                 }
             });
         } else {
             SettingsStore.addGlobalChangeListener(forceUpdate);
             return () => SettingsStore.removeGlobalChangeListener(forceUpdate);
         }
-    }, [paths]);
+    }, []);
 
     return SettingsStore.store;
 }
