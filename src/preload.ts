@@ -44,7 +44,8 @@ if (location.protocol !== "data:") {
             });
         `);
 
-        webFrame.executeJavaScript(sendSync<string>(IpcEvents.PRELOAD_GET_RENDERER_JS));
+        webFrame.executeJavaScript(sendSync<string>(IpcEvents.PRELOAD_GET_RENDERER_JS))
+            .catch(err => console.error("[YouCord] Renderer script failed:", err));
         // Not supported in sandboxed preload scripts but Discord doesn't support it either so who cares
         require(process.env.DISCORD_PRELOAD!);
 

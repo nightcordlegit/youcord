@@ -53,11 +53,17 @@ for (const method of [
     "setPrototypeOf"
 ]) {
     handler[method] =
-        (target: any, ...args: any[]) => Reflect[method](target[SYM_LAZY_GET](), ...args);
+        (target: any, ...args: any[]) => {
+            const lazyTarget = target[SYM_LAZY_GET]();
+            if ((typeof lazyTarget === "object" && lazyTarget !== null) || typeof lazyTarget === "function")
+                return Reflect[method](lazyTarget, ...args);
+            return undefined;
+        };
 }
 
 handler.ownKeys = target => {
     const v = target[SYM_LAZY_GET]();
+    if (v == null) return unconfigurable;
     const keys = Reflect.ownKeys(v);
     for (const key of unconfigurable) {
         if (!keys.includes(key)) keys.push(key);
@@ -69,7 +75,9 @@ handler.getOwnPropertyDescriptor = (target, p) => {
     if (typeof p === "string" && unconfigurable.includes(p))
         return Reflect.getOwnPropertyDescriptor(target, p);
 
-    const descriptor = Reflect.getOwnPropertyDescriptor(target[SYM_LAZY_GET](), p);
+    const lazyTarget = target[SYM_LAZY_GET]();
+    if (lazyTarget == null) return undefined;
+    const descriptor = Reflect.getOwnPropertyDescriptor(lazyTarget, p);
 
     if (descriptor) Object.defineProperty(target, p, descriptor);
     return descriptor;
@@ -115,7 +123,11 @@ export function proxyLazy<T>(factory: () => T, attempts = 5, isChild = false): T
             // `const { meow } = findByPropsLazy("meow");`
             if (!isChild && isSameTick)
                 return proxyLazy(
-                    () => Reflect.get(target[SYM_LAZY_GET](), p, receiver),
+                    () => {
+                        const innerTarget = target[SYM_LAZY_GET]();
+                        if (innerTarget == null) return undefined;
+                        return Reflect.get(innerTarget, p, receiver);
+                    },
                     attempts,
                     true
                 );
