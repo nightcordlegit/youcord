@@ -61,14 +61,28 @@ class TidalSocket {
     public ready = false;
 
     public socket: WebSocket | undefined;
+    private _openHandler: (() => void) | null = null;
+    private _errorHandler: ((e: Event) => void) | null = null;
+    private _closeHandler: ((e: Event) => void) | null = null;
+    private _messageHandler: ((e: MessageEvent) => void) | null = null;
 
     constructor(onChange: typeof this.onChange) {
         this.reconnect();
         this.onChange = onChange;
     }
 
+    public destroy() {
+        if (this._openHandler) this.socket?.removeEventListener("open", this._openHandler);
+        if (this._errorHandler) this.socket?.removeEventListener("error", this._errorHandler);
+        if (this._closeHandler) this.socket?.removeEventListener("close", this._closeHandler);
+        if (this._messageHandler) this.socket?.removeEventListener("message", this._messageHandler);
+        this.socket?.close();
+        this.socket = undefined;
+        this.ready = false;
+    }
+
     public reconnect() {
-        if (this.ready) return;
+        this.destroy();
         try {
             this.initWs();
         } catch (e) {
@@ -99,23 +113,26 @@ class TidalSocket {
         }
         this.socket = new WebSocket(url);
 
-        this.socket.addEventListener("open", () => {
+        this._openHandler = () => {
             this.ready = true;
             this.socket?.send(JSON.stringify({ action: "subscribe", all: true, fields: ["currentTime"] }));
-        });
+        };
+        this.socket.addEventListener("open", this._openHandler);
 
-        this.socket.addEventListener("error", e => {
+        this._errorHandler = () => {
             if (!this.ready) setTimeout(() => this.reconnect(), 5_000);
             this.onChange({ type: "update", all: true, fields: { playing: false, track: null, currentTime: 0, repeatMode: 0, shuffle: false, volume: 100 } });
-        });
+        };
+        this.socket.addEventListener("error", this._errorHandler);
 
-        this.socket.addEventListener("close", e => {
+        this._closeHandler = () => {
             this.ready = false;
-            if (!this.ready) setTimeout(() => this.reconnect(), 10_000);
+            setTimeout(() => this.reconnect(), 10_000);
             this.onChange({ type: "update", all: true, fields: { playing: false, track: null, currentTime: 0, repeatMode: 0, shuffle: false, volume: 100 } });
-        });
+        };
+        this.socket.addEventListener("close", this._closeHandler);
 
-        this.socket.addEventListener("message", e => {
+        this._messageHandler = (e: MessageEvent) => {
             let message: Message;
             try {
                 message = JSON.parse(e.data) as Message;
@@ -135,7 +152,8 @@ class TidalSocket {
                 logger.error("Invalid JSON:", err, `\n${e.data}`);
                 return;
             }
-        });
+        };
+        this.socket.addEventListener("message", this._messageHandler);
     }
 }
 

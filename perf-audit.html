@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouCord Performance Audit — v1.21.31</title>
+<style>
+  :root {
+    --bg: #0f0f13;
+    --card: #1a1a24;
+    --border: #2a2a3a;
+    --text: #e0e0e8;
+    --muted: #8888a0;
+    --red: #ff4d6d;
+    --orange: #ff9f43;
+    --yellow: #feca57;
+    --green: #2ed573;
+    --blue: #4a9eff;
+    --font: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 2rem; font-weight: 700; margin-bottom: .25rem; letter-spacing: -.02em; }
+  h1 span { color: var(--muted); font-weight: 400; }
+  .subtitle { color: var(--muted); font-size: .9rem; margin-bottom: 2rem; }
+  h2 { font-size: 1.25rem; font-weight: 600; margin: 2rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1rem; font-weight: 600; margin: 1.5rem 0 .5rem; }
+  .badge {
+    display: inline-block;
+    font-size: .65rem;
+    font-weight: 700;
+    padding: .15rem .55rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    vertical-align: middle;
+    margin-right: .4rem;
+  }
+  .badge.its-critical { background: var(--red); color: #fff; }
+  .badge.high { background: var(--orange); color: #000; }
+  .badge.medium { background: var(--yellow); color: #000; }
+  .badge.low { background: var(--blue); color: #fff; }
+  .badge.good { background: var(--green); color: #000; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: .75rem;
+  }
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-bottom: .35rem;
+  }
+  .card-header .file {
+    font-family: var(--font);
+    font-size: .8rem;
+    color: var(--blue);
+    word-break: break-all;
+  }
+  .card-header .badge { flex-shrink: 0; }
+  .card p { font-size: .88rem; color: var(--muted); }
+  .card code {
+    font-family: var(--font);
+    font-size: .8rem;
+    background: rgba(255,255,255,.04);
+    padding: .05em .4em;
+    border-radius: 3px;
+    color: var(--text);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; margin: .75rem 0; }
+  th, td { text-align: left; padding: .5rem .75rem; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+  tr:hover td { background: rgba(255,255,255,.02); }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .stat .num { font-size: 1.8rem; font-weight: 700; }
+  .stat .label { font-size: .75rem; color: var(--muted); margin-top: .2rem; }
+  .savings { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+  .savings table th:first-child, .savings table td:first-child { padding-left: 0; }
+  .savings table th:last-child, .savings table td:last-child { text-align: right; padding-right: 0; }
+  .green { color: var(--green); }
+  .red { color: var(--red); }
+  .orange { color: var(--orange); }
+  .summary-header { display: flex; align-items: center; gap: .75rem; }
+  .summary-header .big-num { font-size: 2.5rem; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<h1>YouCord <span>Performance Audit</span></h1>
+<div class="subtitle">v1.21.31 &mdash; <script>document.write(new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}))</script></div>
+
+<div class="summary-grid">
+  <div class="stat"><div class="num red">6</div><div class="label">Critical Issues</div></div>
+  <div class="stat"><div class="num orange">8</div><div class="label">High Severity</div></div>
+  <div class="stat"><div class="num yellow">8</div><div class="label">Medium Severity</div></div>
+  <div class="stat"><div class="num green">5</div><div class="label">Low / Good</div></div>
+</div>
+
+<div class="savings">
+  <table>
+    <tr><th>Area</th><th>Current</th><th>Potential</th><th>Saving</th></tr>
+    <tr><td>Duplicate main builds</td><td>2 &times; 55 MB</td><td>1 build</td><td class="green">~55 MB</td></tr>
+    <tr><td>Externalize npm deps</td><td>55 MB inline</td><td>externalized</td><td class="green">~50 MB</td></tr>
+    <tr><td>Source maps in prod</td><td>~150 MB</td><td>excluded</td><td class="green">~150 MB</td></tr>
+    <tr><td>Monaco editor copies</td><td>3 &times; 5.8 MB</td><td>1 copy</td><td class="green">~12 MB</td></tr>
+    <tr><td><strong>Total dist/</strong></td><td><strong>~605 MB</strong></td><td><strong>~340 MB</strong></td><td class="green"><strong>~265 MB</strong></td></tr>
+  </table>
+</div>
+
+<!-- Critical -->
+<h2><span class="badge its-critical">Critical</span> Fix Immediately</h2>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">src/plugins/vcPanelSettings/index.tsx:96-197</span>
+    <span class="badge its-critical">Critical</span>
+  </div>
+  <p><strong>5x <code>useEffect</code> subscription leaks.</strong> Each <code>FluxDispatcher.subscribe()</code> call has <strong>no cleanup return</strong> and <strong>no dependency array</strong>. Every re-render creates 5 new orphan listeners that live forever.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">src/plugins/rpcStats/index.tsx:180</span>
+    <span class="badge its-critical">Critical</span>
+  </div>
+  <p><strong><code>setInterval</code> never cleared.</strong> <code>setInterval(() =&gt; ..., 1000)</code> — the interval ID is not stored, and <code>stop()</code> never calls <code>clearInterval</code>. Runs forever after <code>stop()</code>.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">src/(youcord)plugins/musicControls/tidal/TidalStore.ts:95-139</span>
+    <span class="badge its-critical">Critical</span>
+  </div>
+  <p><strong>WebSocket listener leak.</strong> <code>initWs()</code> creates <code>new WebSocket()</code> and adds 4 anonymous <code>addEventListener</code> calls. <code>reconnect()</code> calls <code>initWs()</code> again without closing the old socket — each reconnect = +1 orphan WebSocket + 4 orphan listeners.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">src/youcordplugins/macOsButtons/index.tsx:132-184</span>
+    <span class="badge its-critical">Critical</span>
+  </div>
+  <p><strong>Window focus/blur listener leak.</strong> <code>window.addEventListener("focus"/"blur", ...)</code> called from <code>MutationObserver</code> callback. No <code>removeEventListener</code> anywhere — listeners accumulate on every reconnect.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">soundcloudPlayer/native.ts:241 &bull; youtubePlayer/native.ts:117</span>
+    <span class="badge its-critical">Critical</span>
+  </div>
+  <p><strong>Global click handlers never removable.</strong> Anonymous <code>document.addEventListener("click", (e) =&gt; {...}, true)</code> — impossible to remove since the function has no reference.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">src/youcordplugins/Surveillance/index.tsx:392+</span>
+    <span class="badge its-critical">Critical</span>
+  </div>
+  <p><strong>Stale <code>getState()</code> reads with no subscription.</strong> <code>PresenceStore.getState()?.statuses</code> called 3 times (lines 392, 547, 590) in event handlers without any <code>FluxDispatcher.subscribe</code>. Data may be stale; no reactive updates.</p>
+</div>
+
+<!-- High -->
+<h2><span class="badge high">High</span> Should Fix Soon</h2>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">scripts/build/build.mjs</span>
+    <span class="badge high">High</span>
+  </div>
+  <p><strong>Duplicate main builds.</strong> <code>dist/desktop/patcher.js</code> and <code>dist/youcord/main.js</code> are compiled from the same entry point (<code>src/main/index.ts</code>) with only a single define difference. Build once, copy the other. Saves <strong>~55 MB</strong>.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">scripts/build/common.mjs:126</span>
+    <span class="badge high">High</span>
+  </div>
+  <p><strong><code>makeAllPackagesExternalPlugin</code> never used.</strong> The plugin is defined but not included in any build config. Every npm dependency (including heavy ones like <code>diff</code> at 507 KB) is inlined into the 55 MB main/patcher bundles. Activating this saves <strong>~50 MB</strong>.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">dist/</span>
+    <span class="badge high">High</span>
+  </div>
+  <p><strong>Source maps shipped in production.</strong> Despite <code>sourcemap: false</code> in <code>commonOpts</code>, <strong>~150 MB</strong> of <code>.map</code> files are present in dist/. The config needs to be verified or <code>.map</code> files need to be cleaned up post-build.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">scripts/build/buildWeb.mjs</span>
+    <span class="badge high">High</span>
+  </div>
+  <p><strong>Monaco editor copied 3x.</strong> Monaco (93 MB npm) is bundled into <code>vendor/monaco/</code> and then copied into <code>chromium-unpacked/</code> + <code>firefox-unpacked/</code> = 17.5 MB wasted. Use symlinks or download on first use. Also, Monaco is only used for the QuickCSS editor in web builds — not in desktop at all.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">100+ locations</span>
+    <span class="badge high">High</span>
+  </div>
+  <p><strong>Inline <code>style={{...}}</code> objects in JSX.</strong> Every render creates new object instances. Worst offenders: <code>customProfile/index.tsx</code> (20+), <code>fakePerm/index.tsx</code> (15+), <code>fakeDM/index.tsx</code> (15+), <code>DynamicIslande/index.tsx</code> (10+). Extract to CSS module classes.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">dist/*/renderer.css</span>
+    <span class="badge high">High</span>
+  </div>
+  <p><strong>CSS produced 6 times.</strong> Same 347 KB CSS content appears in <code>desktop/renderer.css</code>, <code>youcord/renderer.css</code>, <code>browser/browser.css</code>, <code>extension.css</code>, <code>Equicord.user.css</code>, plus extension copies. Additionally, the desktop renderer.css statically bundles all Discord CSS — evaluate if deferred loading is possible.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">PatchPreview.tsx &bull; patchWebpack.ts</span>
+    <span class="badge high">High</span>
+  </div>
+  <p><strong>Dynamic <code>require("diff")</code> prevents tree-shaking.</strong> The 507 KB <code>diff</code> package is bundled synchronously via <code>require()</code> instead of lazy <code>import("diff")</code>. It is only used for <code>diffWordsWithSpace</code> in patch preview modals — a rare operation.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">platformIndicators/index.tsx:115</span>
+    <span class="badge high">High</span>
+  </div>
+  <p><code>PresenceStore.getState()</code> in a component render path without subscribing to store updates. Component may show stale data.</p>
+</div>
+
+<!-- Medium -->
+<h2><span class="badge medium">Medium</span> Should Refactor</h2>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">macOsButtons/index.tsx:171 &bull; youcordAI/index.tsx:849-870</span>
+    <span class="badge medium">Medium</span>
+  </div>
+  <p><strong>DOM queries inside MutationObserver.</strong> <code>document.getElementById()</code> called inside observer callbacks that fire on every body DOM mutation (<code>subtree: true</code>). Inefficient; cache references or use a more specific observer target.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">streamProof/index.tsx:84</span>
+    <span class="badge medium">Medium</span>
+  </div>
+  <p><strong>Long CSS selector on every click.</strong> <code>target.closest("[class*='messageContent_'],[class*='markup_'],...)"</code> — a 14-class selector string evaluated on every <code>document click</code> event across the entire page.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">src/youcordplugins/customProfile/index.tsx</span>
+    <span class="badge medium">Medium</span>
+  </div>
+  <p><strong>Enormous single file.</strong> 2,522 lines, 127.9 KB. Loads all profile editing UI eagerly. Split into lazy subcomponents.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">src/plugins/commandPalette/registry.tsx</span>
+    <span class="badge medium">Medium</span>
+  </div>
+  <p><strong>Largest plugin file.</strong> 3,839 lines. Eagerly imports 15+ Discord stores at module level. Could use deferred imports.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">multiple files</span>
+    <span class="badge medium">Medium</span>
+  </div>
+  <p><strong>Hardcoded theme colors.</strong> <code>fakePerm/index.tsx</code>, <code>fakeDM/index.tsx</code>, <code>abreviation/index.tsx</code> use <code>"#ffffff"</code>, <code>"#5865f2"</code>, etc. instead of CSS custom properties. Breaks theme compatibility.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">15+ locations</span>
+    <span class="badge medium">Medium</span>
+  </div>
+  <p><strong><code>style={{ display: "contents" }}</code> pattern.</strong> Repeated 15+ times across the codebase. Should be a single CSS class like <code>.vc-display-contents</code>.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">src/plugins/snowfall/index.tsx:327-342</span>
+    <span class="badge medium">Medium</span>
+  </div>
+  <p><strong>Partial cleanup in <code>stop()</code>.</strong> Clears the interval but not the resize/visibility listeners. Only <code>destroy()</code> does the full cleanup.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">scripts/build/build.mjs vs buildDesktop.mts</span>
+    <span class="badge medium">Medium</span>
+  </div>
+  <p><strong>Two divergent build pipelines.</strong> <code>build.mjs</code> produces 60 MB outputs, while <code>buildDesktop.mts</code> produces 400 KB using <code>vencordDep</code> from an external asar. Reconcile or migrate to the leaner approach.</p>
+</div>
+
+<!-- Low / Good -->
+<h2><span class="badge low">Low</span> Opportunities</h2>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">src/plugins/blurNsfw/index.ts:64</span>
+    <span class="badge low">Low</span>
+  </div>
+  <p>Manually creates and appends a <code>&lt;style&gt;</code> tag in <code>start()</code> instead of using the managed CSS import system.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">src/Vencord.ts:400</span>
+    <span class="badge low">Low</span>
+  </div>
+  <p>Runtime CSS injection for titlebar position via <code>createAndAppendStyle("youcord-titlebar-position")</code> in an idle callback. Could be static CSS.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">src/youcordplugins/messageLoggerEnhanced/</span>
+    <span class="badge low">Low</span>
+  </div>
+  <p>27 files, 125.5 KB plugin with eager subcomponent imports. Could benefit from deeper lazy splitting.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">src/plugins/musicControls/</span>
+    <span class="badge low">Low</span>
+  </div>
+  <p>29 files, 117.3 KB — large plugin with many eager imports.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="file">src/youcordplugins/voiceMessages/index.tsx:128-149</span>
+    <span class="badge low">Low</span>
+  </div>
+  <p>Waveform generation uses nested <code>for</code> loops with <code>channelData[offset] ** 2</code> math. Called once per recording, not hot path — negligible.</p>
+</div>
+
+<h2><span class="badge good">Good</span> Practices Already in Place</h2>
+
+<div class="card">
+  <p><strong>LazyComponent</strong> used in <strong>48+</strong> locations — heavy components deferred until first render.</p>
+</div>
+<div class="card">
+  <p><strong>findByPropsLazy / findLazy</strong> used in <strong>40+</strong> locations — webpack modules resolved on first property access, not at import time.</p>
+</div>
+<div class="card">
+  <p><strong>extractAndLoadChunksLazy</strong> in <strong>12+</strong> locations — webpack chunk loading infrastructure is sound and properly deferred.</p>
+</div>
+<div class="card">
+  <p><strong>25/55</strong> <code>FluxDispatcher.subscribe</code> calls are properly paired with <code>unsubscribe</code> in cleanup functions.</p>
+</div>
+<div class="card">
+  <p><strong>key={index}</strong> anti-pattern already fixed in previous performance pass.</p>
+</div>
+<div class="card">
+  <p><strong>Minification</strong> + <strong>console/debugger dropping</strong> enabled in production builds via <code>commonOpts</code>.</p>
+</div>
+
+</body>
+</html>

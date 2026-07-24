@@ -114,7 +114,7 @@ export async function installWatchingTogetherIntercept(_?: any) {
         electron.app.on("browser-window-created" as any, (_e: any, win: Electron.BrowserWindow) => hook(win));
     } else {
         // Browser extension mode: intercept anchor clicks
-        document.addEventListener("click", (e: MouseEvent) => {
+        const _ytClickHandler = (e: MouseEvent) => {
             const target = (e.target as HTMLElement)?.closest("a") as HTMLAnchorElement | null;
             if (!target) return;
             const href = target.href || "";
@@ -125,7 +125,17 @@ export async function installWatchingTogetherIntercept(_?: any) {
                 const ytId = new URL(href).searchParams.get("v") ?? "";
                 window.dispatchEvent(new CustomEvent("youtube-watch-together", { detail: { ytId } }));
             } catch { }
-        }, true);
+        };
+        document.addEventListener("click", _ytClickHandler, true);
+        (window as any).__ytClickHandler = _ytClickHandler;
+    }
+}
+
+export function uninstallYtIntercept(): void {
+    const handler = (window as any).__ytClickHandler;
+    if (handler && document) {
+        document.removeEventListener("click", handler, true);
+        delete (window as any).__ytClickHandler;
     }
 }
 

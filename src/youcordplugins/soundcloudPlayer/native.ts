@@ -241,3 +241,9 @@ export function installListeningTogetherIntercept(_?: any): void {
         document.addEventListener("click", _browserClickHandler, true);
     }
 }
+
+export function uninstallListeningTogetherIntercept(): void {
+    if (document) {
+        document.removeEventListener("click", _browserClickHandler, true);
+    }
+}

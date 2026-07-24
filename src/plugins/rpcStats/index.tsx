@@ -127,6 +127,7 @@ interface IMessageCreate {
 }
 
 const Native = VencordNative.pluginHelpers.RPCStats as PluginNative<typeof import("./native")>;
+let intervalId: ReturnType<typeof setInterval> | null = null;
 
 async function updateData() {
     switch (settings.store.statDisplay) {
@@ -177,7 +178,7 @@ export default definePlugin({
     async start() {
         updateData();
 
-        setInterval(() => {
+        intervalId = setInterval(() => {
             checkForNewDay();
             updateData();
         }, 1000);
@@ -185,6 +186,10 @@ export default definePlugin({
     },
     settings,
     stop() {
+        if (intervalId !== null) {
+            clearInterval(intervalId);
+            intervalId = null;
+        }
         setRpc(true);
     },
     flux:

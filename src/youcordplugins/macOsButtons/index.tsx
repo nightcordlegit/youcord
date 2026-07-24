@@ -129,8 +129,12 @@ function injectMacOsButtons() {
     pushToolbarLeft();
 
     // Focus / unfocus
-    window.addEventListener("focus", () => container.classList.remove("macos-unfocused"));
-    window.addEventListener("blur", () => container.classList.add("macos-unfocused"));
+    const onFocus = () => container.classList.remove("macos-unfocused");
+    const onBlur = () => container.classList.add("macos-unfocused");
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("blur", onBlur);
+    (container as any).__focusHandler = onFocus;
+    (container as any).__blurHandler = onBlur;
     if (!document.hasFocus()) container.classList.add("macos-unfocused");
 }
 
@@ -152,7 +156,12 @@ function pushToolbarLeft() {
 }
 
 function removeMacOsButtons() {
-    document.getElementById("macos-window-controls")?.remove();
+    const container = document.getElementById("macos-window-controls");
+    if (container) {
+        if ((container as any).__focusHandler) window.removeEventListener("focus", (container as any).__focusHandler);
+        if ((container as any).__blurHandler) window.removeEventListener("blur", (container as any).__blurHandler);
+        container.remove();
+    }
     document.getElementById("macos-buttons-style")?.remove();
     document.getElementById("macos-toolbar-push")?.remove();
 }
