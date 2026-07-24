@@ -139,11 +139,16 @@ jobs:
                   npx electron-builder --config electron-builder.config.cjs --mac --publish never
 
             - name: Create or update latest release
+              shell: pwsh
               env:
                   GH_TOKEN: ${{ github.token }}
               run: |
-                  tag="latest"
-                  gh release create $tag --title "Latest Build" --notes "Automated build from main branch ($GITHUB_SHA)" --latest=false 2>/dev/null || true
-                  for f in release/*.dmg release/*.zip release/*.app.tar.gz; do
-                      [ -f "$f" ] && gh release upload $tag --clobber "$f"
-                  done
+                  $tag = "latest"
+
+                  # Try to create the release (fails silently if already exists)
+                  gh release create $tag --title "Latest Build" --notes "Automated build from main branch ($env:GITHUB_SHA)" --latest=false 2>$null
+
+                  # Upload artifacts (--clobber overwrites existing files)
+                  Get-ChildItem "release/*.dmg","release/*.zip","release/*.app.tar.gz" -ErrorAction SilentlyContinue | ForEach-Object {
+                      gh release upload $tag --clobber $_.FullName
+                  }
