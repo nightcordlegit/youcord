@@ -113,10 +113,11 @@
         --text-muted: #95989d;
         --text-link: #a78bfa;
 
-        /* Accent colors */
-        --accent: #7c3aed;
-        --accent-hover: #6d28d9;
-        --accent-faded: rgba(124, 58, 237, 0.4);
+        /* Accent colors — sampled from the YouCord logo gradient */
+        --accent: #842fe2;
+        --accent-hover: #6925b4;
+        --accent-faded: rgba(132, 47, 226, 0.4);
+        --brand-yellow: #fcd211;
 
         /* Danger colors */
         --danger: #c13a3a;

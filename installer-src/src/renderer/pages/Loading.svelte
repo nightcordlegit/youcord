@@ -28,7 +28,7 @@
     }
 
     .arc {
-        stroke: #5865F2;
+        stroke: var(--accent);
         transform-origin: center;
         animation: rotate 0.9s ease-in-out infinite;
     }
