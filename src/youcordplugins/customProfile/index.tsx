@@ -1675,7 +1675,8 @@ export default definePlugin({
 
     fakeOtherUser(realUser: any, data: CustomProfileData) {
         if (!realUser || !realUser.id) return realUser;
-        const clone = Object.create(realUser);
+        const clone = Object.create(Object.getPrototypeOf(realUser));
+        Object.assign(clone, realUser);
 
         // Username / display name
         if (data.username) clone.username = data.username;
