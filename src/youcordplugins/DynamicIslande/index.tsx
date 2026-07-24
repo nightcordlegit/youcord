@@ -612,7 +612,8 @@ function DynamicIsland({ onlySoundCord }: { onlySoundCord?: boolean }) {
     const [streamStartedAt, setStreamStartedAt] = useState(Date.now());
     const swipeStartRef = useRef<SwipeStart | null>(null);
     const suppressClickRef = useRef(false);
-    const { islandColor, keepIslandVisible, morphNotifications, showScreenShareIsland, showSoundCordIsland, showSpotifyIsland, showVoiceIsland } = settings.use(SETTINGS_KEYS);
+    const _settings = settings.use(SETTINGS_KEYS) ?? {};
+    const { islandColor = "black", keepIslandVisible = false, morphNotifications = true, showScreenShareIsland = true, showSoundCordIsland = true, showSpotifyIsland = true, showVoiceIsland = true } = _settings;
     const spotifyTrack = useStateFromStores([SpotifyStore], () => SpotifyStore.device?.is_active ? SpotifyStore.track : null);
     const isPlaying = useStateFromStores([SpotifyStore], () => SpotifyStore.isPlaying);
     const spotifyTrackId = spotifyTrack?.id;
