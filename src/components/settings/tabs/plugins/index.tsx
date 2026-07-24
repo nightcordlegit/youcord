@@ -378,10 +378,13 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
             return true;
         }
 
+        const searchLower = search.toLowerCase();
+        const searchNoSpaces = searchLower.replace(/\s+/g, "");
+        
         return (
-            plugin.name.toLowerCase().includes(search.replace(/\s+/g, "")) ||
-            plugin.description.toLowerCase().includes(search) ||
-            plugin.tags?.some(t => t.toLowerCase().includes(search))
+            plugin.name.toLowerCase().includes(searchNoSpaces) ||
+            plugin.description.toLowerCase().includes(searchLower) ||
+            plugin.tags?.some(t => t.toLowerCase().includes(searchLower))
         );
     }, [searchValue, search, premiumOnly]);
 

@@ -6,7 +6,7 @@
 
 import { IS_MAC } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
-import { SVGProps } from "react";
+import { React, SVGProps } from "@webpack/common";
 
 const cl = classNameFactory("vc-command-palette-");
 

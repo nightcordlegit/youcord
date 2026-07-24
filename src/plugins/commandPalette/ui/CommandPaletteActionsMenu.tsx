@@ -7,8 +7,10 @@
 import { CogWheel } from "@components/Icons";
 import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
-import { TextInput, useCallback, useEffect, useMemo, useRef, useState } from "@webpack/common";
+import { React, TextInput, useCallback, useEffect, useMemo, useRef, useState } from "@webpack/common";
 import type { KeyboardEvent } from "react";
+
+const memo = React.memo;
 
 import type { CommandActionIntent } from "../registry";
 
@@ -45,7 +47,7 @@ function parseShortcut(shortcut: string): string[] {
     });
 }
 
-export function CommandPaletteActionsMenu({ actions, title, onClose, onAction, isClosing }: CommandPaletteActionsMenuProps) {
+export const CommandPaletteActionsMenu = memo(function CommandPaletteActionsMenu({ actions, title, onClose, onAction, isClosing }: CommandPaletteActionsMenuProps) {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedIndex, setSelectedIndex] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -200,4 +202,4 @@ export function CommandPaletteActionsMenu({ actions, title, onClose, onAction, i
             </div>
         </div>
     );
-}
+});

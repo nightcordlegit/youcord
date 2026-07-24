@@ -19,6 +19,8 @@ import { OptionType, Plugin } from "@utils/types";
 import { React, showToast, Text, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
 
+const memo = React.memo;
+
 import { PluginMeta } from "~plugins";
 
 import { openPluginModal } from "./PluginModal";
@@ -37,7 +39,7 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     onMouseLeave?: React.MouseEventHandler<HTMLDivElement>;
 }
 
-export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew, hasTutorial }: PluginCardProps) {
+export const PluginCard = memo(function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew, hasTutorial }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
     const isEnabled = () => isPluginEnabled(plugin.name);
 
@@ -292,4 +294,4 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
                 </div>
             } />
     );
-}
+});

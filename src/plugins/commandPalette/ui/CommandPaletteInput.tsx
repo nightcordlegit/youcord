@@ -8,6 +8,8 @@ import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import { React, TextInput } from "@webpack/common";
 
+const memo = React.memo;
+
 const cl = classNameFactory("vc-command-palette-");
 
 interface CommandPaletteInputProps {
@@ -24,7 +26,7 @@ interface CommandPaletteInputProps {
     children?: React.ReactNode;
 }
 
-export function CommandPaletteInput({
+export const CommandPaletteInput = memo(function CommandPaletteInput({
     value,
     onChange,
     placeholder,
@@ -56,4 +58,4 @@ export function CommandPaletteInput({
             {children}
         </div>
     );
-}
+});
