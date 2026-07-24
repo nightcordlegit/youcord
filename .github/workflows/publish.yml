@@ -60,7 +60,7 @@ jobs:
 
             - name: Setup PNPM
               if: steps.check.outputs.release == 'true'
-              uses: pnpm/action-setup@v4
+              uses: pnpm/action-setup@v6
 
             - name: Use Node.js 22
               if: steps.check.outputs.release == 'true'
