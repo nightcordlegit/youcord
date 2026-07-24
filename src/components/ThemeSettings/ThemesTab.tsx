@@ -46,7 +46,7 @@ import { getThemeInfo, stripBOM, type UserThemeHeader } from "@utils/themes/bd";
 import { usercssParse } from "@utils/themes/usercss";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { findComponentByCodeLazy, findLazy } from "@webpack";
-import { Alerts, Menu, React, Select, showToast, TextInput, Toasts, Tooltip, useCallback, useEffect, useMemo, useState } from "@webpack/common";
+import { Alerts, Menu, React, Select, showToast, TextInput, Toasts, Tooltip, useEffect, useMemo, useState } from "@webpack/common";
 import { ContextMenuApi } from "@webpack/common/menu";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 import type { UserstyleHeader } from "usercss-meta";
@@ -386,22 +386,6 @@ function ThemesTab() {
     const [searchQuery, setSearchQuery] = useState("");
     const [filter, setFilter] = useState(ThemeFilter.All);
 
-    const changeThemeLibraryURLs = useCallback(async () => {
-        const newLinks = settings.themeLinks.map(link => {
-            if (link.startsWith("https://discord-themes.com/api")) {
-                return link.replace("https://discord-themes.com/api", "https://themes.equicord.org/api");
-            }
-            return link;
-        });
-        // Only write back if something actually changed. settings.themeLinks is a
-        // dependency of refreshOnlineThemes, so reassigning it to a new array every
-        // call (even a no-op .map()) changes its identity, which recreates
-        // refreshOnlineThemes, which reruns the effect below, which calls this again
-        // — an infinite render loop (React error #185) on the Themes tab.
-        const changed = newLinks.some((link, i) => link !== settings.themeLinks[i]);
-        if (changed) settings.themeLinks = newLinks;
-    }, [settings]);
-
     async function refreshLocalThemes() {
         const themes = await VencordNative.themes.getThemesList();
         const themeInfo: ThemeHeader[] = [];
@@ -495,7 +479,7 @@ function ThemesTab() {
         refreshOnlineThemes();
     }
 
-    const refreshOnlineThemes = useCallback(async () => {
+    async function refreshOnlineThemes() {
         const themes = await Promise.all(
             settings.themeLinks.map(async link => {
                 try {
@@ -510,16 +494,25 @@ function ThemesTab() {
             })
         );
         setOnlineThemes(themes.filter(theme => theme !== null));
-    }, [settings.themeLinks, setOnlineThemes]);
+    }
 
+    // Migrate old theme library URLs on mount and when themeLinks change
     useEffect(() => {
-        async function updateThemes() {
-            await changeThemeLibraryURLs();
-            refreshLocalThemes();
-            refreshOnlineThemes();
+        const newLinks = settings.themeLinks.map(link => {
+            if (link.startsWith("https://discord-themes.com/api")) {
+                return link.replace("https://discord-themes.com/api", "https://themes.equicord.org/api");
+            }
+            return link;
+        });
+        const changed = newLinks.some((link, i) => link !== settings.themeLinks[i]);
+        if (changed) {
+            settings.themeLinks = newLinks;
+            return;
         }
-        updateThemes();
-    }, [changeThemeLibraryURLs, refreshOnlineThemes]);
+
+        refreshLocalThemes();
+        refreshOnlineThemes();
+    }, [settings.themeLinks]);
 
     function onThemeLinkEnabledChange(link: string, enabled: boolean) {
         if (enabled) {
