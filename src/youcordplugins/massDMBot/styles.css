@@ -1,5 +1,5 @@
 .mdb-modal {
-    width: 620px;
+    width: 680px;
     max-width: 90vw;
     border-radius: 12px;
     overflow: hidden;
@@ -25,6 +25,9 @@
     margin-bottom: 8px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .mdb-token-list {
@@ -202,6 +205,48 @@
     border-color: var(--brand-experiment);
 }
 
+.mdb-examples-toggle {
+    color: var(--text-link);
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+    margin-top: 4px;
+}
+
+.mdb-examples-toggle:hover {
+    text-decoration: underline;
+}
+
+.mdb-examples-box {
+    background: var(--background-tertiary);
+    border-radius: 6px;
+    padding: 10px;
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.mdb-examples-box code {
+    background: var(--background-modifier-accent);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-family: var(--font-code);
+    font-size: 11px;
+}
+
+.mdb-examples-box .mdb-example-label {
+    color: var(--text-muted);
+    display: block;
+}
+
+.mdb-examples-box .mdb-example-code {
+    color: var(--text-normal);
+    display: block;
+    margin-bottom: 6px;
+    font-family: var(--font-code);
+    font-size: 12px;
+}
+
 .mdb-options {
     display: flex;
     align-items: center;
@@ -344,4 +389,13 @@
 @keyframes mdb-pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
+}
+
+.mdb-icon-glow {
+    animation: mdb-icon-pulse 2s ease-in-out infinite;
+}
+
+@keyframes mdb-icon-pulse {
+    0%, 100% { filter: drop-shadow(0 0 2px rgba(88,101,242,0.6)); }
+    50% { filter: drop-shadow(0 0 8px rgba(88,101,242,1)); }
 }

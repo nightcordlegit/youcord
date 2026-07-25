@@ -146,8 +146,8 @@ function useObservableState() {
 
 function BotIcon(props: any) {
     return (
-        <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width={20} height={20} viewBox="0 0 24 24" fill="currentColor" {...props}>
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.66-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.41-.88.03-.24.36-.49.99-.74 3.93-1.71 6.55-2.84 7.88-3.39 3.75-1.56 4.53-1.83 5.04-1.84.11 0 .36.03.52.17.14.12.18.28.2.46z" />
+        <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width={22} height={22} viewBox="0 0 24 24" {...props}>
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#5865F2" />
         </svg>
     );
 }
@@ -167,6 +167,8 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
     const [mention, setMention] = useState(true);
     const [editingDelay, setEditingDelay] = useState(false);
     const [delayInput, setDelayInput] = useState(String(state.delayMs / 1000));
+    const [showExamples, setShowExamples] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const logRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -192,6 +194,32 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
         const newTokens = tokens.filter(t => t !== tok);
         saveTokens(newTokens);
         if (selectedToken === tok) setSelectedToken(newTokens[0] || "");
+    };
+
+    const importTokensFromFile = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.currentTarget.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const text = reader.result as string;
+            const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0 && !l.startsWith("#"));
+            const existing = new Set(tokens);
+            const newTokens = [...tokens];
+            for (const line of lines) {
+                if (!existing.has(line)) {
+                    newTokens.push(line);
+                    existing.add(line);
+                }
+            }
+            saveTokens(newTokens);
+            if (newTokens.length > 0 && !selectedToken) setSelectedToken(newTokens[0]);
+        };
+        reader.readAsText(file);
+        e.currentTarget.value = "";
     };
 
     const fetchGuilds = async () => {
@@ -220,14 +248,32 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
         setSelectedGuildIds(next);
     };
 
+    const insertExample = (text: string) => {
+        setMessage(prev => prev ? prev + "\n" + text : text);
+    };
+
     const idle = !s.running && !s.finished;
     const pct = s.total > 0 ? Math.round((s.done / s.total) * 100) : 0;
+
+    const exampleItems = [
+        { label: "Ping l'utilisateur", code: "<@USER_ID>" },
+        { label: "Ping un rôle", code: "<@&ROLE_ID>" },
+        { label: "Texte en gras", code: "**texte en gras**" },
+        { label: "Texte en italique", code: "*texte en italique*" },
+        { label: "Souligné", code: "__souligné__" },
+        { label: "Lien cliquable", code: "https://exemple.fr" },
+        { label: "Code inline", code: "`code`" },
+        { label: "Bloc de code", code: "```\ncode block\n```" },
+        { label: "Saut de ligne", code: "ligne 1\\nligne 2" },
+        { label: "Citation", code: "> citation" },
+        { label: "Message avec embed (lien seul)", code: "https://discord.com/channels/..." },
+    ];
 
     return (
         <ModalRoot {...rootProps} className="mdb-modal">
             <ModalHeader>
                 <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                    <BotIcon style={{ marginRight: 8, color: "#5865F2" }} />
+                    <BotIcon style={{ marginRight: 10 }} className="mdb-icon-glow" />
                     <span style={{ flex: 1, fontWeight: 700, fontSize: 16, color: "#fff" }}>Mass DM Bot</span>
                     {s.running && <span className="mdb-badge">Running...</span>}
                     <ModalCloseButton onClick={rootProps.onClose} />
@@ -263,7 +309,20 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
                                     onKeyDown={e => { if (e.key === "Enter") addToken(); }}
                                 />
                                 <Button size="min" variant="primary" onClick={addToken} disabled={!tokenInput.trim()}>Add</Button>
+                                <Button size="min" variant="secondary" onClick={importTokensFromFile}>Import .txt</Button>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept=".txt"
+                                    style={{ display: "none" }}
+                                    onChange={handleFileChange}
+                                />
                             </div>
+                            {tokens.length > 0 && (
+                                <div style={{ color: "var(--text-muted)", fontSize: 11, marginTop: 6 }}>
+                                    {tokens.length} token(s) — click a token to load its guilds
+                                </div>
+                            )}
                         </div>
 
                         {selectedToken && (
@@ -294,6 +353,11 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
                                         </div>
                                     ))}
                                 </div>
+                                {guilds.length > 0 && (
+                                    <div style={{ color: "var(--text-muted)", fontSize: 11, marginTop: 6 }}>
+                                        {selectedGuildIds.size} / {guilds.length} selected
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -301,11 +365,41 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
                             <div className="mdb-section-title">Message</div>
                             <textarea
                                 className="mdb-textarea"
-                                placeholder="Write your DM message here..."
+                                placeholder={
+                                    "Write your DM message here.\n" +
+                                    "Examples: Hello! | <@USER_ID> Welcome! | **bold** text\n" +
+                                    "Use <@USER_ID> to ping the user (enabled below)"
+                                }
                                 value={message}
                                 onChange={e => setMessage(e.currentTarget.value)}
                                 rows={6}
                             />
+                            <div
+                                className="mdb-examples-toggle"
+                                onClick={() => setShowExamples(!showExamples)}
+                            >
+                                {showExamples ? "▼" : "▶"} Message examples
+                            </div>
+                            {showExamples && (
+                                <div className="mdb-examples-box">
+                                    {exampleItems.map((item, i) => (
+                                        <div key={i}>
+                                            <span className="mdb-example-label">{item.label}</span>
+                                            <span
+                                                className="mdb-example-code"
+                                                style={{ cursor: "pointer" }}
+                                                onClick={() => insertExample(item.code)}
+                                                title="Click to insert"
+                                            >
+                                                {item.code}
+                                            </span>
+                                        </div>
+                                    ))}
+                                    <div style={{ color: "var(--text-muted)", marginTop: 4, fontSize: 11 }}>
+                                        Click an example to insert it into your message.
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="mdb-options">
