@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
@@ -217,7 +217,7 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
         };
     }, []);
 
-    // Static list â€” no fetch, no CORS issues.
+    // Static list — no fetch, no CORS issues.
     // Also populate TUTORIAL_CACHE so the SearchStatus.TUTORIAL filter works.
     const tutorialPlugins = useMemo(() => {
         for (const name of Object.values(Plugins).map(p => p.name).filter(Boolean)) {
@@ -407,7 +407,7 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
 
     const handleRestartNeeded = useCallback((name: string, key: string) => changes.handleChange(`${name}:${key}`), [changes]);
 
-    // Only filter/categorize plugin DATA here â€” no JSX created yet
+    // Only filter/categorize plugin DATA here — no JSX created yet
         const { youcordData, othersData, requiredData } = useMemo(() => {
         const youcordData: typeof sortedPlugins = [];
         const othersData: typeof sortedPlugins = [];
@@ -572,10 +572,12 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
         const totalPlugins = Object.keys(Plugins).filter(p => !isApiPlugin(p));
         const enabledPlugins = Object.keys(Plugins).filter(p => isPluginEnabled(p) && !isApiPlugin(p));
 
-        const totalStockPlugins = totalPlugins.filter(p => !PluginMeta[p].userPlugin && !Plugins[p].hidden).length;
-        const totalUserPlugins = totalPlugins.filter(p => PluginMeta[p].userPlugin).length;
-        const enabledStockPlugins = enabledPlugins.filter(p => !PluginMeta[p].userPlugin).length;
-        const enabledUserPlugins = enabledPlugins.filter(p => PluginMeta[p].userPlugin).length;
+        const isStockPlugin = (p: string) => !(PluginMeta[p]?.userPlugin ?? false);
+        const isUserPlugin = (p: string) => PluginMeta[p]?.userPlugin ?? false;
+        const totalStockPlugins = totalPlugins.filter(p => isStockPlugin(p) && !Plugins[p].hidden).length;
+        const totalUserPlugins = totalPlugins.filter(p => isUserPlugin(p)).length;
+        const enabledStockPlugins = enabledPlugins.filter(p => isStockPlugin(p)).length;
+        const enabledUserPlugins = enabledPlugins.filter(p => isUserPlugin(p)).length;
         return { totalStockPlugins, totalUserPlugins, enabledStockPlugins, enabledUserPlugins, enabledPlugins };
     }, []);
 
@@ -791,7 +793,7 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
                             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, padding: "8px 0" }}>
                                 <UserPluginsTabIcon />
                                 <span style={{ color: "var(--header-primary)", fontWeight: 600, fontSize: 14 }}>
-                                    {t("User Plugins â€” from your local folder")}
+                                    {t("User Plugins — from your local folder")}
                                 </span>
                             </div>
                             {youcordPlugins.length > 0 || othersVisible.length > 0 ? (
@@ -825,7 +827,7 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
                             ref={sentinelRef}
                             style={{ height: 40, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", fontSize: 13 }}
                         >
-                            {t("Loading more pluginsâ€¦")}
+                            {t("Loading more plugins...")}
                         </div>
                     )}
                 </>

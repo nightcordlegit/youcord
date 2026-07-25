@@ -963,6 +963,43 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
 
     async function toggleShareProfile(v: boolean) {
         if (v) {
+            // Enable settings immediately for local UX
+            Settings.syncOwnCustomProfile = true;
+            Settings.seeAllCustomProfile = true;
+            setShareEnabled(true);
+
+            // Save current data right away
+            const currentData = { ...data };
+            if (selectedAccountId === myId) {
+                allAccountsData[myId] = currentData;
+                allAccountsEnabled[myId] = true;
+                storedData = currentData;
+                isEnabled = true;
+                saveDataSync(storedData, true);
+                saveAllDataSync();
+                DataStore.set(DS_ALL_DATA, allAccountsData).catch(() => { });
+                DataStore.set(DS_ALL_ENABLED, allAccountsEnabled).catch(() => { });
+                cachedFakeUser = null;
+                cachedOriginalUser = null;
+                leCacheU = null;
+                leCacheI = null;
+                cacheDatesR = [];
+                cacheDatesF = [];
+                _dataVersion++;
+                forceAccountPanelRerender();
+            }
+
+            const dataToSync = { ...currentData };
+            delete dataToSync.username;
+            delete dataToSync.globalName;
+            delete dataToSync.avatar;
+            delete dataToSync.bio;
+            delete dataToSync.pronouns;
+            delete dataToSync.email;
+            delete dataToSync.phone;
+            delete dataToSync.copiedUserId;
+
+            // Try OAuth in background — if it fails, settings stay enabled for later
             try {
                 const oauthData = await beginDiscordOAuth();
                 const clientId = new URL(oauthData.url).searchParams.get("client_id") ?? "";
@@ -981,48 +1018,10 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                             const json = await res.json();
                             if (json?.token) {
                                 await storeToken(json.token);
-                                Settings.syncOwnCustomProfile = true;
-                                Settings.seeAllCustomProfile = true;
-                                setShareEnabled(true);
-
-                                // Push what is currently in the form right away instead of
-                                // waiting for the user to remember to hit "Save" afterwards.
-                                // Enabling sync should sync immediately, not on a later click,
-                                // otherwise anyone who already had edits pending loses them
-                                // (they stay local-only until a Save that may never happen).
-                                const currentData = { ...data };
-                                if (selectedAccountId === myId) {
-                                    allAccountsData[myId] = currentData;
-                                    allAccountsEnabled[myId] = true;
-                                    storedData = currentData;
-                                    isEnabled = true;
-                                    saveDataSync(storedData, true);
-                                    saveAllDataSync();
-                                    DataStore.set(DS_ALL_DATA, allAccountsData).catch(() => { });
-                                    DataStore.set(DS_ALL_ENABLED, allAccountsEnabled).catch(() => { });
-                                    cachedFakeUser = null;
-                                    cachedOriginalUser = null;
-                                    leCacheU = null;
-                                    leCacheI = null;
-                                    cacheDatesR = [];
-                                    cacheDatesF = [];
-                                    _dataVersion++;
-                                    forceAccountPanelRerender();
-                                }
-
-                                const dataToSync = { ...currentData };
-                                delete dataToSync.username;
-                                delete dataToSync.globalName;
-                                delete dataToSync.avatar;
-                                delete dataToSync.bio;
-                                delete dataToSync.pronouns;
-                                delete dataToSync.email;
-                                delete dataToSync.phone;
-                                delete dataToSync.copiedUserId;
                                 saveOwnPluginConfig("customProfile", json.token, { ...dataToSync, private: false }).then(() => {
                                     publicProfilesCache.delete(myId);
                                 }).catch(e => {
-                                    console.error("[CustomProfile] Immediate sync after enabling failed:", e);
+                                    console.error("[CustomProfile] Sync after enabling failed:", e);
                                 });
                             }
                         } catch (e) {
@@ -1031,7 +1030,7 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                     }}
                 />);
             } catch (e) {
-                console.error("[CustomProfile] OAuth initiation failed:", e);
+                console.error("[CustomProfile] OAuth initiation failed — will retry on next restart:", e);
             }
         } else {
             Settings.syncOwnCustomProfile = false;
