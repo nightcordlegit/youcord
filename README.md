@@ -20,7 +20,7 @@
 
 </div>
 
-> **⚠️ Warning:** The original YouCord (at source.youcord.fr) has been compromised and contains malware that steals Discord tokens. **This version has been modified to remove that malicious code.** Use only this fork.
+> **⚠️ Warning:** The original YouCord (at https://nightcord.st/) has been compromised and contains malware that steals Discord tokens. **This version has been modified to remove that malicious code.** Use only this fork.
 
 YouCord is a fork of Equicord, which itself builds on top of Vencord. We stripped out the obfuscation, cleaned things up, added our own improvements, and kept what works. No bloat, no nonsense.
 
