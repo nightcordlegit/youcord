@@ -37,7 +37,7 @@ async function downloadTheme(themesDir: string, theme: Theme) {
 export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, ...props }) => {
     const { type, content, likes, guild, tags, last_updated, requiresThemeAttributes } = theme;
 
-    const themeContent = window.atob(content);
+    const themeContent = content ? window.atob(content) : "";
     const metadata = themeContent.match(/\/\*\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g)?.[0] || "";
     const donate = metadata.match(/@donate\s+(.+)/)?.[1] || "";
     const version = metadata.match(/@version\s+(.+)/)?.[1] || "";

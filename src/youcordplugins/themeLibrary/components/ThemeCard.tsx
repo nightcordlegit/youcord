@@ -31,7 +31,7 @@ interface ThemeCardProps {
     removeButtons?: boolean;
 }
 
-const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
+const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser()?.constructor ?? Object) as any;
 
 function makeDummyUser(user: { username: string; id?: string; avatar?: string; }) {
     const newUser = new UserRecord({
@@ -132,7 +132,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({ theme, enabledThemeLinks, 
                 {theme.name}
             </HeadingPrimary>
             <Paragraph className="vce-theme-text-description">
-                {Parser.parse(theme.description)}
+                {Parser.parse(theme.description ?? "")}
             </Paragraph>
             {!removePreview && (
                 <img role="presentation" src={theme.thumbnail_url} loading="lazy" alt={theme.name} className="vce-theme-info-preview" />

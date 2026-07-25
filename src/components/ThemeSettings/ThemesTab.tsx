@@ -418,7 +418,7 @@ function ThemesTab() {
                             normalizedValue = varInfo.default;
                             break;
                         case "select":
-                            normalizedValue = varInfo.options.find(v => v.name === varInfo.default)!.value;
+                            normalizedValue = varInfo.options.find(v => v.name === varInfo.default)?.value ?? varInfo.default;
                             break;
                         case "range":
                             normalizedValue = `${varInfo.default}${varInfo.units}`;

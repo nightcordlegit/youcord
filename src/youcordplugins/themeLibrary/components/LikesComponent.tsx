@@ -20,13 +20,13 @@ export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { t
     const debounce = useRef(false);
 
     useEffect(() => {
-        const themeLike = likedThemes?.likes.find(like => like.themeId === themeId as unknown as Number);
+        const themeLike = likedThemes?.likes.find(like => String(like.themeId) === themeId);
         setLikesCount(themeLike ? themeLike.likes : 0);
     }, [likedThemes, themeId]);
 
     const handleLikeClick = async (themeId: Theme["id"]) => {
         if (!isAuthorized()) return;
-        const theme = likedThemes?.likes.find(like => like.themeId === themeId as unknown as Number);
+        const theme = likedThemes?.likes.find(like => String(like.themeId) === themeId);
         const hasLiked: boolean = theme?.hasLiked ?? false;
         const endpoint = hasLiked ? "/likes/remove" : "/likes/add";
         const token = await DataStore.get("ThemeLibrary_uniqueToken");
@@ -72,7 +72,7 @@ export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { t
         debounce.current = false;
     };
 
-    const hasLiked = likedThemes?.likes.some(like => like.themeId === themeId as unknown as Number && like?.hasLiked === true) ?? false;
+    const hasLiked = likedThemes?.likes.some(like => String(like.themeId) === themeId && like?.hasLiked === true) ?? false;
 
     return (
         <Button onClick={() => handleLikeClick(themeId)}
