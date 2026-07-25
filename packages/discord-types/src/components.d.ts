@@ -530,6 +530,12 @@ export type Icon = ComponentType<JSX.IntrinsicElements["svg"] & {
     colorClass?: string;
 } & Record<string, any>>;
 
+export type ComponentSection = ComponentType<PropsWithChildren<{
+    heading?: string;
+    disabled?: boolean;
+    showNitroIcon?: boolean;
+}>>;
+
 export type ColorPicker = ComponentType<{
     color: number | null;
     showEyeDropper?: boolean;

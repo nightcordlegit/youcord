@@ -8,7 +8,7 @@ import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import { React, TextInput } from "@webpack/common";
 
-const memo = React.memo;
+const { memo } = React;
 
 const cl = classNameFactory("vc-command-palette-");
 

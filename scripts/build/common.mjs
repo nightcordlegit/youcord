@@ -606,6 +606,7 @@ export const commonOpts = {
         "@webpack/patcher": "./src/webpack/patchWebpack",
         "@webpack": "./src/webpack/webpack",
         "@youcordplugins": "./src/youcordplugins",
+        "@equicordplugins": "./src/equicordplugins",
     }
 };
 
