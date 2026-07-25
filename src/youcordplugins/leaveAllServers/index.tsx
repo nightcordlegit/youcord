@@ -188,7 +188,7 @@ function LeaveAllServersModal({ rootProps }: { rootProps: any; }) {
                 <div className="las-footer-info">
                     <span>{selected.size} server{selected.size > 1 ? "s" : ""} selected</span>
                     {settings.store.safeMode && (
-                        <span className="las-safe-note">Â· Safe mode active (owners excluded)</span>
+                        <span className="las-safe-note">· Safe mode active (owners excluded)</span>
                     )}
                 </div>
 

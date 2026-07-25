@@ -25,7 +25,7 @@ interface VoiceChannel {
     guildIcon: string | null;
     memberCount: number;
     canAccess: boolean; // false = channel visible but no permission to join
-    // Pre-built unique search index: "channel name Â· server name"
+    // Pre-built unique search index: "channel name · server name"
     searchIndex: string;
 }
 
@@ -224,7 +224,7 @@ function VoiceSearchModal({ rootProps, channels }: { rootProps: any; channels: V
                                             <span className="vcs-guild-name">{ch.guildName}</span>
                                             {ch.memberCount > 0 && (
                                                 <div className="vcs-members-info">
-                                                    <span className="vcs-members-count"> Â· {ch.memberCount}</span>
+                                                    <span className="vcs-members-count"> · {ch.memberCount}</span>
                                                     <div className="vcs-member-avatars">
                                                         {(() => {
                                                             const allStates = VoiceStateStore.getAllVoiceStates();

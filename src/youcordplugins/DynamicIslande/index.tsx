@@ -592,7 +592,7 @@ function ScreenShareSection({ startedAt, stream }: { startedAt: number; stream: 
                 <div className={cl("stream-indicator")}><ScreenShareIcon /></div>
                 <div className={cl("copy")}>
                     <strong>{channel.name || t("Screen sharing")}</strong>
-                    <span><ScreenShareTimer startedAt={startedAt} /> Â· {viewerCount} {viewerCount === 1 ? t("viewer") : t("viewers")}</span>
+                    <span><ScreenShareTimer startedAt={startedAt} /> · {viewerCount} {viewerCount === 1 ? t("viewer") : t("viewers")}</span>
                 </div>
             </div>
             <div className={cl("controls")}>

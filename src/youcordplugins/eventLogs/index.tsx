@@ -348,7 +348,7 @@ function LogRow({ e }: { e: LogEntry; }) {
                 <div className="el-top">
                     <span className="el-badge" style={{ background: cfg.color }}>{t(cfg.label)}</span>
                     {e.authorName && e.authorName !== "?" && <span className="el-author">{e.authorName}</span>}
-                    {e.channelName && <><span className="el-sep">Â·</span><span className="el-channel">#{e.channelName}</span></>}
+                    {e.channelName && <><span className="el-sep">·</span><span className="el-channel">#{e.channelName}</span></>}
                     {e.guildName && <span className="el-guild">{e.guildName}</span>}
                     <span className="el-time">{e.timeStr}</span>
                 </div>

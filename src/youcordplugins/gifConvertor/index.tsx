@@ -270,7 +270,7 @@ function GifConvertorPopover({ position, onClose }: PopoverProps) {
                             {isDragOver ? "Release to convert!" : "Drop media here"}
                         </span>
                         <span className="nc-gifconv-dropzone-sub">
-                            or click to browse Â· Ctrl+V to paste<br />
+                            or click to browse · Ctrl+V to paste<br />
                             Images &amp; Videos (MP4, WebMâ€¦)
                         </span>
                     </div>
@@ -294,7 +294,7 @@ function GifConvertorPopover({ position, onClose }: PopoverProps) {
             {stage === "preview" && previewUrl && (
                 <div className="nc-gifconv-preview-wrap">
                     <img src={previewUrl} alt="GIF preview" className="nc-gifconv-preview-img" />
-                    <span className="nc-gifconv-preview-label">Preview Â· {filename}</span>
+                    <span className="nc-gifconv-preview-label">Preview · {filename}</span>
                     <div className="nc-gifconv-actions">
                         <button
                             className="nc-gifconv-btn nc-gifconv-btn-secondary"

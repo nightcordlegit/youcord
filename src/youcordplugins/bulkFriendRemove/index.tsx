@@ -162,7 +162,7 @@ function BulkFriendRemoveModal({ rootProps }: { rootProps: any; }) {
 
                 <Forms.FormTitle tag="h5" style={{ margin: "4px 0" }}>
                     {friends.length} {friends.length !== 1 ? t("friends") : t("friend")}
-                    {selected.length > 0 && <span className="bfr-selected-count"> Â· {selected.length} {selected.length !== 1 ? t("selected") : t("selected")}</span>}
+                    {selected.length > 0 && <span className="bfr-selected-count"> · {selected.length} {selected.length !== 1 ? t("selected") : t("selected")}</span>}
                 </Forms.FormTitle>
 
                 <div className="bfr-list">

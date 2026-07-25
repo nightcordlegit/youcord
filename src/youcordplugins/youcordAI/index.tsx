@@ -209,7 +209,7 @@ async function executeAction(action: DiscordAction): Promise<string> {
     try {
         switch (action.type) {
             case "call":
-                if (!friend) return `âŒ Friend Â« ${action.target} Â» not found in your friends list.`;
+                if (!friend) return `âŒ Friend « ${action.target} » not found in your friends list.`;
                 await callUser(friend.id);
                 return action.reply ?? `ðŸ“ž Call in progress to **${friend.username}**...`;
             case "join_voice":
@@ -688,7 +688,7 @@ Rules:
                         }
                     </button>
                 </div>
-                <p className="nai-hint">{t("Shift+Enter for new line Â· Local history (100 messages)")}</p>
+                <p className="nai-hint">{t("Shift+Enter for new line · Local history (100 messages)")}</p>
             </div>
 
         </div>
