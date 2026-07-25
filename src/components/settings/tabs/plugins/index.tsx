@@ -628,13 +628,13 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
     const requiredPlugins = requiredData.map(makeRequiredCard);
 
     const totalYouCordPlugins = React.useMemo(() => {
-        return Object.values(Plugins).filter(p => PluginMeta[p.name]?.folderName?.startsWith("src/youcordplugins/")).length;
+        return Object.values(Plugins).filter(p => p && PluginMeta[p.name]?.folderName?.startsWith("src/youcordplugins/")).length;
     }, []);
 
     const totalOtherPlugins = React.useMemo(() => {
         const isYouCordPlugin = (p: string) => PluginMeta[p]?.folderName?.startsWith("src/youcordplugins/");
         const isCorePlugin = (p: string) => PluginMeta[p]?.folderName?.startsWith("src/plugins/_");
-        return Object.values(Plugins).filter(p => !isYouCordPlugin(p.name) && !isCorePlugin(p.name)).length;
+        return Object.values(Plugins).filter(p => p && !isYouCordPlugin(p.name) && !isCorePlugin(p.name)).length;
     }, []);
 
     // Category-aware stats for the "ENABLED PLUGINS" card: reflects whichever tab
