@@ -361,7 +361,7 @@ async function init() {
                     if (window.youcord && typeof window.youcord.openUrl === "function") {
                         window.youcord.openUrl("https://discord.gg/remHHJQRXg");
                     } else {
-                        VencordNative.native.openExternal("https://t.me/youcordoff");
+                        VencordNative.native.openExternal("https://t.me/youcord");
                     }
                 }
             });
