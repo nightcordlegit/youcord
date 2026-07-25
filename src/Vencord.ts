@@ -269,13 +269,13 @@ function showGreenUpdateBanner() {
     });
     closeBtn.onmouseenter = () => closeBtn.style.color = "#dbdee1";
     closeBtn.onmouseleave = () => closeBtn.style.color = "#b5bac1";
-    closeBtn.textContent = "âœ•";
+    closeBtn.textContent = "✕";
     closeBtn.title = "Dismiss (will auto-install when Discord closes)";
     closeBtn.addEventListener("click", () => {
         if (installing) return; // do not close if installing
         if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
         banner.remove();
-        UpdateLogger.info("Update banner dismissed â€” will auto-apply on Discord quit.");
+        UpdateLogger.info("Update banner dismissed — will auto-apply on Discord quit.");
     });
 
     rightContent.appendChild(updateBtn);

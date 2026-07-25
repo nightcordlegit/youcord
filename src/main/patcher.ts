@@ -92,7 +92,7 @@ if (!IS_VANILLA) {
             const ourPreload = join(__dirname, "preload.js");
             const preloadIsOurs = options.webPreferences.preload === ourPreload;
             // Exception : la fenêtre principale Discord a un preload à elle (l'original Discord),
-            // et c'est précisément ce qu'on veut remplacer â€” donc on accepte aussi le cas où
+            // et c'est précisément ce qu'on veut remplacer — donc on accepte aussi le cas où
             // le titre est une fenêtre YouCord/Equicord/Discord connue.
             const KNOWN_TITLES = /^(Discord|Vesktop|Equibop)$|^(YouCord|Equicord)/;
             const isTrustedTitle = !!(options.title && KNOWN_TITLES.test(options.title));
@@ -199,10 +199,10 @@ if (!IS_VANILLA) {
                     return superIsFullScreen();
                 };
 
-                // â”€â”€ Fullscreen via HTML5 (vidéo plein écran, etc.) â”€â”€
+                // ── Fullscreen via HTML5 (vidéo plein écran, etc.) ──
                 // On branche enter/leave-html-full-screen dans les deux modes pour que
                 // les vrais plein écrans HTML5 fonctionnent correctement.
-                // DISCORD_WINDOW_TOGGLE_FULLSCREEN est neutralisé plus bas â€” il ne
+                // DISCORD_WINDOW_TOGGLE_FULLSCREEN est neutralisé plus bas — il ne
                 // passera JAMAIS par setFullScreen natif.
                 if (isTransparent) {
                     this.on("enter-html-full-screen", () => {
@@ -220,7 +220,7 @@ if (!IS_VANILLA) {
                     });
                 }
 
-                // â”€â”€ F11 géré ici, côté main process â”€â”€
+                // ── F11 géré ici, côté main process ──
                 // On intercepte F11 via before-input-event pour basculer le fullscreen
                 // utilisateur. C'est la SEULE source légitime de toggle fullscreen manuel.
                 this.webContents.on("before-input-event", (event, input) => {
@@ -289,19 +289,19 @@ if (!IS_VANILLA) {
         registerMediaPermissionsForSession(session.defaultSession);
     });
 
-    // â”€â”€ Neutralisation de DISCORD_WINDOW_TOGGLE_FULLSCREEN â”€â”€
+    // ── Neutralisation de DISCORD_WINDOW_TOGGLE_FULLSCREEN ──
     //
     // PROBLÈME RACINE : Discord émet cet IPC automatiquement à chaque démarrage
     // ET à chaque rechargement de thème pour "synchroniser" son état interne.
-    // L'ancien handler faisait `win.setFullScreen(!win.isFullScreen())` â€” un toggle
-    // aveugle. Résultat : fenêtre maximisée + isFullScreen()=false â†’ setFullScreen(true)
-    // â†’ overlay OS fullscreen â†’ tous les inputs bloqués, app figée. F11 sortait du
+    // L'ancien handler faisait `win.setFullScreen(!win.isFullScreen())` — un toggle
+    // aveugle. Résultat : fenêtre maximisée + isFullScreen()=false → setFullScreen(true)
+    // → overlay OS fullscreen → tous les inputs bloqués, app figée. F11 sortait du
     // fullscreen et débloquait. Le fix du délai de 2s ne suffisait pas car les thèmes
     // rechargent Discord après ce délai.
     //
     // SOLUTION : on intercepte le handler Discord et on le remplace par un no-op
     // complet. Le fullscreen utilisateur est désormais géré exclusivement via F11
-    // intercepté dans before-input-event ci-dessus â€” ce qui est à la fois plus propre
+    // intercepté dans before-input-event ci-dessus — ce qui est à la fois plus propre
     // et impossible à déclencher accidentellement par Discord.
     {
         const _originalHandle = electron.ipcMain.handle.bind(electron.ipcMain);
@@ -313,7 +313,7 @@ if (!IS_VANILLA) {
                 if (_fullscreenPatched) return;
                 _fullscreenPatched = true;
                 // No-op : on enregistre un handler vide pour que Discord ne crash pas
-                // ("no handler registered"), mais on ne fait RIEN â€” le fullscreen est
+                // ("no handler registered"), mais on ne fait RIEN — le fullscreen est
                 // géré par before-input-event (F11) côté main process.
                 _originalHandle(FULLSCREEN_CHANNEL, (_event: electron.IpcMainInvokeEvent) => {
                     // Intentionnellement vide.

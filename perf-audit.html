@@ -114,7 +114,7 @@
 <div class="subtitle">v1.21.31 &mdash; <script>document.write(new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}))</script></div>
 
 <div class="summary-grid">
-  <div class="stat"><div class="num red">6</div><div class="label">Critical Issues</div></div>
+  <div class="stat"><div class="num green">0</div><div class="label">Critical Issues</div></div>
   <div class="stat"><div class="num orange">8</div><div class="label">High Severity</div></div>
   <div class="stat"><div class="num yellow">8</div><div class="label">Medium Severity</div></div>
   <div class="stat"><div class="num green">5</div><div class="label">Low / Good</div></div>
@@ -131,55 +131,37 @@
   </table>
 </div>
 
-<!-- Critical -->
-<h2><span class="badge its-critical">Critical</span> Fix Immediately</h2>
+<!-- Fixed -->
+<h2><span class="badge good">Fixed</span> All Critical Issues — Commit b4a82f3</h2>
 
 <div class="card">
-  <div class="card-header">
-    <span class="file">src/plugins/vcPanelSettings/index.tsx:96-197</span>
-    <span class="badge its-critical">Critical</span>
-  </div>
-  <p><strong>5x <code>useEffect</code> subscription leaks.</strong> Each <code>FluxDispatcher.subscribe()</code> call has <strong>no cleanup return</strong> and <strong>no dependency array</strong>. Every re-render creates 5 new orphan listeners that live forever.</p>
+  <div class="card-header"><span class="file">src/plugins/vcPanelSettings/index.tsx:96-197</span><span class="badge good">Fixed</span></div>
+  <p><strong>5x <code>useEffect</code> subscription leaks.</strong> Added cleanup returns and empty dependency arrays to all 5 <code>FluxDispatcher.subscribe</code> calls. Each effect now properly unsubscribes on unmount.</p>
 </div>
 
 <div class="card">
-  <div class="card-header">
-    <span class="file">src/plugins/rpcStats/index.tsx:180</span>
-    <span class="badge its-critical">Critical</span>
-  </div>
-  <p><strong><code>setInterval</code> never cleared.</strong> <code>setInterval(() =&gt; ..., 1000)</code> — the interval ID is not stored, and <code>stop()</code> never calls <code>clearInterval</code>. Runs forever after <code>stop()</code>.</p>
+  <div class="card-header"><span class="file">src/plugins/rpcStats/index.tsx:180</span><span class="badge good">Fixed</span></div>
+  <p><strong><code>setInterval</code> never cleared.</strong> Stored interval ID in a module-level variable and call <code>clearInterval</code> in <code>stop()</code>.</p>
 </div>
 
 <div class="card">
-  <div class="card-header">
-    <span class="file">src/(youcord)plugins/musicControls/tidal/TidalStore.ts:95-139</span>
-    <span class="badge its-critical">Critical</span>
-  </div>
-  <p><strong>WebSocket listener leak.</strong> <code>initWs()</code> creates <code>new WebSocket()</code> and adds 4 anonymous <code>addEventListener</code> calls. <code>reconnect()</code> calls <code>initWs()</code> again without closing the old socket — each reconnect = +1 orphan WebSocket + 4 orphan listeners.</p>
+  <div class="card-header"><span class="file">src/(youcord)plugins/musicControls/tidal/TidalStore.ts:95-139</span><span class="badge good">Fixed</span></div>
+  <p><strong>WebSocket listener leak.</strong> Stored all 4 event handler references (open, error, close, message) as class properties. Added <code>destroy()</code> method that removes all listeners and closes the socket. <code>reconnect()</code> now calls <code>destroy()</code> first to clean up the old socket before creating a new one.</p>
 </div>
 
 <div class="card">
-  <div class="card-header">
-    <span class="file">src/youcordplugins/macOsButtons/index.tsx:132-184</span>
-    <span class="badge its-critical">Critical</span>
-  </div>
-  <p><strong>Window focus/blur listener leak.</strong> <code>window.addEventListener("focus"/"blur", ...)</code> called from <code>MutationObserver</code> callback. No <code>removeEventListener</code> anywhere — listeners accumulate on every reconnect.</p>
+  <div class="card-header"><span class="file">src/youcordplugins/macOsButtons/index.tsx:132-184</span><span class="badge good">Fixed</span></div>
+  <p><strong>Window focus/blur listener leak.</strong> Stored handler references on the container element and call <code>removeEventListener</code> in <code>removeMacOsButtons()</code>.</p>
 </div>
 
 <div class="card">
-  <div class="card-header">
-    <span class="file">soundcloudPlayer/native.ts:241 &bull; youtubePlayer/native.ts:117</span>
-    <span class="badge its-critical">Critical</span>
-  </div>
-  <p><strong>Global click handlers never removable.</strong> Anonymous <code>document.addEventListener("click", (e) =&gt; {...}, true)</code> — impossible to remove since the function has no reference.</p>
+  <div class="card-header"><span class="file">soundcloudPlayer/native.ts &bull; youtubePlayer/native.ts</span><span class="badge good">Fixed</span></div>
+  <p><strong>Global click handlers never removable.</strong> Exposed <code>uninstallListeningTogetherIntercept()</code> and <code>uninstallYtIntercept()</code> cleanup functions. YouTube handler extracted from anonymous to named reference.</p>
 </div>
 
 <div class="card">
-  <div class="card-header">
-    <span class="file">src/youcordplugins/Surveillance/index.tsx:392+</span>
-    <span class="badge its-critical">Critical</span>
-  </div>
-  <p><strong>Stale <code>getState()</code> reads with no subscription.</strong> <code>PresenceStore.getState()?.statuses</code> called 3 times (lines 392, 547, 590) in event handlers without any <code>FluxDispatcher.subscribe</code>. Data may be stale; no reactive updates.</p>
+  <div class="card-header"><span class="file">Surveillance/index.tsx:392+</span><span class="badge low">False Positive</span></div>
+  <p><code>PresenceStore.getState()</code> calls are in one-time seed functions and event handlers — not in render paths. The store <em>does</em> have proper <code>addChangeListener</code>/<code>removeChangeListener</code> at lines 565/577. No issue.</p>
 </div>
 
 <!-- High -->

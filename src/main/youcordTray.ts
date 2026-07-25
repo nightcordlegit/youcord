@@ -90,7 +90,7 @@ export function initYouCordTray(injectorPath: string) {
                 }
             });
 
-            console.log("[YouCord] Tray created âœ“", iconPath ?? "(icon from exe)");
+            console.log("[YouCord] Tray created ✓", iconPath ?? "(icon from exe)");
         } catch (e) {
             console.error("[YouCord] Failed to create tray:", e);
         }

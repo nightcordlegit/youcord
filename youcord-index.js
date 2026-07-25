@@ -5,16 +5,16 @@ const Module = require("module");
 const fs = require("fs");
 const { app } = require("electron");
 
-// â”€â”€ CRITIQUE : userData = dossier YouCord pour les settings/plugins
+// ── CRITIQUE : userData = dossier YouCord pour les settings/plugins
 const youcordData = path.join(app.getPath("appData"), "YouCord");
 app.setPath("userData", youcordData);
 
-// AppUserModelId unique â€” Windows reconnaÃ®t YouCord comme app sÃ©parÃ©e de Discord
+// AppUserModelId unique — Windows reconnaît YouCord comme app séparée de Discord
 app.setAppUserModelId("com.squirrel.Discord.Discord");
 
-// Flags Chromium utiles uniquement (suppression des flags qui nuisent au dÃ©marrage :
-// process-per-site, renderer-process-limit, enable-low-end-device-mode forÃ§aient
-// des sous-processus et dÃ©sactivaient l'accÃ©lÃ©ration GPU â†’ freeze sur splash screen)
+// Flags Chromium utiles uniquement (suppression des flags qui nuisent au démarrage :
+// process-per-site, renderer-process-limit, enable-low-end-device-mode forçaient
+// des sous-processus et désactivaient l'accélération GPU → freeze sur splash screen)
 app.commandLine.appendSwitch("enable-gpu-rasterization");
 app.commandLine.appendSwitch("enable-zero-copy");
 app.commandLine.appendSwitch("disk-cache-size", "104857600");
@@ -22,11 +22,11 @@ app.commandLine.appendSwitch("disk-cache-size", "104857600");
 app.once("ready", () => {
     try {
         // Liste des modules natifs qui causent des erreurs 403 inutiles
-        // NB: discord_overlay est intentionnellement ABSENT de cette liste â€”
+        // NB: discord_overlay est intentionnellement ABSENT de cette liste —
         //     il doit pouvoir s'initialiser localement pour que l'overlay en jeu fonctionne.
-        //     Seuls les modules vraiment inutiles pour YouCord sont bloquÃ©s.
+        //     Seuls les modules vraiment inutiles pour YouCord sont bloqués.
         const BLOCKED_MODULES = new Set([
-            // "discord_overlay",  // RETIRE â€” nÃ©cessaire pour l'overlay in-game
+            // "discord_overlay",  // RETIRE — nécessaire pour l'overlay in-game
             "discord_rpc",
             "discord_dispatch",
             "discord_erinn",
@@ -35,7 +35,7 @@ app.once("ready", () => {
         const { session, shell } = require("electron");
         const { webContents: webContentsModule } = require("electron");
 
-        // URLs Discord lÃ©gitimes Ã  ne pas bloquer dans will-navigate
+        // URLs Discord légitimes à ne pas bloquer dans will-navigate
         function isDiscordUrl(url) {
             return url.startsWith("https://discord.com") ||
                 url.startsWith("https://canary.discord.com") ||
@@ -46,15 +46,15 @@ app.once("ready", () => {
         }
 
         function patchWebContents(wc) {
-            // Ã‰viter de patcher deux fois le mÃªme webContents
+            // Éviter de patcher deux fois le même webContents
             if (wc._youcordPatched) return;
             wc._youcordPatched = true;
 
             // Intercepte les window.open() :
-            // - about:blank est autorisÃ© (Discord en a besoin pour ses popups lÃ©gitimes)
-            //   MAIS on Ã©coute did-create-window pour patcher immÃ©diatement la fenÃªtre enfant
-            // - devtools:// est autorisÃ©
-            // - tout le reste â†’ navigateur externe
+            // - about:blank est autorisé (Discord en a besoin pour ses popups légitimes)
+            //   MAIS on écoute did-create-window pour patcher immédiatement la fenêtre enfant
+            // - devtools:// est autorisé
+            // - tout le reste → navigateur externe
             wc.setWindowOpenHandler(({ url }) => {
                 if (!url || url === "about:blank" || url.startsWith("devtools://")) {
                     return { action: "allow" };
@@ -64,23 +64,23 @@ app.once("ready", () => {
                 return { action: "deny" };
             });
 
-            // FIX CLEF : quand about:blank crÃ©e une fenÃªtre enfant,
+            // FIX CLEF : quand about:blank crée une fenêtre enfant,
             // Discord navigue ensuite vers une URL externe (TikTok, GitHub, etc.)
-            // dans cette fenÃªtre enfant. On la patche immÃ©diatement Ã  sa crÃ©ation
+            // dans cette fenêtre enfant. On la patche immédiatement à sa création
             // pour bloquer cette navigation et l'ouvrir dans le navigateur.
             wc.on("did-create-window", (childWin) => {
                 const childWc = childWin.webContents;
                 if (childWc._youcordPatched) return;
                 childWc._youcordPatched = true;
 
-                // La fenÃªtre enfant dÃ©marre sur about:blank mais va naviguer vers une URL externe
-                // On bloque toute navigation non-Discord dÃ¨s qu'elle se produit
+                // La fenêtre enfant démarre sur about:blank mais va naviguer vers une URL externe
+                // On bloque toute navigation non-Discord dès qu'elle se produit
                 childWc.on("will-navigate", (event, url) => {
                     if (!isDiscordUrl(url)) {
                         event.preventDefault();
                         shell.openExternal(url).catch(() => {});
                         console.log("[YouCord][CHILD-NAV] Redirection externe:", url);
-                        // Fermer la fenÃªtre enfant vide aprÃ¨s redirection
+                        // Fermer la fenêtre enfant vide après redirection
                         try { childWin.close(); } catch (_) {}
                     }
                 });
@@ -102,7 +102,7 @@ app.once("ready", () => {
                     return { action: "deny" };
                 });
 
-                // Bloquer aussi did-finish-load si la fenÃªtre a chargÃ© une URL externe
+                // Bloquer aussi did-finish-load si la fenêtre a chargé une URL externe
                 childWc.on("did-finish-load", () => {
                     const url = childWc.getURL();
                     if (url && url !== "about:blank" && !isDiscordUrl(url)) {
@@ -113,7 +113,7 @@ app.once("ready", () => {
                 });
             });
 
-            // Bloquer les navigations de la fenÃªtre mÃ¨re vers des URLs externes
+            // Bloquer les navigations de la fenêtre mère vers des URLs externes
             wc.on("will-navigate", (event, url) => {
                 const currentUrl = wc.getURL();
                 if (url !== currentUrl && !isDiscordUrl(url)) {
@@ -124,22 +124,22 @@ app.once("ready", () => {
             });
         }
 
-        // Patcher tous les webContents crÃ©Ã©s (fenÃªtres ET popups)
+        // Patcher tous les webContents créés (fenêtres ET popups)
         app.on("browser-window-created", (_, win) => {
             patchWebContents(win.webContents);
         });
 
-        // Patcher aussi les webContents crÃ©Ã©s sans BrowserWindow (popups dÃ©tachÃ©s, etc.)
+        // Patcher aussi les webContents créés sans BrowserWindow (popups détachés, etc.)
         app.on("web-contents-created", (_, wc) => {
             patchWebContents(wc);
         });
 
-        // Patcher les webContents dÃ©jÃ  existants au moment du ready
+        // Patcher les webContents déjà existants au moment du ready
         for (const wc of webContentsModule.getAllWebContents()) {
             patchWebContents(wc);
         }
 
-        console.log("[YouCord] Patch liens externes activÃ© sur TOUS les webContents (avec did-create-window) âœ“");
+        console.log("[YouCord] Patch liens externes activé sur TOUS les webContents (avec did-create-window) ✓");
 
         app.once("browser-window-created", (_, win) => {
 
@@ -152,15 +152,15 @@ app.once("ready", () => {
                         let isBlocked = false;
                         for (const m of BLOCKED_MODULES) { if (url.includes(m)) { isBlocked = true; break; } }
                         if (isBlocked) {
-                            // Bloquer silencieusement â€” Ã©vite le 403 + les logs d'erreur
-                            console.log("[YouCord] Module bloquÃ© (inutile pour YouCord):", url.split("/").slice(-2).join("/"));
+                            // Bloquer silencieusement — évite le 403 + les logs d'erreur
+                            console.log("[YouCord] Module bloqué (inutile pour YouCord):", url.split("/").slice(-2).join("/"));
                             callback({ cancel: true });
                         } else {
                             callback({});
                         }
                     }
                 );
-                console.log("[YouCord] Filtre modules 403 activÃ© âœ“");
+                console.log("[YouCord] Filtre modules 403 activé ✓");
             } catch (e) {
                 console.warn("[YouCord] Impossible d'activer le filtre modules:", e.message);
             }
@@ -170,28 +170,28 @@ app.once("ready", () => {
     }
 });
 
-// Protection contre le freeze aprÃ¨s crash â€” vÃ©rifier et rÃ©parer le LevelDB localStorage
-// Quand Discord crash pendant une Ã©criture localStorage, le fichier LevelDB peut se
-// corrompre et gÃ©ler le renderer au dÃ©marrage suivant.
+// Protection contre le freeze après crash — vérifier et réparer le LevelDB localStorage
+// Quand Discord crash pendant une écriture localStorage, le fichier LevelDB peut se
+// corrompre et géler le renderer au démarrage suivant.
 try {
     const lsPath = path.join(youcordData, "Local Storage", "leveldb");
     if (fs.existsSync(lsPath)) {
-        // DÃ©tecter la corruption : fichier LOCK verrouillÃ© ou fichier LOG manquant
+        // Détecter la corruption : fichier LOCK verrouillé ou fichier LOG manquant
         const lockFile = path.join(lsPath, "LOCK");
         const logFile = path.join(lsPath, "LOG");
         let corrupted = false;
         if (fs.existsSync(lockFile)) {
             try {
-                // Essayer d'ouvrir le LOCK en Ã©criture â€” si Ã©choue, un process zombie le tient
+                // Essayer d'ouvrir le LOCK en écriture — si échoue, un process zombie le tient
                 const fd = fs.openSync(lockFile, "r+");
                 fs.closeSync(fd);
             } catch (e) {
-                // LOCK verrouillÃ© par un zombie â€” supprimer pour dÃ©bloquer
+                // LOCK verrouillé par un zombie — supprimer pour débloquer
                 try { fs.unlinkSync(lockFile); } catch { }
                 corrupted = true;
             }
         }
-        // VÃ©rifier aussi les fichiers .ldb corrompus (taille 0)
+        // Vérifier aussi les fichiers .ldb corrompus (taille 0)
         if (!corrupted) {
             const files = fs.readdirSync(lsPath).filter(f => f.endsWith(".ldb"));
             for (const f of files) {
@@ -200,21 +200,21 @@ try {
             }
         }
         if (corrupted) {
-            console.warn("[YouCord] LevelDB localStorage corrompu dÃ©tectÃ© â€” rÃ©paration...");
+            console.warn("[YouCord] LevelDB localStorage corrompu détecté — réparation...");
             try { fs.rmSync(lsPath, { recursive: true, force: true }); } catch { }
-            console.warn("[YouCord] LevelDB supprimÃ© â€” les donnÃ©es localStorage seront rÃ©crÃ©Ã©es");
+            console.warn("[YouCord] LevelDB supprimé — les données localStorage seront récréées");
         }
     }
 } catch (e) { console.warn("[YouCord] LevelDB check failed:", e.message); }
 
-// Modules bundlÃ©s dans youcord-dist/modules/
+// Modules bundlés dans youcord-dist/modules/
 const bundledModulesPath = path.join(path.dirname(process.execPath), "modules");
 const moduleDataPath = path.join(app.getPath("appData"), "discord", "module_data");
 
-// â”€â”€ DÃ‰TECTION AUTOMATIQUE du dossier modules de Discord stable â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── DÉTECTION AUTOMATIQUE du dossier modules de Discord stable ───────────────
 // Les modules natifs (discord_voice, discord_krisp...) sont dans AppData\Local\Discord\app-X.X.XXXX\modules\
 // et NON dans AppData\Roaming\discord\module_data\ (qui est souvent vide).
-// On dÃ©tecte automatiquement la version installÃ©e pour avoir le bon chemin.
+// On détecte automatiquement la version installée pour avoir le bon chemin.
 const discordLocalBase = path.join(app.getPath("appData"), "..", "Local", "Discord");
 let discordNativeModulesPath = null;
 try {
@@ -225,10 +225,10 @@ try {
         .sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
     if (entries.length > 0) {
         discordNativeModulesPath = entries[0].full;
-        console.log("[YouCord] Modules natifs Discord dÃ©tectÃ©s:", discordNativeModulesPath);
+        console.log("[YouCord] Modules natifs Discord détectés:", discordNativeModulesPath);
     }
 } catch (e) {
-    console.warn("[YouCord] Impossible de dÃ©tecter les modules natifs Discord:", e.message);
+    console.warn("[YouCord] Impossible de détecter les modules natifs Discord:", e.message);
 }
 
 // Utilise un Set pour les ajouts O(1) (au lieu de .includes() O(n) en boucle)
@@ -243,7 +243,7 @@ function addGlobalPath(p) {
     } catch (_) { }
 }
 
-// PrioritÃ© aux modules bundlÃ©s (portables, dans youcord-dist/modules/)
+// Priorité aux modules bundlés (portables, dans youcord-dist/modules/)
 addGlobalPath(bundledModulesPath);
 
 // Ajout des modules natifs Discord (discord_voice, discord_krisp, etc.)
@@ -294,14 +294,14 @@ try {
     }
 } catch (e) { }
 
-// Ce patch garantit que les modules chargÃ©s depuis l'asar Discord (qui ont
-// parent.paths = []) trouvent quand mÃªme les modules natifs YouCord.
-// Node.js injecte dÃ©jÃ  Module.globalPaths nativement dans tous les autres cas.
+// Ce patch garantit que les modules chargés depuis l'asar Discord (qui ont
+// parent.paths = []) trouvent quand même les modules natifs YouCord.
+// Node.js injecte déjà Module.globalPaths nativement dans tous les autres cas.
 const _globalPathsArr = Module.globalPaths.slice();
 const _origResolve = Module._resolveLookupPaths;
 Module._resolveLookupPaths = function (request, parent) {
-    // Uniquement pour les contextes asar isolÃ©s (paths vide) â€”
-    // dans tous les autres cas, Node gÃ¨re globalPaths lui-mÃªme, on ne touche Ã  rien.
+    // Uniquement pour les contextes asar isolés (paths vide) —
+    // dans tous les autres cas, Node gère globalPaths lui-même, on ne touche à rien.
     if (parent && (!parent.paths || parent.paths.length === 0)) {
         parent.paths = _globalPathsArr.slice();
     }
@@ -309,7 +309,7 @@ Module._resolveLookupPaths = function (request, parent) {
 };
 
 // Chercher discord_desktop_core dans cet ordre :
-// 1. modules bundlÃ©s (portable)
+// 1. modules bundlés (portable)
 // 2. modules natifs Discord local (AppData\Local\Discord\app-X\modules\)
 // 3. module_data Roaming (fallback)
 const coreModuleDir = path.join(bundledModulesPath, "discord_desktop_core-1", "discord_desktop_core");
@@ -323,8 +323,8 @@ global.mainAppDirname = fs.existsSync(coreModuleDir)
         : path.join(moduleDataPath, "discord_desktop_core");
 console.log("[YouCord] mainAppDirname:", global.mainAppDirname);
 
-// â”€â”€ FIX AUDIO NATIF : patch build_info.json pour que Discord trouve les modules â”€â”€
-// On ne patche qu'une fois (vÃ©rification rapide avant toute lecture disque)
+// ── FIX AUDIO NATIF : patch build_info.json pour que Discord trouve les modules ──
+// On ne patche qu'une fois (vérification rapide avant toute lecture disque)
 try {
     const buildInfoPath = path.join(
         path.dirname(process.execPath), "resources", "build_info.json"
@@ -337,7 +337,7 @@ try {
         if (!buildInfo.localModulesRoot) {
             buildInfo.localModulesRoot = nativeModulesDir;
             fs.writeFileSync(buildInfoPath, JSON.stringify(buildInfo, null, 2));
-            console.log("[YouCord] build_info.json patchÃ© â†’ localModulesRoot:", nativeModulesDir);
+            console.log("[YouCord] build_info.json patché → localModulesRoot:", nativeModulesDir);
         }
     }
 } catch (e) {

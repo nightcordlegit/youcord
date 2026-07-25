@@ -176,7 +176,7 @@ function StealthModeSection() {
             <Heading className={Margins.top20}>{t("Stealth Mode")}</Heading>
             <Paragraph className={Margins.bottom16}>
                 {enabled
-                    ? "Stealth mode is enabled ââ‚¬â€ all YouCord visual elements are hidden. Shortcut: Ctrl+Shift+H"
+                    ? "Stealth mode is enabled â€â€ all YouCord visual elements are hidden. Shortcut: Ctrl+Shift+H"
                     : t("Hides all YouCord visual elements without disabling plugins. Shortcut: Ctrl+Shift+H")}
             </Paragraph>
             <Button
@@ -197,7 +197,7 @@ function StealthModeButton() {
             onClick={toggleStealthMode}
             variant={enabled ? "dangerPrimary" : "primary"}
         >
-            {enabled ? t("âœ“ Stealth Mode Enabled â€” Click to disable") : t("Enable Stealth Mode")}
+            {enabled ? t("✓ Stealth Mode Enabled — Click to disable") : t("Enable Stealth Mode")}
         </Button>
     );
 }
@@ -444,7 +444,7 @@ function EquicordSettings() {
                 onClick={toggleCompactMode}
                 variant={compactActive ? "dangerPrimary" : "primary"}
             >
-                {compactActive ? t("âœ“ Compact Mode Enabled â€” Click to disable") : t("Enable Compact Mode")}
+                {compactActive ? t("✓ Compact Mode Enabled — Click to disable") : t("Enable Compact Mode")}
             </Button>
 
             <Divider className={Margins.top20} />

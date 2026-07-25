@@ -180,8 +180,8 @@ async function downloadDist() {
         progress.set(FETCH_RELEASE_PROGRESS);
     }
     catch (error) {
-        log(`âŒ Failed to query release API at ${RELEASE_API}`);
-        log(`âŒ ${error.message}`);
+        log(`❌ Failed to query release API at ${RELEASE_API}`);
+        log(`❌ ${error.message}`);
         throw error;
     }
 
@@ -195,12 +195,12 @@ async function downloadDist() {
             progress.set(overall);
             status.set(`Downloading YouCord... (${dlMB}/${totalMB} MB)`);
         });
-        log("âœ… Package downloaded successfully");
+        log("✅ Package downloaded successfully");
         progress.set(DOWNLOAD_PACKAGE_PROGRESS);
     }
     catch (error) {
-        log(`âŒ Failed to download package from ${assetUrl}`);
-        log(`âŒ ${error.message}`);
+        log(`❌ Failed to download package from ${assetUrl}`);
+        log(`❌ ${error.message}`);
         throw error;
     }
 
@@ -210,14 +210,14 @@ async function downloadDist() {
         await fs.mkdir(distDir, { recursive: true });
         
         execSync(`powershell.exe -NoProfile -Command "Expand-Archive -Path '${tmpZip}' -DestinationPath '${distDir}' -Force"`);
-        log("âœ… Package extracted successfully");
+        log("✅ Package extracted successfully");
         progress.set(EXTRACTION_PROGRESS);
         
         await safeDelete(tmpZip);
     }
     catch (error) {
-        log("âŒ Failed to extract package");
-        log(`âŒ ${error.message}`);
+        log("❌ Failed to extract package");
+        log(`❌ ${error.message}`);
         throw error;
     }
 }
@@ -253,12 +253,12 @@ async function applyDefaultPluginsSetting() {
         if (existing && typeof existing === "object" && "plugins" in existing) {
             delete existing.plugins;
             await fs.writeFile(settingsPath, JSON.stringify(existing, null, 2), "utf-8");
-            log("âœ… Default plugins enabled (reset to built-in defaults)");
+            log("✅ Default plugins enabled (reset to built-in defaults)");
         } else {
-            log("âœ… Default plugins enabled (no override needed)");
+            log("✅ Default plugins enabled (no override needed)");
         }
     } catch (err) {
-        log(`âš ï¸ Could not apply plugin settings: ${err.message}`);
+        log(`⚠️ Could not apply plugin settings: ${err.message}`);
     }
 }
 
@@ -297,7 +297,7 @@ async function copyAssetsToDiscord(resPath) {
             }
         }
         catch (err) {
-            log(`âš ï¸ build_info patch error: ${err.message}`);
+            log(`⚠️ build_info patch error: ${err.message}`);
         }
     }
 }
@@ -378,12 +378,12 @@ async function injectShims(paths) {
             log("4. Starting Discord...");
             startDiscord(resPath);
 
-            log("âœ… Injection successful!");
+            log("✅ Injection successful!");
             progress.set(progress.value + progressPerLoop);
         }
         catch (err) {
-            log(`âŒ Could not inject into ${resPath}`);
-            log(`âŒ ${err.message}`);
+            log(`❌ Could not inject into ${resPath}`);
+            log(`❌ ${err.message}`);
             return err;
         }
     }
@@ -396,13 +396,13 @@ export default async function(paths) {
         const localAppData = process.env.LOCALAPPDATA;
         if (!localAppData) throw new Error("LOCALAPPDATA environment variable is missing.");
         await fs.mkdir(path.join(localAppData, "YouCord"), { recursive: true });
-        log("âœ… Local AppData directory prepared");
+        log("✅ Local AppData directory prepared");
         progress.set(MAKE_DIR_PROGRESS);
         lognewline("Downloading YouCord package...");
         const distLocal = path.join(__dirname, "dist", "patcher.js");
         const hasLocalDist = await safeExists(distLocal);
         if (hasLocalDist) {
-            log("âœ… Using local dist folder");
+            log("✅ Using local dist folder");
         } else {
             await downloadDist();
         }
@@ -415,8 +415,8 @@ export default async function(paths) {
         lognewline("Install complete!");
         return true;
     } catch (err) {
-        lognewline("âŒ Installation failed");
-        log(`âŒ ${err.message}`);
+        lognewline("❌ Installation failed");
+        log(`❌ ${err.message}`);
         return false;
     }
 }

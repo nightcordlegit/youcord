@@ -226,12 +226,12 @@ function formatSize(bytes: number) {
 }
 
 function buildTxt(messages: RichMessage[], channelName: string): string {
-    const lines = [`=== ${t("Export DMs")} â€” ${channelName} ===`, `${t("Exported on")} ${new Date().toLocaleString()}`, `${t("Total:")} ${messages.length} ${t("messages")}`, ""];
+    const lines = [`=== ${t("Export DMs")} — ${channelName} ===`, `${t("Exported on")} ${new Date().toLocaleString()}`, `${t("Total:")} ${messages.length} ${t("messages")}`, ""];
     for (const m of messages) {
         const d = new Date(m.timestamp).toLocaleString();
         if (m.referencedMessage) lines.push(`  > [${m.referencedMessage.authorName}]: ${m.referencedMessage.content}`);
         lines.push(`[${d}]${m.editedAt ? ` ${t("(edited)")}` : ""} ${m.authorName}: ${m.content}`);
-        for (const a of m.attachments) lines.push(`  [${getMediaType(a.url, a.contentType).toUpperCase()}] ${a.filename} (${formatSize(a.size)}) â€” ${a.url}`);
+        for (const a of m.attachments) lines.push(`  [${getMediaType(a.url, a.contentType).toUpperCase()}] ${a.filename} (${formatSize(a.size)}) — ${a.url}`);
         for (const e of m.embeds) { if (e.url) lines.push(`  [LIEN] ${e.title ?? "Embed"}: ${e.url}`); }
         for (const s of m.stickers) lines.push(`  [STICKER] ${s.name}`);
         if (m.reactions.length) lines.push(`  ${m.reactions.map(r => `${r.emoji} x${r.count}`).join(" ")}`);
@@ -256,11 +256,11 @@ function buildCsv(messages: RichMessage[]): string {
 }
 
 function buildMd(messages: RichMessage[], channelName: string): string {
-    const lines = [`# ${t("Export DMs")} â€” ${channelName}`, `> ${t("Exported on")} ${new Date().toLocaleString()} Â· **${messages.length} ${t("messages")}**`, ""];
+    const lines = [`# ${t("Export DMs")} — ${channelName}`, `> ${t("Exported on")} ${new Date().toLocaleString()} · **${messages.length} ${t("messages")}**`, ""];
     for (const m of messages) {
         const d = new Date(m.timestamp).toLocaleString();
         if (m.referencedMessage) lines.push(`> **${m.referencedMessage.authorName}**: ${m.referencedMessage.content}`);
-        lines.push(`**${m.authorName}** â€” *${d}*${m.editedAt ? ` ${t("(edited)")}` : ""}${m.pinned ? ` ${t("[pinned]")}` : ""}`);
+        lines.push(`**${m.authorName}** — *${d}*${m.editedAt ? ` ${t("(edited)")}` : ""}${m.pinned ? ` ${t("[pinned]")}` : ""}`);
         if (m.content) lines.push(m.content);
         for (const a of m.attachments) lines.push(`[${a.filename}](${a.url}) *(${formatSize(a.size)})*`);
         for (const e of m.embeds) { if (e.url) lines.push(`[${e.title ?? "Lien"}](${e.url})`); }
@@ -305,9 +305,9 @@ function buildHtml(messages: RichMessage[], channelName: string): string {
         return `<div class="${msgClass}">${replyHtml}<div class="msg-header"><img src="${avatarUrl}" class="avatar"><span class="author">${m.authorName}</span><span class="ts">${d}</span>${edited}${pinned}</div>${content}${mediaHtml}${embedHtml}${stickerHtml}${reactHtml}</div>`;
     }).join("");
 
-    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${t("Export DMs")} â€” ${channelName}</title>
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${t("Export DMs")} — ${channelName}</title>
 <style>*{box-sizing:border-box;margin:0;padding:0}body{background:#1e1f22;color:#dbdee1;font-ffriendly:system-ui,sans-serif;padding:20px;max-width:900px;margin:0 auto}h1{color:#5865f2;margin-bottom:4px}.meta{color:#949ba4;font-size:13px;margin-bottom:24px}.msg.deleted{background-color:rgba(240,71,71,0.1);border-left:2px solid #f04747}.msg{padding:10px 12px;border-radius:4px;margin-bottom:2px}.msg:hover{background:rgba(255,255,255,0.04)}.msg-header{display:flex;align-items:center;gap:8px;margin-bottom:4px}.avatar{width:32px;height:32px;border-radius:50%}.author{font-weight:700;color:#f2f3f5;font-size:14px}.ts{font-size:11px;color:#949ba4;margin-left:4px}.edited,.pin{font-size:10px;color:#949ba4;margin-left:4px}.reply{font-size:12px;color:#949ba4;padding:4px 8px;border-left:3px solid #4f545c;margin-bottom:6px;background:rgba(255,255,255,0.03)}.content{font-size:14px;line-height:1.5;color:#dbdee1;white-space:pre-wrap;word-break:break-word;margin-bottom:4px}.media{margin:6px 0}.media img,.media video{max-width:400px;max-height:300px;border-radius:8px;display:block}.media-name{font-size:11px;color:#949ba4;margin-top:2px}.attachment{padding:6px 10px;background:rgba(0,0,0,0.2);border-radius:4px;margin:4px 0;display:inline-block}.attachment a{color:#00aff4;text-decoration:none}.embed{border-left:4px solid #5865f2;background:rgba(255,255,255,0.04);border-radius:0 4px 4px 0;padding:8px 12px;margin:6px 0}.embed-title{font-weight:700;color:#00aff4;margin-bottom:4px}.embed-desc{font-size:13px;color:#dbdee1}.embed-img{max-width:300px;border-radius:4px;margin-top:6px}.embed-url{font-size:12px;color:#00aff4;display:block;margin-top:4px;text-decoration:none}.sticker{font-size:12px;color:#b5bac1;background:rgba(255,255,255,0.06);border-radius:4px;padding:2px 6px;margin:2px}.reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.reaction{background:rgba(255,255,255,0.08);border-radius:8px;padding:2px 8px;font-size:12px}audio{width:300px;margin-top:4px}</style>
-</head><body><h1>${channelName}</h1><p class="meta">${t("Exported on")} ${new Date().toLocaleString()} Â· ${messages.length} ${t("messages")}</p>${rows}</body></html>`;
+</head><body><h1>${channelName}</h1><p class="meta">${t("Exported on")} ${new Date().toLocaleString()} · ${messages.length} ${t("messages")}</p>${rows}</body></html>`;
 }
 
 function downloadFile(content: string, filename: string, mime: string) {
@@ -375,7 +375,7 @@ function ExportDMModal({ rootProps }: { rootProps: any; }) {
             if (!includeEmbeds) msgs = msgs.map(m => ({ ...m, embeds: [] }));
             if (!includeReactions) msgs = msgs.map(m => ({ ...m, reactions: [] }));
 
-            setProgress(`${prefix}${msgs.length} ${t("messages")} â€” ${t("generating file...")}`);
+            setProgress(`${prefix}${msgs.length} ${t("messages")} — ${t("generating file...")}`);
             const safeName = ch.name.replace(/[^a-z0-9_-]/gi, "_").slice(0, 40) || "DM";
             const date = new Date().toISOString().slice(0, 10);
 
@@ -441,7 +441,7 @@ function ExportDMModal({ rootProps }: { rootProps: any; }) {
                         autoFocus
                     />
                     {search && (
-                        <button className="edm-search-clear" onClick={() => setSearch("")}>âœ•</button>
+                        <button className="edm-search-clear" onClick={() => setSearch("")}>✕</button>
                     )}
                 </div>
 
@@ -464,7 +464,7 @@ function ExportDMModal({ rootProps }: { rootProps: any; }) {
                                     : <div className="edm-avatar-placeholder">{c.type === 3 ? "G" : (c.name?.[0] ?? "?")}</div>
                                 }
                                 <span className="edm-channel-name">{c.name || `DM ${c.id.slice(-4)}`}</span>
-                                {isSel && <span className="edm-check">âœ“</span>}
+                                {isSel && <span className="edm-check">✓</span>}
                             </div>
                         );
                     })}
