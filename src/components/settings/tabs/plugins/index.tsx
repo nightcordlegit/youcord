@@ -28,7 +28,7 @@ import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { HeadingTertiary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
-import { SettingsTab } from "@components/settings";
+import { SettingsTab, wrapTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
 import { ChangeList } from "@utils/ChangeList";
 import { classNameFactory } from "@utils/css";
@@ -196,7 +196,7 @@ interface PluginSettingsProps {
     premiumOnly?: boolean;
 }
 
-export default function PluginSettings({ premiumOnly = false }: PluginSettingsProps) {
+function PluginSettings({ premiumOnly = false }: PluginSettingsProps) {
     const settings = useSettings();
     const changes = React.useMemo(() => new ChangeList<string>(), []);
 
@@ -858,6 +858,8 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
         </SettingsTab>
     );
 }
+
+export default wrapTab(PluginSettings, "Plugins");
 
 export function PluginDependencyList({ deps }: { deps: string[]; }) {
     return (
