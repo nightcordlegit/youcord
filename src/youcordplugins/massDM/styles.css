@@ -218,6 +218,14 @@
     font-size: 13px;
 }
 
+.mdm-stat-ok {
+    color: var(--status-positive-text);
+}
+
+.mdm-stat-fail {
+    color: var(--status-danger-text);
+}
+
 .mdm-bar-bg {
     height: 8px;
     background: var(--background-modifier-accent);
@@ -241,7 +249,8 @@
 }
 
 .mdm-log {
-    max-height: 150px;
+    max-height: 300px;
+    min-height: 100px;
     background: var(--background-tertiary);
     border-radius: 8px;
     padding: 8px;
@@ -254,6 +263,14 @@
     font-size: 12px;
     font-family: var(--font-code);
     margin-bottom: 2px;
+}
+
+.mdm-log-ok {
+    color: var(--status-positive-text);
+}
+
+.mdm-log-fail {
+    color: var(--status-danger-text);
 }
 
 .mdm-badge {

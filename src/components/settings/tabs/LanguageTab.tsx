@@ -33,12 +33,12 @@ const FLAG_ICONS: Record<Language, string | undefined> = {
 };
 
 const LANG_PREVIEW: Record<Language, { label: string; sample: string; }> = {
-    en: { label: "English", sample: "Plugins Â· Themes Â· Updater Â· Sync" },
-    fr: { label: "Français", sample: "Plugins Â· Thèmes Â· Mises à jour Â· Synchronisation" },
-    es: { label: "Español", sample: "Plugins Â· Temas Â· Actualizador Â· Sincronización" },
-    ru: { label: "Ð ÑƒÑÑÐºÐ¸Ð¹", sample: "ÐŸÐ»Ð°Ð³Ð¸Ð½Ñ‹ Â· Ð¢ÐµÐ¼Ñ‹ Â· ÐžÐ±Ð½Ð¾Ð²Ð»ÐµÐ½Ð¸Ñ Â· Ð¡Ð¸Ð½Ñ…Ñ€Ð¾Ð½Ð¸Ð·Ð°Ñ†Ð¸Ñ" },
-    zh: { label: "ä¸­æ–‡", sample: "æ’ä»¶ Â· ä¸»é¢˜ Â· æ›´æ–° Â· åŒæ­¥" },
-    ar: { label: "Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©", sample: "Ø¥Ø¶Ø§ÙØ§Øª Â· Ø³Ù…Ø§Øª Â· Ù…Ø­Ø¯Ø« Â· Ù…Ø²Ø§Ù…Ù†Ø©" },
+    en: { label: "English", sample: "Plugins \u00b7 Themes \u00b7 Updater \u00b7 Sync" },
+    fr: { label: "Fran\u00e7ais", sample: "Plugins \u00b7 Th\u00e8mes \u00b7 Mises \u00e0 jour \u00b7 Synchronisation" },
+    es: { label: "Espa\u00f1ol", sample: "Plugins \u00b7 Temas \u00b7 Actualizador \u00b7 Sincronizaci\u00f3n" },
+    ru: { label: "\u0420\u0443\u0441\u0441\u043a\u0438\u0439", sample: "\u041f\u043b\u0430\u0433\u0438\u043d\u044b \u00b7 \u0422\u0435\u043c\u044b \u00b7 \u041e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u044f \u00b7 \u0421\u0438\u043d\u0445\u0440\u043e\u043d\u0438\u0437\u0430\u0446\u0438\u044f" },
+    zh: { label: "\u4e2d\u6587", sample: "\u63d2\u4ef6 \u00b7 \u4e3b\u9898 \u00b7 \u66f4\u65b0 \u00b7 \u540c\u6b65" },
+    ar: { label: "\u0627\u0644\u0639\u0631\u0628\u064a\u0629", sample: "\u0625\u0636\u0627\u0641\u0627\u062a \u00b7 \u0633\u0645\u0627\u062a \u00b7 \u0645\u062d\u062f\u062b \u00b7 \u0645\u0632\u0627\u0645\u0646\u0629" },
 };
 
 const languageOptions = (Object.keys(LANGUAGES) as Language[]).map(lang => ({
@@ -72,7 +72,7 @@ function LanguageTab() {
                 {t("Translations are community-maintained and may be incomplete. If you'd like to help translate YouCord, contributions are welcome!")}
             </Notice.Info>
 
-            {/* Dropdown sélectif â€” même composant/pattern que "Cloud Backend" dans CloudTab */}
+            {/* Dropdown s\u00e9lectif \u2014 m\u00eame composant/pattern que "Cloud Backend" dans CloudTab */}
             <div className={Margins.bottom8}>
                 <SearchableSelect
                     options={languageOptions}
@@ -90,7 +90,7 @@ function LanguageTab() {
             <Divider className={Margins.top8} />
 
             <Notice.Warning className={Margins.top16}>
-                <strong>{t("Reload required")}</strong> â€” {t("Please reload Discord after changing the language for all changes to take effect.")}
+                <strong>{t("Reload required")}</strong> \u2014 {t("Please reload Discord after changing the language for all changes to take effect.")}
             </Notice.Warning>
         </SettingsTab>
     );

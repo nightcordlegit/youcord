@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -544,6 +544,11 @@ async function copyUserProfile(userId: string) {
         newData.copiedUserId = userId;
         storedData = newData;
         isEnabled = true;
+        const myId = AuthenticationStore?.getId?.();
+        if (myId) {
+            allAccountsData[myId] = newData;
+            allAccountsEnabled[myId] = true;
+        }
         cachedFakeUser = null;
         cachedOriginalUser = null;
         _trueOriginalUser = null;
@@ -553,6 +558,7 @@ async function copyUserProfile(userId: string) {
         cacheDatesF = [];
         _dataVersion++;
         saveDataSync(newData, true);
+        saveAllDataSync();
         DataStore.set(DS_ALL_DATA, allAccountsData).catch(() => { });
         DataStore.set(DS_ALL_ENABLED, allAccountsEnabled).catch(() => { });
 
@@ -894,7 +900,7 @@ function BadgePicker({ selected, onChange, nitroType, onNitroType, boostLevel, o
                     icon="https://cdn.discordapp.com/badge-icons/7d9ae358c8c5e118768335dbe68b4fb8.png"
                     active={customIds.includes("quest")}
                     onClick={() => onCustomIds(customIds.includes("quest") ? customIds.filter(x => x !== "quest") : [...customIds, "quest"])} />
-                <BadgeBtn label={t("Orbs â€” Apprentice")}
+                <BadgeBtn label={t("Orbs — Apprentice")}
                     icon="https://cdn.discordapp.com/badge-icons/83d8a1eb09a8d64e59233eec5d4d5c2d.png"
                     active={customIds.includes("orbs")}
                     onClick={() => onCustomIds(customIds.includes("orbs") ? customIds.filter(x => x !== "orbs") : [...customIds, "orbs"])} />
@@ -907,7 +913,7 @@ function BadgePicker({ selected, onChange, nitroType, onNitroType, boostLevel, o
                     <input className="cp-input" value={oldName} placeholder="OldUser#0000"
                         onChange={e => onOldName(e.target.value)} />
                     <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3 }}>
-                        {t('Ex : Triggerr#5954 â€” will appear as "Old username: Triggerr#5954" when hovering the badge.')}
+                        {t('Ex : Triggerr#5954 — will appear as "Old username: Triggerr#5954" when hovering the badge.')}
                     </div>
                 </div>
             )}
@@ -1116,7 +1122,7 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                                 console.error("[CustomProfile] Failed to sync to cloud:", e);
                             });
                         } else {
-                            // No token yet â€” open OAuth to get one, then sync
+                            // No token yet — open OAuth to get one, then sync
                             beginDiscordOAuth().then(oauthData => {
                                 const clientId = new URL(oauthData.url).searchParams.get("client_id") ?? "";
                                 openModal((p: any) => <OAuth2AuthorizeModal
@@ -1263,7 +1269,7 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                     alignItems: "flex-start",
                     gap: 10,
                 }}>
-                    <span style={{ fontSize: 18, flexShrink: 0 }}>âš ï¸</span>
+                    <span style={{ fontSize: 18, flexShrink: 0 }}>⚠️</span>
                     <span style={{ color: "var(--text-warning, #faa61a)", fontSize: 13, lineHeight: 1.4 }}>
                         {t("This requires Discord authorization. Once enabled, everyone using YouCord will be able to see your Custom Profile, and you will be able to see theirs.")}
                     </span>
@@ -1279,7 +1285,7 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                 <Field label={t("Bio")} value={data.bio ?? ""} placeholder={t("My description...")} onChange={v => set("bio", v)} />
                 <Field label={t("Pronouns")} value={data.pronouns ?? ""} placeholder={t("he/him")} onChange={v => set("pronouns", v)} />
                 <div className="cp-field">
-                    <SectionLabel>{t("Profile color (Nitro â€” gradient possible)")}</SectionLabel>
+                    <SectionLabel>{t("Profile color (Nitro — gradient possible)")}</SectionLabel>
                     <div className="cp-color-row" style={{ marginBottom: 6 }}>
                         <span style={{ fontSize: 11, color: "var(--text-muted)", marginRight: 6 }}>{t("Color 1")}</span>
                         <input type="color" value={accentHex || "#5865f2"} onChange={e => { const n = parseInt(e.target.value.replace("#", ""), 16); if (!isNaN(n)) set("accentColor", n); }} className="cp-color-swatch" />
@@ -1395,10 +1401,10 @@ function CPDMNotice({ userId }: { userId: string; }) {
             alignItems: "flex-start",
             gap: 10,
         }}>
-            <span style={{ fontSize: 18, flexShrink: 0 }}>âš ï¸</span>
+            <span style={{ fontSize: 18, flexShrink: 0 }}>⚠️</span>
             <div style={{ flex: 1 }}>
                 <span style={{ color: "var(--text-warning, #faa61a)", fontWeight: 600, fontSize: 13 }}>
-                    {t("WARNING â€” This user has CustomProfile enabled. Their profile has been modified.")}
+                    {t("WARNING — This user has CustomProfile enabled. Their profile has been modified.")}
                 </span>
                 <br />
                 <span
@@ -1433,7 +1439,7 @@ function CPDMNotice({ userId }: { userId: string; }) {
 export default definePlugin({
     name: "CustomProfile",
     enabledByDefault: true,
-    description: t("Visually customize your Discord profile (username, PFP, banner, badges, bio...) â€” persistent, only visible to you."),
+    description: t("Visually customize your Discord profile (username, PFP, banner, badges, bio...) — persistent, only visible to you."),
     authors: [{ name: "YouCord", id: 0n }],
     dependencies: ["HeaderBarAPI", "ContextMenuAPI"],
 
@@ -1458,7 +1464,7 @@ export default definePlugin({
                 replace: "$self.patchBannerUrl(arguments[0])||$&"
             }
         },
-        // UserProfileStore patch removed â€” caused invisible channels for members
+        // UserProfileStore patch removed — caused invisible channels for members
         // with high permissions. getUserProfile is called by Discord to calculate
         // VIEW_CHANNEL and other permissions. virtualMerge with premiumType:2 corrupted
         // these calculations even with isMe() guard. DomObserver + fakeCurrentUser are enough.
@@ -1682,13 +1688,13 @@ export default definePlugin({
         if (data.username) clone.username = data.username;
         if (data.globalName) clone.globalName = data.globalName;
 
-        // Avatar â€” override directly on the clone object
+        // Avatar — override directly on the clone object
         if (data.avatar) clone.avatar = data.avatar;
 
         if (data.email) clone.email = data.email;
         if (data.phone) clone.phone = data.phone;
 
-        // Account creation date â€” must override createdAt AND store the id
+        // Account creation date — must override createdAt AND store the id
         // so SnowflakeUtils.extractTimestamp gets intercepted per-user
         if (data.createdAt) {
             const fakeCreatedAt = new Date(data.createdAt + "T12:00:00Z");
@@ -1805,7 +1811,7 @@ export default definePlugin({
                 : Array.isArray(profile.badges) ? [...profile.badges] : [];
             const customIds = data.customBadgeIds ?? [];
             if (customIds.includes("quest")) badgesArr.push({ id: "quest", icon: "7d9ae358c8c5e118768335dbe68b4fb8", description: "Completed a quest" });
-            if (customIds.includes("orbs")) badgesArr.push({ id: "orbs", icon: "83d8a1eb09a8d64e59233eec5d4d5c2d", description: "Orbs â€” Apprentice" });
+            if (customIds.includes("orbs")) badgesArr.push({ id: "orbs", icon: "83d8a1eb09a8d64e59233eec5d4d5c2d", description: "Orbs — Apprentice" });
             if (customIds.includes("oldname")) {
                 const dText = data.oldName ? "Originally known as " + data.oldName : "Originally known as ...";
                 badgesArr.push({ id: "legacy_username", icon: "6de6d34650760ba5551a79732e98ed60", description: dText });
@@ -2072,7 +2078,7 @@ export default definePlugin({
                     const member = origGetMember(guildId, userId);
                     if (!member) return member;
 
-                    // Only patch own user â€” never expose custom nick to other users' views
+                    // Only patch own user — never expose custom nick to other users' views
                     if (isEnabled && isMe(userId)) {
                         const patched = { ...member };
                         if (storedData.username) patched.nick = storedData.globalName || storedData.username;
@@ -2205,11 +2211,11 @@ export default definePlugin({
 
         loadData().then(() => {
             updateCachedRealData();
-            // Retry avatar patch â€” may have failed at early boot if module wasn't ready yet
+            // Retry avatar patch — may have failed at early boot if module wasn't ready yet
             if (!_avatarPatchApplied) {
                 applyAvatarPatchEarly();
             } else {
-                // Module already patched but storedData was empty at patch time â€” the patch
+                // Module already patched but storedData was empty at patch time — the patch
                 // reads storedData at call-time so no re-patch needed, just rerender.
             }
             if (isEnabled) {
@@ -2263,7 +2269,7 @@ export default definePlugin({
             applyAvatarPatchEarly();
         }
 
-        // Hook GuildMemberStore.getMember â€” only patches nick for own user
+        // Hook GuildMemberStore.getMember — only patches nick for own user
         try {
             if (GuildMemberStore?.getMember && !(GuildMemberStore as any)._cp_member_hook) {
                 const _origGetMember = GuildMemberStore.getMember.bind(GuildMemberStore);
@@ -2454,7 +2460,7 @@ export default definePlugin({
 
                 // 11. SERVER BOOST (Right after Early Supporter on image 2)
                 if (hasBoostFake) {
-                    badgeList.push({ description: `Server Booster â€” ${BOOST_LABELS[bm]}`, iconSrc: BOOST_ICONS[bm], position: 0, props: { style, title: `Server Booster â€” ${BOOST_LABELS[bm]}` } });
+                    badgeList.push({ description: `Server Booster — ${BOOST_LABELS[bm]}`, iconSrc: BOOST_ICONS[bm], position: 0, props: { style, title: `Server Booster — ${BOOST_LABELS[bm]}` } });
                 }
 
                 // 12. Active Developer
@@ -2475,7 +2481,7 @@ export default definePlugin({
 
                 // 15. Orbs
                 if (storedData.customBadgeIds?.includes("orbs")) {
-                    badgeList.push({ description: "Orbs â€” Apprentice", iconSrc: "https://cdn.discordapp.com/badge-icons/83d8a1eb09a8d64e59233eec5d4d5c2d.png", position: 0, props: { style } });
+                    badgeList.push({ description: "Orbs — Apprentice", iconSrc: "https://cdn.discordapp.com/badge-icons/83d8a1eb09a8d64e59233eec5d4d5c2d.png", position: 0, props: { style } });
                 }
 
                 badges.push(...badgeList);

@@ -28,6 +28,7 @@ const state = {
     running: false,
     finished: false,
     done: 0,
+    failed: 0,
     total: 0,
     log: [] as string[],
     aborted: false,
@@ -40,6 +41,7 @@ const state = {
         this.running = false;
         this.finished = false;
         this.done = 0;
+        this.failed = 0;
         this.total = 0;
         this.log = [];
         this.aborted = false;
@@ -80,13 +82,13 @@ async function startSending(message: string, excludedIds: Set<string> = new Set(
         const user = UserStore?.getUser?.(id);
         const name = user ? (user.globalName || user.username) : id;
 
-        // Remplacement dynamique de @user par la mention réelle
         const personalizedMessage = message.replace(/@user/g, `<@${id}>`);
 
         try {
             const dmRes = await RestAPI.post({ url: "/users/@me/channels", body: { recipient_id: id } });
             if (!dmRes?.body?.id) {
-                state.log.push(`❌ ${name} — channel not found`);
+                state.failed++;
+                state.log.push(`❌ ${name}`);
                 state.notify();
                 continue;
             }
@@ -94,7 +96,8 @@ async function startSending(message: string, excludedIds: Set<string> = new Set(
             state.done++;
             state.log.push(`✅ ${name}`);
         } catch (e: any) {
-            state.log.push(`❌ ${name} — ${e?.message ?? "error"}`);
+            state.failed++;
+            state.log.push(`❌ ${name}`);
         }
         state.notify();
         if (!state.aborted) await sleep(state.delayMs);
@@ -294,16 +297,27 @@ function MassDMModal({ rootProps }: { rootProps: any; }) {
                     <>
                         <div className="mdm-stats">
                             <span className="mdm-stats-count">{s.done} / {s.total} friends</span>
-                            <span className="mdm-stats-pct">{pct}%</span>
+                            <span className="mdm-stats-pct">
+                                <span className="mdm-stat-ok">✅ {s.done}</span>
+                                {s.failed > 0 && <span className="mdm-stat-fail"> ❌ {s.failed}</span>}
+                                {" — "}{pct}%
+                            </span>
                         </div>
                         <div className="mdm-bar-bg">
                             <div className="mdm-bar-fill" style={{ width: `${pct}%` }} />
                         </div>
                         {s.finished && (
-                            <p className="mdm-done">✅ Finished — {s.done} message{s.done > 1 ? "s" : ""} sent.</p>
+                            <p className="mdm-done">
+                                {s.failed === 0
+                                    ? `✅ Finished — ${s.done} message${s.done > 1 ? "s" : ""} sent.`
+                                    : `⚠️ Finished — ${s.done} sent, ${s.failed} failed.`
+                                }
+                            </p>
                         )}
                         <ScrollerThin className="mdm-log" ref={logRef}>
-                            {s.log.map((line, i) => <div key={i} className="mdm-log-line">{line}</div>)}
+                            {s.log.map((line, i) => (
+                                <div key={i} className={`mdm-log-line ${line.startsWith("✅") ? "mdm-log-ok" : line.startsWith("❌") ? "mdm-log-fail" : ""}`}>{line}</div>
+                            ))}
                         </ScrollerThin>
                     </>
                 )}

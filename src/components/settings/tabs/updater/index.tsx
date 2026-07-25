@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -56,9 +56,9 @@ function UpdaterTab() {
             // Strip any residual HTML and truncate to keep the UI clean
             if (detail) {
                 detail = detail.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-                if (detail.length > 300) detail = detail.substring(0, 300) + "â€¦";
+                if (detail.length > 300) detail = detail.substring(0, 300) + "...";
             }
-            setError(t("Check for Updates") + " â€” " + (detail ?? "Please check your connection."));
+            setError(t("Check for Updates") + " — " + (detail ?? "Please check your connection."));
         } finally {
             setChecking(false);
         }
@@ -135,7 +135,7 @@ function UpdaterTab() {
                     </Card>
                 ) : (
                     <Card style={{ padding: "10px 16px", marginBottom: 12, borderLeft: "3px solid var(--status-positive)" }}>
-                        <Span size="sm" style={{ color: "var(--text-positive)" }}>{t("You are running the latest version âœ“")}</Span>
+                        <Span size="sm" style={{ color: "var(--text-positive)" }}>{t("You are running the latest version")}</Span>
                     </Card>
                 )
             )}
@@ -157,7 +157,7 @@ function UpdaterTab() {
                         onClick={handleUpdate}
                         disabled={downloading}
                     >
-                        {downloading ? "Installing..." : "ðŸš€ Update Now (Automatic)"}
+                        {downloading ? "Installing..." : "Update Now (Automatic)"}
                     </Button>
                 )}
             </Flex>
