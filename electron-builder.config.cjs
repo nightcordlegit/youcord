@@ -202,6 +202,7 @@ module.exports = {
     extraMetadata: { main: "index.js" },
     asar: true,
     asarUnpack: ["**/*.node", "**/*.exe", "**/*.dll", "**/*.bin/*", "mac/**/*"],
+    extraResources: [{ from: "dist/youcord.asar", to: "youcord.asar" }],
     files: ["index.js", "dist/js/**/*", "static/**/*", "!**/*.map", "!**/*.ts"],
     directories: { output: "release", buildResources: "static" },
     win: {

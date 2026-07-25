@@ -5,14 +5,17 @@
  */
 
 import { execSync } from "child_process";
-import { BuildContext, BuildOptions, context } from "esbuild";
+import { build, BuildOptions } from "esbuild";
 import { copyFile } from "fs/promises";
 import * as path from "path";
+import { fileURLToPath } from "url";
 
 import vencordDep from "./vencordDep.mjs";
 import { includeDirPlugin } from "./includeDirPlugin.mts";
 
 const isDev = process.argv.includes("--dev");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let gitHash: string;
 try {
@@ -44,76 +47,66 @@ const NodeCommonOpts: BuildOptions = {
     }
 };
 
-const contexts = [] as BuildContext[];
-async function createContext(options: BuildOptions) {
-    contexts.push(await context(options));
-}
-
-await Promise.all([
-    // Main process
-    createContext({
-        ...NodeCommonOpts,
-        entryPoints: ["src/youcord/main/index.ts"],
-        outfile: "dist/js/main.js",
-        footer: { js: "//# sourceURL=VesktopMain" }
-    }),
-    // Preloads
-    createContext({
-        ...NodeCommonOpts,
-        entryPoints: ["src/youcord/preload/index.ts"],
-        outfile: "dist/js/preload.js",
-        footer: { js: "//# sourceURL=VesktopPreload" }
-    }),
-    createContext({
-        ...NodeCommonOpts,
-        entryPoints: ["src/youcord/preload/splash.ts"],
-        outfile: "dist/js/splashPreload.js",
-        footer: { js: "//# sourceURL=VesktopSplashPreload" }
-    }),
-    createContext({
-        ...NodeCommonOpts,
-        entryPoints: ["src/youcord/preload/updater.ts"],
-        outfile: "dist/js/updaterPreload.js",
-        footer: { js: "//# sourceURL=VesktopUpdaterPreload" }
-    }),
-    // Renderer
-    createContext({
-        ...CommonOpts,
-        globalName: "Equibop",
-        entryPoints: ["src/youcord/renderer/index.ts"],
-        outfile: "dist/js/renderer.js",
-        format: "iife",
-        inject: ["./scripts/build/injectReact.mjs"],
-        jsxFactory: "VencordCreateElement",
-        jsxFragment: "VencordFragment",
-        external: ["@YouCord/types/*", "@youcord/types/*"],
-        plugins: [vencordDep, includeDirPlugin("patches", "src/youcord/renderer/patches")],
-        footer: { js: "//# sourceURL=VesktopRenderer" }
-    })
-]);
-
 const watch = process.argv.includes("--watch");
 
 if (watch) {
-	await Promise.all(contexts.map((ctx) => ctx.watch()));
+    const { context } = await import("esbuild");
+    const contexts = [
+        await context({ ...NodeCommonOpts, entryPoints: ["src/youcord/main/index.ts"], outfile: "dist/js/main.js", footer: { js: "//# sourceURL=VesktopMain" } }),
+        await context({ ...NodeCommonOpts, entryPoints: ["src/youcord/preload/index.ts"], outfile: "dist/js/preload.js", footer: { js: "//# sourceURL=VesktopPreload" } }),
+        await context({ ...NodeCommonOpts, entryPoints: ["src/youcord/preload/splash.ts"], outfile: "dist/js/splashPreload.js", footer: { js: "//# sourceURL=VesktopSplashPreload" } }),
+        await context({ ...NodeCommonOpts, entryPoints: ["src/youcord/preload/updater.ts"], outfile: "dist/js/updaterPreload.js", footer: { js: "//# sourceURL=VesktopUpdaterPreload" } }),
+        await context({
+            ...CommonOpts,
+            globalName: "Equibop",
+            entryPoints: ["src/youcord/renderer/index.ts"],
+            outfile: "dist/js/renderer.js",
+            format: "iife",
+            inject: ["./scripts/build/injectReact.mjs"],
+            jsxFactory: "VencordCreateElement",
+            jsxFragment: "VencordFragment",
+            external: ["@YouCord/types/*", "@youcord/types/*"],
+            plugins: [vencordDep, includeDirPlugin("patches", "src/youcord/renderer/patches")],
+            footer: { js: "//# sourceURL=VesktopRenderer" }
+        })
+    ];
+    await Promise.all(contexts.map(ctx => ctx.watch()));
 } else {
-	const results = await Promise.all(
-		contexts.map(async (ctx) => {
-			const result = await ctx.rebuild();
-			await ctx.dispose();
-			return result;
-		}),
-	);
+    const start = Date.now();
 
-	for (const result of results) {
-		if (result.metafile) {
-			const outputs = Object.keys(result.metafile.outputs);
-			for (const output of outputs) {
-				const meta = result.metafile.outputs[output];
-				const size = (meta.bytes / 1024).toFixed(2);
-				console.log(`  ${output} ${size} KB`);
-			}
-		}
-	}
+    // Use build() API (not context().rebuild()) to avoid hangs on Windows
+    const results = await Promise.all([
+        build({ ...NodeCommonOpts, entryPoints: ["src/youcord/main/index.ts"], outfile: "dist/js/main.js", footer: { js: "//# sourceURL=VesktopMain" } }),
+        build({ ...NodeCommonOpts, entryPoints: ["src/youcord/preload/index.ts"], outfile: "dist/js/preload.js", footer: { js: "//# sourceURL=VesktopPreload" } }),
+        build({ ...NodeCommonOpts, entryPoints: ["src/youcord/preload/splash.ts"], outfile: "dist/js/splashPreload.js", footer: { js: "//# sourceURL=VesktopSplashPreload" } }),
+        build({ ...NodeCommonOpts, entryPoints: ["src/youcord/preload/updater.ts"], outfile: "dist/js/updaterPreload.js", footer: { js: "//# sourceURL=VesktopUpdaterPreload" } }),
+        build({
+            ...CommonOpts,
+            globalName: "Equibop",
+            entryPoints: ["src/youcord/renderer/index.ts"],
+            outfile: "dist/js/renderer.js",
+            format: "iife",
+            inject: ["./scripts/build/injectReact.mjs"],
+            jsxFactory: "VencordCreateElement",
+            jsxFragment: "VencordFragment",
+            external: ["@YouCord/types/*", "@youcord/types/*"],
+            plugins: [vencordDep, includeDirPlugin("patches", "src/youcord/renderer/patches")],
+            footer: { js: "//# sourceURL=VesktopRenderer" }
+        })
+    ]);
 
+    const elapsed = ((Date.now() - start) / 1000).toFixed(2);
+
+    for (const result of results) {
+        if (result.metafile) {
+            const outputs = Object.keys(result.metafile.outputs);
+            for (const output of outputs) {
+                const meta = result.metafile.outputs[output];
+                const size = (meta.bytes / 1024).toFixed(2);
+                console.log(`  ${output} ${size} KB`);
+            }
+        }
+    }
+
+    console.log(`\nBuild complete in ${elapsed}s`);
 }
