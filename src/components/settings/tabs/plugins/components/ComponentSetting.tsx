@@ -22,5 +22,6 @@ import { ComponentSettingProps } from "./Common";
 
 export function ComponentSetting({ option, onChange }: ComponentSettingProps<PluginOptionComponent>) {
     const Component = option.component;
+    if (typeof Component !== "function") return null;
     return <Component setValue={onChange} option={option} />;
 }

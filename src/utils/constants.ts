@@ -649,6 +649,39 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "prism",
         id: 390884143749136386n,
     },
+    Darxoon: {
+        name: "Darxoon",
+        id: 409745838898937866n
+    },
+    koish1: {
+        name: "koish1",
+        id: 291089948709486593n,
+        badge: false
+    },
+    nightmaresan: {
+        name: "NightmareSan",
+        id: 304239816466235392n
+    },
+    angelcube: {
+        name: "angelcube",
+        id: 958505257288208446n
+    },
+    Lunascape: {
+        name: "Lunascape",
+        id: 383365021415243776n
+    },
+    coll: {
+        name: "coll",
+        id: 0n
+    },
+    viciouscal: {
+        name: "viciouscal",
+        id: 0n
+    },
+    Unknown: {
+        name: "Unknown",
+        id: 0n
+    },
 } satisfies Record<string, Dev>);
 
 export const EquicordDevs = Object.freeze({
@@ -1293,6 +1326,46 @@ export const EquicordDevs = Object.freeze({
     nickwoah: {
         name: "nickwoah",
         id: 644298972420374528n
+    },
+    dka: {
+        name: "DKA",
+        id: 119386840624005121n
+    },
+    Kiri: {
+        name: "Kiri",
+        id: 310525496771346434n
+    },
+    Gir0fa: {
+        name: "gir0fa",
+        id: 1282734265955520545n
+    },
+    yonn2222: {
+        name: "yonn2222",
+        id: 821835831844012103n
+    },
+    Moowi: {
+        name: "Moowi",
+        id: 246128594756173824n
+    },
+    sketchmyname: {
+        name: "sketchmyname",
+        id: 1412164910443663491n
+    },
+    NassCT: {
+        name: "NassCT",
+        id: 354996937868705793n
+    },
+    yafyx: {
+        name: "kiniyaku",
+        id: 658209494609821699n
+    },
+    dhopcs: {
+        name: "dhopcs",
+        id: 206309860038410240n
+    },
+    qdnx: {
+        name: "qdnx",
+        id: 1374803023506702508n
     },
 } satisfies Record<string, Dev>);
 

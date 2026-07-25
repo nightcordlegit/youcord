@@ -382,7 +382,7 @@ function PluginSettings({ premiumOnly = false }: PluginSettingsProps) {
 
         const searchLower = search.toLowerCase();
         const searchNoSpaces = searchLower.replace(/\s+/g, "");
-        
+
         return (
             plugin.name.toLowerCase().includes(searchNoSpaces) ||
             plugin.description.toLowerCase().includes(searchLower) ||

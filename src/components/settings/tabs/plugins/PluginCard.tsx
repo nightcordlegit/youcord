@@ -19,7 +19,7 @@ import { OptionType, Plugin } from "@utils/types";
 import { React, showToast, Text, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
 
-const memo = React.memo;
+const { memo } = React;
 
 import { PluginMeta } from "~plugins";
 
