@@ -220,7 +220,7 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
     // Static list — no fetch, no CORS issues.
     // Also populate TUTORIAL_CACHE so the SearchStatus.TUTORIAL filter works.
     const tutorialPlugins = useMemo(() => {
-        for (const name of Object.values(Plugins).map(p => p.name).filter(Boolean)) {
+        for (const name of Object.values(Plugins).filter(Boolean).map(p => p.name).filter(Boolean)) {
             TUTORIAL_CACHE.set(name, TUTORIAL_PLUGIN_NAMES.has(name));
         }
         return TUTORIAL_PLUGIN_NAMES;
@@ -259,7 +259,9 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
     const depMap = useMemo(() => {
         const o = {} as Record<string, string[]>;
         for (const plugin in Plugins) {
-            const deps = Plugins[plugin].dependencies;
+            const p = Plugins[plugin];
+            if (!p) continue;
+            const deps = p.dependencies;
             if (deps) {
                 for (const dep of deps) {
                     o[dep] ??= [];
@@ -271,10 +273,10 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
     }, []);
 
     const sortedPlugins = useMemo(() => Object.values(Plugins)
-        .filter(p => typeof p.name === "string")
+        .filter(p => p && typeof p.name === "string")
         .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? "")), []);
 
-    const hasUserPlugins = useMemo(() => !IS_STANDALONE && Object.values(PluginMeta).some(m => m.userPlugin), []);
+    const hasUserPlugins = useMemo(() => !IS_STANDALONE && PluginMeta && Object.values(PluginMeta).some(m => m?.userPlugin), []);
 
     const [searchValue, setSearchValue] = useState({ value: "", status: SearchStatus.YOUCORD });
     const [searchInput, setSearchInput] = useState("");
@@ -450,16 +452,18 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
         let restartNeeded = false;
 
         for (const plugin of enabledPlugins) {
+            const p = Plugins[plugin];
+            if (!p) continue;
             const pluginSettings = settings.plugins[plugin];
 
-            if (Plugins[plugin].patches?.length) {
+            if (p.patches?.length) {
                 pluginSettings.enabled = false;
                 changes.handleChange(plugin);
                 restartNeeded = true;
                 continue;
             }
 
-            const result = stopPlugin(Plugins[plugin]);
+            const result = stopPlugin(p);
 
             if (!result) {
                 logger.error(`Error while stopping plugin ${plugin}`);
@@ -567,14 +571,14 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
 
     // Code directly taken from supportHelper.tsx
     const { totalStockPlugins, totalUserPlugins, enabledStockPlugins, enabledUserPlugins, enabledPlugins } = useMemo(() => {
-        const isApiPlugin = (plugin: string) => plugin.endsWith("API") || Plugins[plugin].required;
+        const isApiPlugin = (plugin: string) => plugin.endsWith("API") || Plugins[plugin]?.required;
 
-        const totalPlugins = Object.keys(Plugins).filter(p => !isApiPlugin(p));
-        const enabledPlugins = Object.keys(Plugins).filter(p => isPluginEnabled(p) && !isApiPlugin(p));
+        const totalPlugins = Object.keys(Plugins).filter(p => Plugins[p] && !isApiPlugin(p));
+        const enabledPlugins = Object.keys(Plugins).filter(p => Plugins[p] && isPluginEnabled(p) && !isApiPlugin(p));
 
         const isStockPlugin = (p: string) => !(PluginMeta[p]?.userPlugin ?? false);
         const isUserPlugin = (p: string) => PluginMeta[p]?.userPlugin ?? false;
-        const totalStockPlugins = totalPlugins.filter(p => isStockPlugin(p) && !Plugins[p].hidden).length;
+        const totalStockPlugins = totalPlugins.filter(p => isStockPlugin(p) && !Plugins[p]?.hidden).length;
         const totalUserPlugins = totalPlugins.filter(p => isUserPlugin(p)).length;
         const enabledStockPlugins = enabledPlugins.filter(p => isStockPlugin(p)).length;
         const enabledUserPlugins = enabledPlugins.filter(p => isUserPlugin(p)).length;
