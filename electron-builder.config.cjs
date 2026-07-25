@@ -202,8 +202,8 @@ module.exports = {
     extraMetadata: { main: "index.js" },
     asar: true,
     asarUnpack: ["**/*.node", "**/*.exe", "**/*.dll", "**/*.bin/*", "mac/**/*"],
-    files: ["index.js", "dist/desktop/**/*", "!**/*.map", "!**/*.ts"],
-    directories: { output: "release", buildResources: "desktop/assets" },
+    files: ["index.js", "dist/js/**/*", "static/**/*", "!**/*.map", "!**/*.ts"],
+    directories: { output: "release", buildResources: "static" },
     win: {
         target: [
             { target: "nsis", arch: ["x64"] },

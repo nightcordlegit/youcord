@@ -1,1 +1,1 @@
-require("./dist/desktop/patcher.js");
+require("./dist/js/main.js");
