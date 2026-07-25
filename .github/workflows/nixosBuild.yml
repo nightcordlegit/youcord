@@ -65,7 +65,7 @@ jobs:
 
                   find release -size 0 -delete
                   rm release/package.json
-                  rm release/*.map
+                  rm -f release/*.map
 
             - name: Get current date
               id: date
