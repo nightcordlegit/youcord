@@ -64,7 +64,7 @@ export function isPluginEnabled(p: string) {
     return (
         meta.required ||
         dependencyPlugins.has(p) ||
-        (Settings as any)?.plugins?.[p]?.enabled
+        ((Settings as any)?.plugins?.[p]?.enabled ?? meta.enabledByDefault)
     ) ?? false;
 }
 

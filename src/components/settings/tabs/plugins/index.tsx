@@ -664,6 +664,7 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
 
     return (
         <SettingsTab>
+            <ErrorBoundary fallback={<div style={{ padding: 32, color: "var(--text-muted)", textAlign: "center" }}>Something went wrong loading the plugin list. Try restarting Discord.</div>}>
             <div className="vc-plugins-full-width-container">
                 {!premiumOnly && (
                     <div className={cl("ecosystem-banner")}>
@@ -853,6 +854,7 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
                 </>
             )}
             </div>
+            </ErrorBoundary>
         </SettingsTab>
     );
 }
