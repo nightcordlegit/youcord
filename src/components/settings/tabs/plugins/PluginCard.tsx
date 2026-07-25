@@ -56,27 +56,27 @@ export const PluginCard = memo(function PluginCard({ plugin, disabled, onRestart
             }
 
             if (restartNeeded) {
-                settings.enabled = true;
+                if (settings) settings.enabled = true;
                 onRestartNeeded(plugin.name, "enabled");
                 return;
             }
         }
 
         if (pluginRequiresRestart(plugin)) {
-            settings.enabled = !wasEnabled;
+            if (settings) settings.enabled = !wasEnabled;
             onRestartNeeded(plugin.name, "enabled");
             return;
         }
 
         if (wasEnabled && !plugin.started) {
-            settings.enabled = !wasEnabled;
+            if (settings) settings.enabled = !wasEnabled;
             return;
         }
 
         const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
 
         if (!result) {
-            settings.enabled = false;
+            if (settings) settings.enabled = false;
 
             const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
             showToast(msg, Toasts.Type.FAILURE, {
@@ -86,12 +86,12 @@ export const PluginCard = memo(function PluginCard({ plugin, disabled, onRestart
             return;
         }
 
-        settings.enabled = !wasEnabled;
+        if (settings) settings.enabled = !wasEnabled;
     }
 
     function toggleEnabled() {
         const wasEnabled = isEnabled();
-        if (!wasEnabled && plugin.name.toLowerCase() === "autoresponder") {
+        if (!wasEnabled && plugin.name?.toLowerCase() === "autoresponder") {
             openModal(props => (
                 <ModalRoot {...props} size={ModalSize.SMALL}>
                     <ModalHeader separator={false}>
@@ -139,7 +139,7 @@ export const PluginCard = memo(function PluginCard({ plugin, disabled, onRestart
             <ModalRoot {...props} size={ModalSize.DYNAMIC} className="nc-tutorial-modal">
                 <ModalHeader separator={false}>
                     <Text variant="heading-xl/bold" style={{ flex: 1, color: "#fff" }}>
-                        {plugin.name} â€“ Tutorial
+                        {plugin.name} – Tutorial
                     </Text>
                     <ModalCloseButton onClick={props.onClose} />
                 </ModalHeader>
@@ -227,12 +227,13 @@ export const PluginCard = memo(function PluginCard({ plugin, disabled, onRestart
                         </a>
                     ) : (
                         plugin.authors?.map(a => {
-                            const user = UserStore.getUser(a.id.toString());
-                            const avatarUrl = user ? user.getAvatarURL(undefined, 128) : `https://cdn.discordapp.com/avatars/${a.id}/${a.id}.png`;
+                            const userId = a?.id?.toString();
+                            const user = userId ? UserStore.getUser(userId) : null;
+                            const avatarUrl = user ? user.getAvatarURL(undefined, 128) : (userId ? `https://cdn.discordapp.com/avatars/${userId}/${userId}.png` : "");
                             return (
-                                <div key={a.id.toString()} style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "20px", fontWeight: 600, color: "var(--text-normal)" }}>
-                                    <img src={avatarUrl} alt={a.name} style={{ width: 64, height: 64, borderRadius: "50%" }} />
-                                    <span>{a.name}</span>
+                                <div key={userId ?? Math.random().toString()} style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "20px", fontWeight: 600, color: "var(--text-normal)" }}>
+                                    <img src={avatarUrl} alt={a?.name ?? ""} style={{ width: 64, height: 64, borderRadius: "50%" }} />
+                                    <span>{a?.name ?? ""}</span>
                                 </div>
                             );
                         })

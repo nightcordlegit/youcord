@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -503,7 +503,7 @@ const translations: Record<string, Partial<Record<Language, string>>> = {
     "✦ GIF Convertor": { fr: "✦ Convertisseur GIF", es: "✦ Convertidor GIF", ru: "✦ Конвертер GIF", zh: "✦ GIF 转换器" },
     "Uploading…": { fr: "Téléchargement…", es: "Subiendo…", ru: "Загрузка…", zh: "正在上传..." },
     "If you don't have mod permissions on the server, and that server is large (over 100 members), the plugin may be limited in the following ways:": { fr: "Si vous n'avez pas d'autorisations de mod sur le serveur et que ce serveur est grand (plus de 100 membres), le plugin peut être limité des manières suivantes :", es: "Si no tiene permisos de modificación en el servidor y ese servidor es grande (más de 100 miembros), el complemento puede estar limitado de las siguientes maneras:", ru: "Если у вас нет разрешений на модификацию на сервере, и этот сервер большой (более 100 участников), плагин может быть ограничен следующими способами:", zh: "如果您在服务器上没有 mod 权限，并且该服务器很大（超过 100 个成员），则该插件可能会受到以下限制：" },
-    "• Offline members won't be listed": { fr: "•Â Les membres hors ligne ne seront pas répertoriés", es: "• Los miembros sin conexión no aparecerán en la lista", ru: "•Â ÐžÑ„Ð»Ð°Ð¹Ð½-участники не будут указаны в списке.", zh: "• 离线会员不会被列出" },
+    "• Offline members won't be listed": { fr: "• Les membres hors ligne ne seront pas répertoriés", es: "• Los miembros sin conexión no aparecerán en la lista", ru: "• ÐžÑ„Ð»Ð°Ð¹Ð½-участники не будут указаны в списке.", zh: "• 离线会员不会被列出" },
     "• Up to 100 members will be listed by default. To get more, scroll down in the member list to load more members.": { fr: "• Jusqu'à 100 membres seront répertoriés par défaut. Pour en obtenir plus, faites défiler la liste des membres pour charger plus de membres.", es: "• Se enumerarán hasta 100 miembros de forma predeterminada. Para obtener más, desplácese hacia abajo en la lista de miembros para cargar más miembros.", ru: "• По умолчанию будет указано до 100 участников. Чтобы получить больше, прокрутите список участников вниз, чтобы загрузить больше участников.", zh: "• 默认情况下最多会列出100 个成员。要获取更多信息，请在成员列表中向下滚动以加载更多成员。" },
     "• However, friends will always be shown regardless of their status.": { fr: "• Cependant, les amis seront toujours affichés quel que soit leur statut.", es: "• Sin embargo, los amigos siempre se mostrarán independientemente de su estado.", ru: "• Однако друзья всегда будут отображаться независимо от их статуса.", zh: "• 但是，无论好友的状态如何，都将始终显示。" },
     "mention.match(/": { fr: "mention.match(/", es: "mencionar.match(/", ru: "упоминание.match(/", zh: "提及.match(/" },

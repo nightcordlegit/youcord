@@ -54,8 +54,8 @@ function ContributorModal({ user }: { user: User; }) {
         const pluginsByAuthor = (VencordDevsById[user.id] || EquicordDevsById[user.id])
             ? allPlugins.filter(p => p.authors.includes(VencordDevsById[user.id] || EquicordDevsById[user.id]))
             : allPlugins.filter(p =>
-                PluginMeta[p.name]?.userPlugin && p.authors.some(a => a.id.toString() === user.id)
-                || p.authors.some(a => a.name === user.username)
+                PluginMeta[p.name]?.userPlugin && p.authors?.some(a => a.id?.toString() === user.id)
+                || p.authors?.some(a => a.name === user.username)
             );
 
         return pluginsByAuthor

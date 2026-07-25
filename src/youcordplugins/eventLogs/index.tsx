@@ -567,11 +567,11 @@ function LogsModal({ rootProps }: { rootProps: any; }) {
 
                 {totalPages > 1 && (
                     <div className="el-pagination">
-                        <button disabled={page === 0} onClick={() => setPage(0)}>Â«</button>
-                        <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>â€¹</button>
+                        <button disabled={page === 0} onClick={() => setPage(0)}>«</button>
+                        <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>‹</button>
                         <span>{page + 1} / {totalPages}</span>
-                        <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>â€º</button>
-                        <button disabled={page >= totalPages - 1} onClick={() => setPage(totalPages - 1)}>Â»</button>
+                        <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>›</button>
+                        <button disabled={page >= totalPages - 1} onClick={() => setPage(totalPages - 1)}>»</button>
                     </div>
                 )}
             </ModalContent>

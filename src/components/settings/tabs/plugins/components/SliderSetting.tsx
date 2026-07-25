@@ -39,9 +39,9 @@ export function SliderSetting({ option, pluginSettings, definedSettings, id, onC
     return (
         <SettingsSection name={id} description={option.description} error={error}>
             <Slider
-                markers={option.markers}
-                minValue={option.markers[0]}
-                maxValue={option.markers[option.markers.length - 1]}
+                markers={option.markers ?? []}
+                minValue={option.markers?.[0] ?? 0}
+                maxValue={option.markers?.[option.markers.length - 1] ?? 100}
                 initialValue={def}
                 onValueChange={handleChange}
                 onValueRender={(v: number) => String(v.toFixed(2))}

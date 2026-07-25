@@ -802,7 +802,7 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
                                 </div>
                             ) : (
                                 <div style={{ textAlign: "center", padding: "48px 16px", color: "var(--text-muted)" }}>
-                                    <div style={{ fontSize: 32, marginBottom: 12 }}>ðŸ“</div>
+                                    <div style={{ fontSize: 32, marginBottom: 12 }}>📁</div>
                                     <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 8 }}>{t("No user plugins found")}</div>
                                     <div style={{ fontSize: 13 }}>{t("Add .tsx files to your")} <code>Documents/YouCord/userplugins/</code> {t("folder and rebuild.")}</div>
                                 </div>
