@@ -125,7 +125,8 @@ function useEnsureOwnStatus(user: User) {
     }, {});
 
     const { clientStatuses } = PresenceStore.getState();
-    clientStatuses[UserStore.getCurrentUser().id] = ownStatus;
+    const ownUser = UserStore.getCurrentUser();
+    if (ownUser) clientStatuses[ownUser.id] = ownStatus;
 }
 
 interface PlatformIndicatorProps {

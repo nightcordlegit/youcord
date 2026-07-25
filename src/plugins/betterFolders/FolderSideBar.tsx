@@ -81,7 +81,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
         display: isFullscreen ? "none" : "flex"
     } satisfies CSSProperties;
 
-    if (!guilds || !settings.store.sidebarAnim) {
+    if (!guilds || !settings.store.sidebarAnim || typeof Animations.Transition !== "function" || !Animations.animated) {
         return visible
             ? <div className="vc-betterFolders-sidebar" style={sidebarStyle}>{Sidebar}</div>
             : null;
