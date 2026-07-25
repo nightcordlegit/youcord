@@ -220,7 +220,9 @@ module.exports = {
         deleteAppDataOnUninstall: false,
         installerIcon: "youcord.ico",
         uninstallerIcon: "youcord.ico",
-        license: "LICENSE"
+        license: "LICENSE",
+        installerHeaderColor: "#B94EFC",
+        installerHeaderIcon: "youcord.ico"
     },
     mac: {
         target: [
