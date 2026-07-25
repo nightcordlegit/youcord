@@ -286,25 +286,33 @@ function ChangelogContent() {
         if (!repoUrl) return false;
 
         try {
-            const commits = await getCommitsSinceLastSeen(repoUrl);
-            if (commits.length === 0) return false;
+            const allCommits = await getCommitsSinceLastSeen(repoUrl);
 
             const newPlgs = await getNewPlugins();
             const updatedPlgs = await getUpdatedPlugins();
             const newSettings = await getNewSettings();
 
-            await saveUpdateSession(commits, newPlgs, updatedPlgs, newSettings);
+            if (allCommits.length > 0) {
+                // Check history to avoid duplicate logs
+                const lastLog = changelogHistory[0];
+                const alreadyLogged = lastLog && lastLog.commits.length > 0 &&
+                    lastLog.commits[0].hash === allCommits[0].hash;
 
-            setChangelog(commits);
+                if (!alreadyLogged) {
+                    await saveUpdateSession(allCommits, newPlgs, updatedPlgs, newSettings);
+                    await loadChangelogHistory();
+                }
+            }
+
+            setChangelog(allCommits);
             setNewPlugins(newPlgs);
             setUpdatedPlugins(updatedPlgs);
-            await loadChangelogHistory();
-            return true;
+            return allCommits.length > 0;
         } catch (err) {
             console.error("Failed to log local update:", err);
             return false;
         }
-    }, [repo, repoErr, repoPending, loadChangelogHistory]);
+    }, [repo, repoErr, repoPending, loadChangelogHistory, changelogHistory]);
 
     // check if the repository was recently refreshed
     React.useEffect(() => {

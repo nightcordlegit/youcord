@@ -396,8 +396,20 @@ export { YOUCORD_REPO_URL };
 export async function getCommitsSinceLastSeen(
     repoUrl: string,
 ): Promise<ChangelogEntry[]> {
-    // Toujours utiliser le repo YouCord, ignorer le repoUrl d'Equicord
-    return fetchCommitsBetween(YOUCORD_RELEASES_REPO, "HEAD~10", "HEAD").catch(() => []);
+    const lastSeenHash = await getLastSeenHash();
+    let commits: ChangelogEntry[] = [];
+
+    // First try to get commits since last seen hash
+    if (lastSeenHash) {
+        commits = await fetchCommitsBetween(YOUCORD_RELEASES_REPO, lastSeenHash, "HEAD");
+    }
+
+    // If no commits found (up to date or hash not found on remote), show recent history
+    if (commits.length === 0) {
+        commits = await fetchCommitsBetween(YOUCORD_RELEASES_REPO, "HEAD~20", "HEAD");
+    }
+
+    return commits;
 }
 
 export async function updateKnownSettings(): Promise<void> {
