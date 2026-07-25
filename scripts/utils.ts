@@ -20,7 +20,7 @@ import { Dirent, readdirSync, readFileSync, writeFileSync } from "fs";
 import { access, readFile } from "fs/promises";
 import { join, sep } from "path";
 import { normalize as posixNormalize, sep as posixSep } from "path/posix";
-import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, PropertyAssignment, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
+import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isAsExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, PropertyAssignment, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
 
 import { getPluginTarget } from "./utils.mjs";
 
@@ -143,7 +143,9 @@ export async function parseFile(fileName: string) {
         const call = node.expression;
         if (!isIdentifier(call.expression) || call.expression.text !== "definePlugin") continue;
 
-        const pluginObj = node.expression.arguments[0];
+        let pluginObj = node.expression.arguments[0];
+        // Unwrap `as` expressions: definePlugin({...} as any)
+        if (isAsExpression(pluginObj)) pluginObj = pluginObj.expression;
         if (!isObjectLiteralExpression(pluginObj)) throw fail("no object literal passed to definePlugin");
 
         const data = {
@@ -162,8 +164,16 @@ export async function parseFile(fileName: string) {
             switch (key) {
                 case "name":
                 case "description":
-                    if (!isStringLiteral(value)) throw fail(`${key} is not a string literal`);
-                    data[key] = value.text;
+                    // Support t("...") wrapper from @api/pluginI18n
+                    if (isCallExpression(value) && isIdentifier(value.expression) && value.expression.text === "t") {
+                        const firstArg = value.arguments[0];
+                        if (!isStringLiteral(firstArg)) throw fail(`${key} is not a string literal inside t()`);
+                        data[key] = firstArg.text;
+                    } else if (!isStringLiteral(value)) {
+                        throw fail(`${key} is not a string literal`);
+                    } else {
+                        data[key] = value.text;
+                    }
                     break;
                 case "patches":
                     data.hasPatches = true;
