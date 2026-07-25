@@ -1,7 +1,7 @@
 ﻿<script>
     import {tooltip} from "./tooltip";
     
-    const telegramUrl = "https://t.me/youcordoff";
+    const telegramUrl = "https://t.me/youcord";
     const githubUrl = "https://github.com/nightcordlegit/youcord";
     const webUrl = "https://youcord.fr";
 </script>

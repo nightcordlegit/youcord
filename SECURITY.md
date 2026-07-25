@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in YouCord, please report it privately via Telegram: https://t.me/youcordoff
+If you discover a security vulnerability in YouCord, please report it privately via Telegram: https://t.me/youcord
 
 Do **not** open a public issue for security vulnerabilities.
 

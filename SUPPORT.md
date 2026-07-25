@@ -2,7 +2,7 @@
 
 ## Community
 
-- **Telegram**: https://t.me/youcordoff — for general discussion, questions, and community support
+- **Telegram**: https://t.me/youcord — for general discussion, questions, and community support
 - **Website**: https://youcord.fr
 
 ## Issues

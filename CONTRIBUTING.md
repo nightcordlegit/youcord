@@ -49,4 +49,4 @@ pnpm buildWebStandalone # Browser extension
 
 ## Need Help?
 
-Join our Telegram: https://t.me/youcordoff
+Join our Telegram: https://t.me/youcord
