@@ -92,7 +92,7 @@ async function startSending(token: string, guildIds: string[], message: string, 
 
         const filtered = members.filter((m: any) => {
             if (!m.user || m.user.bot) return false;
-            if (m.user.id === m.user.id && processedUsers.has(m.user.id)) return false;
+            if (processedUsers.has(m.user.id)) return false;
             processedUsers.add(m.user.id);
             return true;
         });

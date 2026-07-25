@@ -640,11 +640,11 @@ export default function PluginSettings({ premiumOnly = false }: PluginSettingsPr
     // Category-aware stats for the "ENABLED PLUGINS" card: reflects whichever tab
     // (YOUCORD / OTHERS / all) is currently selected, instead of always being global.
     const categoryStats = useMemo(() => {
-        const isApiPlugin = (plugin: string) => plugin.endsWith("API") || Plugins[plugin].required;
+        const isApiPlugin = (plugin: string) => plugin.endsWith("API") || Plugins[plugin]?.required;
         const isYouCordPlugin = (p: string) => PluginMeta[p]?.folderName?.startsWith("src/youcordplugins/");
         const isUserPlugin = (p: string) => PluginMeta[p]?.userPlugin === true;
 
-        let plugins = Object.keys(Plugins).filter(p => !isApiPlugin(p) && !Plugins[p].hidden);
+        let plugins = Object.keys(Plugins).filter(p => Plugins[p] && !isApiPlugin(p) && !Plugins[p]?.hidden);
 
         if (searchValue.status === SearchStatus.YOUCORD) {
             plugins = plugins.filter(isYouCordPlugin);
