@@ -502,6 +502,7 @@ function ThemesTab() {
     }
 
     // Migrate old theme library URLs on mount and when themeLinks change
+    const themeLinksStr = JSON.stringify(settings.themeLinks);
     useEffect(() => {
         try {
             const newLinks = settings.themeLinks.map(link => {
@@ -522,7 +523,7 @@ function ThemesTab() {
             console.error("Theme initialization failed:", e);
             setInitError(String(e));
         }
-    }, [settings.themeLinks]);
+    }, [themeLinksStr]);
 
     function onThemeLinkEnabledChange(link: string, enabled: boolean) {
         if (enabled) {
