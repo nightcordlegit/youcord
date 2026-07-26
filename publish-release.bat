@@ -109,12 +109,12 @@ echo  [5/7] Compilation de YouCord-Installer.exe...
 if not exist "%OUT_DIR%" mkdir "%OUT_DIR%"
 powershell -NoProfile -ExecutionPolicy Bypass -File "build-installer.ps1"
 if errorlevel 1 (
-    echo  [ERREUR] Compilation de l'installeur echouee.
-    pause
-    exit /b 1
+    echo  [ATTENTION] Build local de l'installeur echoue.
+    echo  Telechargement depuis la derniere release GitHub...
+    powershell -NoProfile -Command "Invoke-WebRequest -Uri 'https://github.com/nightcordlegit/youcord/releases/latest/download/YouCord-Installer.exe' -OutFile '%INSTALLER_EXE%' -UseBasicParsing"
 )
 if not exist "%INSTALLER_EXE%" (
-    echo  [ERREUR] YouCord-Installer.exe introuvable apres compilation.
+    echo  [ERREUR] YouCord-Installer.exe introuvable.
     pause
     exit /b 1
 )
