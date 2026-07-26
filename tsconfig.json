@@ -113,6 +113,9 @@
             "@youcordplugins/*": [
                 "./youcordplugins/*"
             ],
+            "@equicordplugins/*": [
+                "./equicordplugins/*"
+            ],
             "@illegalcordplugins/*": [
                 "./illegalcordplugins/*"
             ],

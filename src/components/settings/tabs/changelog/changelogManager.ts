@@ -67,7 +67,6 @@ async function fetchCommitsBetween(
             {
                 headers: {
                     Accept: "application/vnd.github.v3+json",
-                    "Cache-Control": "no-cache",
                 },
             },
         );

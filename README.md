@@ -6,6 +6,7 @@
 **Everything Discord doesn't build, we create.**
 
 [![Telegram](https://img.shields.io/badge/Telegram-Join%20us-26A5E4?logo=telegram&logoColor=white)](https://t.me/youcord)
+[![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?logo=discord&logoColor=white)](https://discord.gg/UNbz6fDwhk)
 [![License](https://img.shields.io/badge/license-GPL%20v3-a855f7)](./LICENSE)
 [![Website](https://img.shields.io/badge/website-youcord.fr-5865F2?logo=googlechrome&logoColor=white)](https://youcord.fr)
 [![Sponsor Graph](https://img.shields.io/badge/sponsor-graph-a855f7?logo=github)](https://github.com/Vendicated/github-sponsor-graph)

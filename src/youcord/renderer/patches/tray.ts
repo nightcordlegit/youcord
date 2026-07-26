@@ -78,7 +78,7 @@ export function cleanupTraySubscriptions() {
 }
 
 onceReady.then(() => {
-    const userID = UserStore.getCurrentUser().id;
+    const userID = UserStore.getCurrentUser()?.id;
 
     const speakingCallback = (params: any) => {
         if (params.userId === userID && params.context === "default") {

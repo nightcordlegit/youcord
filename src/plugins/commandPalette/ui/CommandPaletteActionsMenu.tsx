@@ -10,7 +10,7 @@ import { classes } from "@utils/misc";
 import { React, TextInput, useCallback, useEffect, useMemo, useRef, useState } from "@webpack/common";
 import type { KeyboardEvent } from "react";
 
-const memo = React.memo;
+const { memo } = React;
 
 import type { CommandActionIntent } from "../registry";
 

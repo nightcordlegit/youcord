@@ -231,7 +231,8 @@ export default definePlugin({
     },
 
     renderBadgeComponent: ErrorBoundary.wrap((badge: ProfileBadge & BadgeUserArgs) => {
-        const Component = badge.component!;
+        if (typeof badge.component !== "function") return null;
+        const Component = badge.component;
         return <Component {...badge} />;
     }, { noop: true }),
 

@@ -17,8 +17,8 @@ function setActivity() {
         activity: {
             application_id: APP_ID,
             name: "YouCord",
-            details: "Modding Discord",
-            state: "Injected ✓",
+            state: "Joue à Youcord",
+            details: "Injected ✓",
             timestamps: {
                 start: Date.now()
             },
