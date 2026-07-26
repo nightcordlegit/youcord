@@ -181,7 +181,7 @@ namespace YouCordInstaller
         private string _distDir;
         private string _exeDir;
 
-        const string GITEA_REPO = "youcordlegit/youcord";
+        const string GITEA_REPO = "nightcordlegit/youcord";
         const string GITEA_URL  = "https://api.github.com/repos";
         const string DIST_ZIP   = "youcord-dist.zip";
 

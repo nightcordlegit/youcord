@@ -794,7 +794,7 @@
 
     async function loadLatestVersion() {
       try {
-        const res = await fetch('https://api.github.com/repos/youcordlegit/youcord/releases/latest', {
+        const res = await fetch('https://api.github.com/repos/nightcordlegit/youcord/releases/latest', {
           headers: { 'Accept': 'application/json' }
         });
         if (!res.ok) return;

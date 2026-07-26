@@ -65,21 +65,21 @@ jobs:
           Compress-Archive -Path "$staging\*" -DestinationPath "youcord-dist.zip" -Force
           Write-Host "youcord-dist.zip created ($($(Get-Item youcord-dist.zip).Length / 1MB) MB)"
 
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.x"
+
       - name: Build YouCord Installer
         shell: pwsh
         run: |
-          # Sync installer version with release tag
-          $tag = "$env:GITHUB_REF" -replace '^refs/tags/v', ''
-          $pkg = Get-Content "installer-src/package.json" -Raw | ConvertFrom-Json
-          $pkg.version = $tag
-          $pkg | ConvertTo-Json -Depth 10 | Set-Content "installer-src/package.json"
-          Write-Host "Installer version set to $tag"
-
           Push-Location installer-src
-          npm install --legacy-peer-deps
-          npm run compile
-          npx electron-builder --win -p never
+          dotnet publish -c Release
           Pop-Location
+          # Copy to expected upload location
+          New-Item -ItemType Directory -Force -Path release/installer | Out-Null
+          Copy-Item installer-src/bin/Release/net8.0-windows/win-x64/publish/YouCord-Installer.exe release/installer/YouCord-Installer.exe -Force
+          Write-Host "Installer built: $(Get-Item release/installer/YouCord-Installer.exe | Select-Object -ExpandProperty Length)"
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v3

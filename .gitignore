@@ -37,6 +37,8 @@ ExtensionCache/
 release/
 build/
 dist/
+installer-src/bin/
+installer-src/obj/
 # Exception : scripts/build/ contient les scripts de compilation et doit être versionné
 !scripts/build/
 
