@@ -14,7 +14,7 @@ set "NOTES=%~2"
 
 if "%VERSION%"=="" (
     echo [ERREUR] Usage: publish-release.bat VERSION "Notes de version"
-    echo Exemple : publish-release.bat 1.22.0 "Correction bug audio"
+    echo Exemple : publish-release.bat 1.21.33 "Correction bug audio"
     pause
     exit /b 1
 )
