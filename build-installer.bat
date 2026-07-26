@@ -1,4 +1,4 @@
-﻿@echo off
+@echo off
 title YouCord Installer - Build
 cd /d "%~dp0"
 

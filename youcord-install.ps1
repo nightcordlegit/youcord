@@ -88,40 +88,32 @@ if ($needDownload) {
     }
 }
 
-# ---- [2/3] Telecharger les fichiers YouCord ----------------------------------
-Write-Step 2 3 "Telechargement des fichiers YouCord depuis GitHub..."
+# ---- [2/3] Copier les fichiers YouCord (build local) ------------------------
+Write-Step 2 3 "Copie des fichiers YouCord depuis le build local..."
+
+$LocalDist = Join-Path $PSScriptRoot "dist\desktop"
+if (-not (Test-Path $LocalDist)) {
+    Write-Fail "Build local introuvable dans '$LocalDist'.`n           Lancez 'pnpm buildDesktop' d'abord."
+}
+if (-not (Test-Path "$LocalDist\patcher.js")) {
+    Write-Fail "Fichier patcher.js introuvable dans '$LocalDist'.`n           Verifiez que le build est complet."
+}
 
 try {
-    $apiUrl   = "https://api.github.com/repos/$YouCordRepo/releases/latest"
-    $release  = Invoke-RestMethod -Uri $apiUrl -UseBasicParsing `
-        -Headers @{ "User-Agent" = "YouCord-Installer/2.0"; "Accept" = "application/vnd.github.v3+json" }
-
-    $version  = $release.tag_name
-    $distAsset = $release.assets | Where-Object { $_.name -eq "youcord-dist.zip" } | Select-Object -First 1
-
-    if (-not $distAsset) {
-        Write-Fail "Fichier 'youcord-dist.zip' introuvable dans la release $version.`n           Contactez le support YouCord."
-    }
-
-    Write-Host "          Version : $version" -ForegroundColor DarkGray
-    Write-Host "          Telechargement en cours..." -ForegroundColor DarkGray
-
-    $zipPath = Join-Path $InstallDir "youcord-dist.zip"
-    Invoke-WebRequest -Uri $distAsset.browser_download_url -OutFile $zipPath -UseBasicParsing `
-        -Headers @{ "User-Agent" = "YouCord-Installer/2.0" }
-
-    # Extraire proprement (supprimer l'ancien dist d'abord)
+    # Supprimer l'ancien dist et copier le nouveau
     if (Test-Path $DistDir) { Remove-Item $DistDir -Recurse -Force }
     New-Item -ItemType Directory -Force -Path $DistDir | Out-Null
-    Expand-Archive -Path $zipPath -DestinationPath $DistDir -Force
-    Remove-Item $zipPath -Force
+    Copy-Item "$LocalDist\*" $DistDir -Recurse -Force
 
-    # Sauvegarder la version installee
+    # Lire la version depuis package.json
+    $pkgPath = Join-Path $PSScriptRoot "package.json"
+    $pkg = Get-Content $pkgPath -Raw | ConvertFrom-Json
+    $version = $pkg.version
     Set-Content -Path (Join-Path $InstallDir "version.txt") -Value $version
 
-    Write-OK "YouCord $version pret a etre injecte !"
+    Write-OK "YouCord v$version (build local) pret a etre injecte !"
 } catch {
-    Write-Fail "Echec du telechargement YouCord.`n           Detail : $_"
+    Write-Fail "Echec de la copie des fichiers YouCord.`n           Detail : $_"
 }
 
 # ---- [3/3] Injection via EquilotlCli ----------------------------------------

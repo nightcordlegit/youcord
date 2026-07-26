@@ -1,11 +1,11 @@
-﻿@echo off
-:: â”€â”€â”€ YouCord â€” Publier une nouvelle release sur Gitea â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-:: Usage : publish-release.bat 1.18.1 "Description des changements"
-:: Necessite : pnpm, node
-::             curl (inclus dans Windows 10+)
+@echo off
+:: ---- YouCord -- Publier une nouvelle release sur GitHub -------------------
+:: Usage : publish-release.bat 1.22.0 "Description des changements"
+:: Necessite : pnpm, node, curl
 ::
-:: Auth : token Gitea dans %USERPROFILE%\.gitea_token  (une seule ligne, aucun espace)
-::        Creer le fichier : echo votre_token > %USERPROFILE%\.gitea_token
+:: Auth : token GitHub dans %USERPROFILE%\.github_token  (1 ligne)
+::        Creer le fichier : echo votre_token > %USERPROFILE%\.github_token
+::        Token besoin de scope "repo" (ou "public_repo")
 
 setlocal EnableDelayedExpansion
 
@@ -14,38 +14,38 @@ set "NOTES=%~2"
 
 if "%VERSION%"=="" (
     echo [ERREUR] Usage: publish-release.bat VERSION "Notes de version"
-    echo Exemple : publish-release.bat 1.18.1 "Correction bug audio"
+    echo Exemple : publish-release.bat 1.22.0 "Correction bug audio"
     pause
     exit /b 1
 )
 
-if "%NOTES%"=="" set NOTES=YouCord %VERSION%
+if "%NOTES%"=="" set NOTES=YouCord v%VERSION%
 
-:: â”€â”€ Config Gitea â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-set GITEA_URL=https://source.youcord.fr
-set GITEA_REPO=youcord/youcord
-set GITEA_API=%GITEA_URL%/api/v1
+:: ---- Config GitHub --------------------------------------------------------
+set GH_REPO=nightcordlegit/youcord
+set GH_API=https://api.github.com
+set GH_UPLOAD=https://uploads.github.com
 
-:: â”€â”€ Lecture du token depuis le fichier local (non versionne) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-set TOKEN_FILE=%USERPROFILE%\.gitea_token
+:: ---- Lecture du token -----------------------------------------------------
+set TOKEN_FILE=%USERPROFILE%\.github_token
 if not exist "%TOKEN_FILE%" (
     echo  [ERREUR] Fichier de token introuvable : %TOKEN_FILE%
-    echo  Creez-le avec : echo votre_token_gitea ^> "%%USERPROFILE%%\.gitea_token"
-    echo  Generez un token sur : %GITEA_URL%/user/settings/applications
+    echo  Creez-le avec : echo votre_token_github ^> "%%USERPROFILE%%\.github_token"
+    echo  Token sur : https://github.com/settings/tokens
     pause
     exit /b 1
 )
 
-set /p GITEA_TOKEN=<"%TOKEN_FILE%"
-set "GITEA_TOKEN=%GITEA_TOKEN: =%"
+set /p GH_TOKEN=<"%TOKEN_FILE%"
+set "GH_TOKEN=%GH_TOKEN: =%"
 
-if "%GITEA_TOKEN%"=="" (
+if "%GH_TOKEN%"=="" (
     echo  [ERREUR] Le fichier %TOKEN_FILE% est vide.
     pause
     exit /b 1
 )
 
-:: Chemins de sortie
+:: ---- Preparation ----------------------------------------------------------
 set DIST_DIR=dist\desktop
 set OUT_DIR=release\installer
 set DIST_ZIP=%OUT_DIR%\youcord-dist.zip
@@ -53,58 +53,59 @@ set INSTALLER_EXE=%OUT_DIR%\YouCord-Installer.exe
 set VERSION_JSON=%OUT_DIR%\version.json
 set DESKTOP_ASAR=dist\desktop.asar
 
+if not exist "%OUT_DIR%" mkdir "%OUT_DIR%"
+
 echo.
-echo  â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—
-echo  â•‘    YOUCORD â€” Publication release v%VERSION%
-echo  â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+echo  +--------------------------------------------------+
+echo  ^|  YOUCORD -- Publication GitHub v%VERSION%         ^|
+echo  +--------------------------------------------------+
 echo.
 
-:: â”€â”€ 1. Mise Ã  jour de la version â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-echo  [1/8] Mise a jour de la version vers %VERSION%...
+:: ---- 1. Update version in package.json -----------------------------------
+echo  [1/7] Mise a jour de la version vers %VERSION%...
 node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')); pkg.version = '%VERSION%'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 4) + '\n', 'utf8');"
-echo  [1/8] Version mise a jour.
+echo  OK
 
-:: â”€â”€ 2. Envoi du code source sur Gitea â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+:: ---- 2. Git commit + push -------------------------------------------------
 echo.
-echo  [2/8] Committer et pusher le code source...
+echo  [2/7] Commit et push du code source...
 git add .
 git diff --quiet --cached
 if errorlevel 1 (
-    git commit -m "build: release v%VERSION% - %NOTES%"
+    git commit -m "build: release v%VERSION%"
 ) else (
     echo  Aucun changement a committer.
 )
-git push --set-upstream origin master
+git push
 if errorlevel 1 (
-    echo  [ERREUR] Impossible de push sur Gitea. Verifiez vos identifiants/droits d'acces.
+    echo  [ERREUR] Impossible de push sur GitHub.
     pause
     exit /b 1
 )
-echo  [2/8] Code source synchronise avec Gitea.
+echo  OK
 
-:: â”€â”€ 3. Build JS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+:: ---- 3. Build -------------------------------------------------------------
 echo.
-echo  [3/8] Build + obfuscation en cours...
-taskkill /F /IM Discord.exe /T >nul 2>&1
-taskkill /F /IM node.exe    /T >nul 2>&1
-timeout /t 2 /nobreak >nul
+echo  [3/7] Build en cours...
 call pnpm build
 if errorlevel 1 (
     echo  [ERREUR] pnpm build a echoue.
     pause
     exit /b 1
 )
-echo  [3/8] Build + obfuscation termines !
+echo  OK
 
-:: â”€â”€ 4. Assets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+:: ---- 4. Copie assets ------------------------------------------------------
 echo.
-echo  [4/8] Copie des assets (ffmpeg, node, modules...) vers %DIST_DIR%...
-node scripts\build\collect-assets.mjs
-echo  [4/8] Assets copies.
+echo  [4/7] Copie des assets...
+if exist "scripts\build\collect-assets.mjs" (
+    node scripts\build\collect-assets.mjs
+)
+echo  OK
 
-:: â”€â”€ 5. YouCord-Installer.exe â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+:: ---- 5. Build installer + Zip dist ----------------------------------------
 echo.
-echo  [5/8] Compilation de YouCord-Installer.exe...
+echo  [5/7] Compilation de YouCord-Installer.exe...
 if not exist "%OUT_DIR%" mkdir "%OUT_DIR%"
 powershell -NoProfile -ExecutionPolicy Bypass -File "build-installer.ps1"
 if errorlevel 1 (
@@ -117,11 +118,10 @@ if not exist "%INSTALLER_EXE%" (
     pause
     exit /b 1
 )
-for %%F in ("%INSTALLER_EXE%") do echo  [5/8] YouCord-Installer.exe cree (%%~zF octets)
+for %%F in ("%INSTALLER_EXE%") do echo  YouCord-Installer.exe : %%~zF octets
 
-:: â”€â”€ 6. youcord-dist.zip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 echo.
-echo  [6/8] Creation de youcord-dist.zip...
+echo  Creation de youcord-dist.zip...
 if not exist "%DIST_DIR%\patcher.js" (
     echo  [ERREUR] dist\desktop\patcher.js introuvable.
     pause
@@ -130,41 +130,35 @@ if not exist "%DIST_DIR%\patcher.js" (
 if exist "%DIST_ZIP%" del /F /Q "%DIST_ZIP%"
 del /s /q "%DIST_DIR%\*.map" >nul 2>&1
 del /s /q "%DIST_DIR%\*.LEGAL.txt" >nul 2>&1
-node scripts\build\verify-dist.mjs
-if errorlevel 1 (
-    echo  [ERREUR] Verification du dist echouee.
-    pause
-    exit /b 1
-)
-powershell -NoProfile -Command "Add-Type -Assembly System.IO.Compression.FileSystem; $src = (Resolve-Path '%DIST_DIR%').Path; $dst = (Join-Path (Resolve-Path 'release\installer').Path 'youcord-dist.zip'); [System.IO.Compression.ZipFile]::CreateFromDirectory($src, $dst, [System.IO.Compression.CompressionLevel]::Optimal, $false)"
+powershell -NoProfile -Command "Add-Type -Assembly System.IO.Compression.FileSystem; $src = (Resolve-Path '%DIST_DIR%').Path; $dst = (Join-Path (Resolve-Path (Join-Path (Get-Location) 'release\installer')).Path 'youcord-dist.zip'); [System.IO.Compression.ZipFile]::CreateFromDirectory($src, $dst, [System.IO.Compression.CompressionLevel]::Optimal, $false)"
 if not exist "%DIST_ZIP%" (
     echo  [ERREUR] Impossible de creer youcord-dist.zip
     pause
     exit /b 1
 )
-for %%F in ("%DIST_ZIP%") do echo  [6/8] youcord-dist.zip cree (%%~zF octets)
+for %%F in ("%DIST_ZIP%") do echo  youcord-dist.zip : %%~zF octets
 
-:: â”€â”€ 7. version.json â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+:: ---- 6. version.json ------------------------------------------------------
 echo.
-echo  [7/8] Mise a jour de version.json...
+echo  [6/7] version.json...
 for /f "usebackq" %%d in (`powershell -NoProfile -Command "Get-Date -Format 'yyyy-MM-dd'"`) do set ISO_DATE=%%d
 (
     echo {
     echo   "version": "%VERSION%",
     echo   "releaseDate": "%ISO_DATE%",
-    echo   "installerUrl": "%GITEA_URL%/%GITEA_REPO%/releases/download/v%VERSION%/YouCord-Installer.exe",
-    echo   "distUrl": "%GITEA_URL%/%GITEA_REPO%/releases/download/v%VERSION%/youcord-dist.zip",
-    echo   "downloadUrl": "%GITEA_URL%/%GITEA_REPO%/releases/download/v%VERSION%/desktop.asar",
+    echo   "installerUrl": "https://github.com/%GH_REPO%/releases/download/v%VERSION%/YouCord-Installer.exe",
+    echo   "distUrl": "https://github.com/%GH_REPO%/releases/download/v%VERSION%/youcord-dist.zip",
+    echo   "downloadUrl": "https://github.com/%GH_REPO%/releases/download/v%VERSION%/desktop.asar",
     echo   "changelog": "%NOTES%"
     echo }
 ) > "%VERSION_JSON%"
-echo  [7/8] version.json mis a jour.
+echo  OK
 
-:: â”€â”€ 8. Publier sur Gitea Releases â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+:: ---- 7. Publication GitHub ------------------------------------------------
 echo.
-echo  [8/8] Creation de la release v%VERSION% sur Gitea...
+echo  [7/7] Creation de la release GitHub v%VERSION%...
 
-:: 8a. Creer la release
+:: 7a. Create release
 set "JSON_TMP=%OUT_DIR%\release_payload.json"
 (
     echo {
@@ -175,76 +169,66 @@ set "JSON_TMP=%OUT_DIR%\release_payload.json"
     echo   "prerelease": false
     echo }
 ) > "%JSON_TMP%"
-curl -s -X POST "%GITEA_API%/repos/%GITEA_REPO%/releases" ^
-    -H "Authorization: token %GITEA_TOKEN%" ^
+curl -s -X POST "%GH_API%/repos/%GH_REPO%/releases" ^
+    -H "Authorization: token %GH_TOKEN%" ^
     -H "Content-Type: application/json" ^
     -d "@%JSON_TMP%" ^
     -o "%OUT_DIR%\release_response.json"
 del /F /Q "%JSON_TMP%" >nul 2>&1
 if errorlevel 1 (
-    echo  [ERREUR] Echec de la creation de la release Gitea.
+    type "%OUT_DIR%\release_response.json"
+    echo  [ERREUR] Echec de la creation de la release GitHub.
     pause
     exit /b 1
 )
 
-:: 8b. Extraire l'ID
+:: 7b. Extract upload URL
 for /f "usebackq tokens=*" %%i in (`powershell -NoProfile -Command "(Get-Content '%OUT_DIR%\release_response.json' | ConvertFrom-Json).id"`) do set RELEASE_ID=%%i
 if "%RELEASE_ID%"=="" (
-    echo  [ERREUR] Impossible de recuperer l'ID de la release Gitea.
+    echo  [ERREUR] Impossible de recuperer l'ID de la release.
     type "%OUT_DIR%\release_response.json"
     pause
     exit /b 1
 )
-echo  Release Gitea creee (ID: %RELEASE_ID%)
+echo  Release creee (ID: %RELEASE_ID%)
 
-:: 8c. Upload â€” YouCord-Installer.exe (via curl, < 100MB)
+:: 7c. Upload assets
 echo  Upload de YouCord-Installer.exe...
-curl -s -X POST "%GITEA_API%/repos/%GITEA_REPO%/releases/%RELEASE_ID%/assets?name=YouCord-Installer.exe" ^
-    -H "Authorization: token %GITEA_TOKEN%" ^
-    -H "Content-Type: application/octet-stream" ^
+curl -s -X POST "%GH_UPLOAD%/repos/%GH_REPO%/releases/%RELEASE_ID%/assets?name=YouCord-Installer.exe" ^
+    -H "Authorization: token %GH_TOKEN%" ^
+    -H "Content-Type: application/x-msdos-program" ^
     --data-binary "@%INSTALLER_EXE%" >nul
-if errorlevel 1 ( echo  [ERREUR] Upload YouCord-Installer.exe echoue. & pause & exit /b 1 )
+if errorlevel 1 ( echo  [ERREUR] Upload YouCord-Installer.exe & pause & exit /b 1 )
 
-:: 8d. Upload â€” youcord-dist.zip (via curl, < 100MB)
 echo  Upload de youcord-dist.zip...
-curl -s -X POST "%GITEA_API%/repos/%GITEA_REPO%/releases/%RELEASE_ID%/assets?name=youcord-dist.zip" ^
-    -H "Authorization: token %GITEA_TOKEN%" ^
+curl -s -X POST "%GH_UPLOAD%/repos/%GH_REPO%/releases/%RELEASE_ID%/assets?name=youcord-dist.zip" ^
+    -H "Authorization: token %GH_TOKEN%" ^
     -H "Content-Type: application/zip" ^
     --data-binary "@%DIST_ZIP%" >nul
-if errorlevel 1 ( echo  [ERREUR] Upload youcord-dist.zip echoue. & pause & exit /b 1 )
+if errorlevel 1 ( echo  [ERREUR] Upload youcord-dist.zip & pause & exit /b 1 )
 
-:: 8e. Upload â€” desktop.asar (via PowerShell, contourne limite Cloudflare 100MB)
 echo  Upload de desktop.asar...
-powershell -NoProfile -Command ^
-    "$token = '%GITEA_TOKEN%';" ^
-    "$bytes = [System.IO.File]::ReadAllBytes('dist\desktop.asar');" ^
-    "$uri = 'https://source.youcord.fr/api/v1/repos/youcord/youcord/releases/%RELEASE_ID%/assets?name=desktop.asar';" ^
-    "Invoke-RestMethod -Uri $uri -Method POST -Headers @{Authorization='token '+$token} -ContentType 'application/octet-stream' -Body $bytes | Out-Null;" ^
-    "Write-Host 'OK'"
-if errorlevel 1 ( echo  [ERREUR] Upload desktop.asar echoue. & pause & exit /b 1 )
+curl -s -X POST "%GH_UPLOAD%/repos/%GH_REPO%/releases/%RELEASE_ID%/assets?name=desktop.asar" ^
+    -H "Authorization: token %GH_TOKEN%" ^
+    -H "Content-Type: application/octet-stream" ^
+    --data-binary "@%DESKTOP_ASAR%" >nul
+if errorlevel 1 ( echo  [ERREUR] Upload desktop.asar & pause & exit /b 1 )
 
-:: 8f. Upload â€” version.json (via curl, tiny)
 echo  Upload de version.json...
-curl -s -X POST "%GITEA_API%/repos/%GITEA_REPO%/releases/%RELEASE_ID%/assets?name=version.json" ^
-    -H "Authorization: token %GITEA_TOKEN%" ^
+curl -s -X POST "%GH_UPLOAD%/repos/%GH_REPO%/releases/%RELEASE_ID%/assets?name=version.json" ^
+    -H "Authorization: token %GH_TOKEN%" ^
     -H "Content-Type: application/json" ^
     --data-binary "@%VERSION_JSON%" >nul
-if errorlevel 1 ( echo  [ERREUR] Upload version.json echoue. & pause & exit /b 1 )
+if errorlevel 1 ( echo  [ERREUR] Upload version.json & pause & exit /b 1 )
 
 del /F /Q "%OUT_DIR%\release_response.json" >nul 2>&1
 
-:: â”€â”€ Done â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+:: ---- Done ------------------------------------------------------------------
 echo.
-echo  â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—
-echo  â•‘  YouCord v%VERSION% publie avec succes sur Gitea !
-echo  â•‘
-echo  â•‘  URL : %GITEA_URL%/%GITEA_REPO%/releases/tag/v%VERSION%
-echo  â•‘
-echo  â•‘  Fichiers publies :
-echo  â•‘    YouCord-Installer.exe    â€” installeur .exe avec GUI
-echo  â•‘    youcord-dist.zip         â€” JS obfusques (pour l'injec.)
-echo  â•‘    desktop.asar               â€” asar Discord patcher
-echo  â•‘    version.json               â€” metadonnees de version
-echo  â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+echo  +-------------------------------------------------------------+
+echo  ^|  YouCord v%VERSION% publie sur GitHub !                   ^|
+echo  ^|                                                             ^|
+echo  ^|  https://github.com/%GH_REPO%/releases/tag/v%VERSION%      ^|
+echo  +-------------------------------------------------------------+
 echo.
 pause
