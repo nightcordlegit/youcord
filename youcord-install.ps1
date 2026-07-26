@@ -68,7 +68,7 @@ if (Test-Path $EquilotlExe) {
     try {
         $head = Invoke-WebRequest -Uri $EquilotlUrl -Method Head -UseBasicParsing `
             -Headers @{ "User-Agent" = "YouCord-Installer/2.0" }
-        $remoteSize = [long]($head.Headers["Content-Length"] ?? 0)
+        $remoteSize = if ($head.Headers.ContainsKey("Content-Length")) { [long]$head.Headers["Content-Length"] } else { 0L }
         $localSize  = (Get-Item $EquilotlExe).Length
         if ($remoteSize -gt 0 -and $remoteSize -eq $localSize) {
             $needDownload = $false
