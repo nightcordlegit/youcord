@@ -39,8 +39,7 @@ import { destroyTray, initTray } from "./tray";
 import { clearData } from "./utils/clearData";
 import { makeLinksOpenExternally } from "./utils/makeLinksOpenExternally";
 import { applyDeckKeyboardFix, askToApplySteamLayout, isDeckGameMode } from "./utils/steamOS";
-import { downloadVencordAsar, ensureVencordFiles } from "./utils/vencordLoader";
-import { VENCORD_DIR } from "./vencordDir";
+import { downloadVencordAsar, ensureVencordFiles, getVencordPath } from "./utils/vencordLoader";
 
 let isQuitting = false;
 
@@ -465,7 +464,7 @@ function createMainWindow() {
     return win;
 }
 
-const runVencordMain = once(() => require(VENCORD_DIR));
+const runVencordMain = once(() => require(getVencordPath()));
 
 export function loadUrl(uri: string | undefined) {
     const branch = Settings.store.discordBranch;
@@ -497,7 +496,11 @@ export async function createWindows() {
 
     addSplashLog();
     await ensureVencordFiles();
-    runVencordMain();
+    try {
+        runVencordMain();
+    } catch (e) {
+        console.log("[YouCord] Failed to load youcord.asar, continuing without plugins:", e);
+    }
 
     addSplashLog();
     mainWin = createMainWindow();

@@ -8,7 +8,7 @@ import { existsSync } from "fs";
 import { join } from "path";
 
 import { USER_AGENT } from "../constants";
-import { VENCORD_DIR } from "../vencordDir";
+import { VENCORD_DIR, VENCORD_FALLBACK_DIR } from "../vencordDir";
 import { downloadFile, fetchie } from "./http";
 
 const API_BASE = "https://api.github.com/repos/nightcordlegit/youcord";
@@ -35,20 +35,32 @@ export async function githubGet(endpoint: string) {
 }
 
 export async function downloadVencordAsar() {
+    const target = VENCORD_FALLBACK_DIR ?? VENCORD_DIR;
     await downloadFile(
         "https://github.com/nightcordlegit/youcord/releases/download/latest/YouCord.asar",
-        VENCORD_DIR,
+        target,
         {},
         { retryOnNetworkError: true }
     );
 }
 
 export function isValidVencordInstall(dir: string) {
-    return existsSync(join(dir, "YouCord/main.js"));
+    return existsSync(join(dir, "main.js"));
 }
 
 export async function ensureVencordFiles() {
-    if (!existsSync(VENCORD_DIR)) {
-        console.error("Bundled youcord.asar not found at", VENCORD_DIR);
+    if (existsSync(VENCORD_DIR)) return;
+    if (VENCORD_FALLBACK_DIR && existsSync(VENCORD_FALLBACK_DIR)) return;
+    try {
+        console.log("[YouCord] youcord.asar not found, downloading...");
+        await downloadVencordAsar();
+    } catch (e) {
+        console.log("[YouCord] Failed to download youcord.asar:", e);
     }
+}
+
+export function getVencordPath(): string {
+    if (existsSync(VENCORD_DIR)) return VENCORD_DIR;
+    if (VENCORD_FALLBACK_DIR && existsSync(VENCORD_FALLBACK_DIR)) return VENCORD_FALLBACK_DIR;
+    return VENCORD_DIR;
 }

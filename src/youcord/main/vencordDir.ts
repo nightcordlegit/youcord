@@ -8,6 +8,14 @@ import { app } from "electron";
 import { join } from "path";
 
 // this is in a separate file to avoid circular dependencies
-export const VENCORD_DIR = app.isPackaged
+const PACKAGED_PATH = app.isPackaged
     ? join(process.resourcesPath, "youcord.asar")
-    : join(__dirname, "..", "..", "..", "dist", "youcord.asar");
+    : null;
+
+const DEV_PATH = join(__dirname, "..", "..", "..", "dist", "youcord.asar");
+
+export const VENCORD_DIR = PACKAGED_PATH ?? DEV_PATH;
+
+export const VENCORD_FALLBACK_DIR = app.isPackaged
+    ? join(app.getPath("userData"), "youcord.asar")
+    : null;
