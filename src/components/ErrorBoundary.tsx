@@ -86,15 +86,18 @@ const ErrorBoundary = LazyComponent(() => {
 
             if (this.isNoop) return null;
 
-            if (this.props.fallback)
-                return (
-                    <this.props.fallback
-                        wrappedProps={this.props.wrappedProps}
-                        {...this.state}
-                    >
-                        {this.props.children}
-                    </this.props.fallback>
-                );
+            if (this.props.fallback) {
+                if (typeof this.props.fallback === "function")
+                    return (
+                        <this.props.fallback
+                            wrappedProps={this.props.wrappedProps}
+                            {...this.state}
+                        >
+                            {this.props.children}
+                        </this.props.fallback>
+                    );
+                return this.props.fallback;
+            }
 
             const msg = this.props.message || "An error occurred while rendering this Component. More info can be found below and in your console.";
 
