@@ -6,23 +6,23 @@
 }
 
 .mdb-content {
-    padding: 16px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
 }
 
 .mdb-section {
     background: var(--background-secondary);
     border-radius: 8px;
-    padding: 12px;
+    padding: 14px;
 }
 
 .mdb-section-title {
     color: var(--header-primary);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     display: flex;
@@ -60,8 +60,9 @@
 .mdb-token-preview {
     flex: 1;
     color: var(--text-normal);
-    font-size: 12px;
+    font-size: 13px;
     font-family: var(--font-code);
+    font-weight: 500;
 }
 
 .mdb-token-remove {
@@ -85,9 +86,9 @@
     background: var(--background-tertiary);
     border: 1px solid var(--background-modifier-accent);
     border-radius: 6px;
-    padding: 8px 10px;
+    padding: 10px 12px;
     color: var(--text-normal);
-    font-size: 12px;
+    font-size: 13px;
     font-family: var(--font-code);
     outline: none;
     transition: border-color 0.15s;
@@ -172,9 +173,9 @@
 
 .mdb-guild-name {
     flex: 1;
-    color: var(--text-normal);
+    color: var(--header-primary);
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -183,7 +184,7 @@
 .mdb-guild-check {
     color: var(--brand-experiment);
     font-weight: 700;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .mdb-textarea {
@@ -191,14 +192,15 @@
     background: var(--background-tertiary);
     border: 1px solid var(--background-modifier-accent);
     border-radius: 8px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     color: var(--text-normal);
-    font-size: 13px;
-    font-family: inherit;
+    font-size: 14px;
+    font-family: var(--font-primary, inherit);
     resize: vertical;
     outline: none;
     box-sizing: border-box;
     transition: border-color 0.15s;
+    line-height: 1.5;
 }
 
 .mdb-textarea:focus {
@@ -303,10 +305,13 @@
 }
 
 .mdb-summary {
-    color: var(--text-muted);
-    font-size: 12px;
-    font-style: italic;
+    color: var(--header-primary);
+    font-size: 13px;
+    font-weight: 600;
     text-align: center;
+    background: var(--background-secondary-alt);
+    border-radius: 8px;
+    padding: 8px 12px;
 }
 
 .mdb-stats {
