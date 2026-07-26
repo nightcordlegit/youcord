@@ -232,6 +232,8 @@ module.exports = {
         category: "public.app-category.social-networking",
         hardenedRuntime: true,
         gatekeeperAssess: false,
+        entitlements: "build/entitlements.mac.plist",
+        entitlementsInherit: "build/entitlements.mac.plist",
         artifactName: "${name}-${version}-mac-${arch}.${ext}"
     },
     dmg: {
