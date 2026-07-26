@@ -22,12 +22,21 @@ if not exist "release\installer" mkdir "release\installer"
 :: Entre dans le dossier installer-src
 cd installer-src
 
+:: Verifie que pnpm est disponible
+where pnpm >nul 2>&1
+if errorlevel 1 (
+    echo  [ERREUR] pnpm introuvable. Installez-le avec: npm install -g pnpm
+    cd ..
+    pause
+    exit /b 1
+)
+
 :: Installe les dependances si node_modules absent
 if not exist "node_modules" (
-    echo  [1/3] Installation des dependances npm...
-    npm install --legacy-peer-deps
+    echo  [1/3] Installation des dependances pnpm...
+    call pnpm install
     if errorlevel 1 (
-        echo  [ERREUR] npm install a echoue.
+        echo  [ERREUR] pnpm install a echoue.
         cd ..
         pause
         exit /b 1
@@ -40,7 +49,7 @@ if not exist "node_modules" (
 :: Compile avec electron-webpack
 echo.
 echo  [2/3] Compilation webpack (electron-webpack)...
-call npm run compile
+call pnpm run compile
 if errorlevel 1 (
     echo  [ERREUR] Compilation webpack echouee.
     cd ..
@@ -52,7 +61,7 @@ echo  [2/3] Compilation webpack reussie.
 :: Build electron-builder -> YouCord-Installer.exe dans ../release/installer/
 echo.
 echo  [3/3] Packaging electron-builder...
-call npx electron-builder --win -p never
+call pnpm exec electron-builder --win -p never
 if errorlevel 1 (
     echo  [ERREUR] electron-builder a echoue.
     cd ..

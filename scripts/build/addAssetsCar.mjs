@@ -1,4 +1,5 @@
 import { copyFile, readdir } from "fs/promises";
+import { existsSync } from "fs";
 
 /**
  * @param {{
@@ -20,5 +21,10 @@ export async function addAssetsCar({ appOutDir }) {
         return;
     }
 
-    await copyFile("build/Assets.car", `${appOutDir}/${appName}/Contents/Resources/Assets.car`);
+    const assetsCar = "build/Assets.car";
+    if (!existsSync(assetsCar)) {
+        console.warn(`[addAssetsCar] ${assetsCar} not found — skipping`);
+        return;
+    }
+    await copyFile(assetsCar, `${appOutDir}/${appName}/Contents/Resources/Assets.car`);
 }

@@ -41,11 +41,15 @@ export function NumberSetting({ option, pluginSettings, definedSettings, id, onC
             onChange(serialize(newValue));
         }
 
-        if (option.type === OptionType.NUMBER && BigInt(newValue) >= MAX_SAFE_NUMBER) {
-            setState(`${Number.MAX_SAFE_INTEGER}`);
-        } else {
-            setState(newValue);
+        if (option.type === OptionType.NUMBER && newValue !== "" && newValue != null) {
+            try {
+                if (BigInt(newValue) >= MAX_SAFE_NUMBER) {
+                    setState(`${Number.MAX_SAFE_INTEGER}`);
+                    return;
+                }
+            } catch { }
         }
+        setState(newValue);
     }
 
     return (

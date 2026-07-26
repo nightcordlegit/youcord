@@ -10,7 +10,7 @@ import { copyFile } from "fs/promises";
 import * as path from "path";
 import { fileURLToPath } from "url";
 
-import vencordDep from "./vencordDep.mjs";
+import vencordDep from "./vencordDep.mts";
 import { includeDirPlugin } from "./includeDirPlugin.mts";
 
 const isDev = process.argv.includes("--dev");

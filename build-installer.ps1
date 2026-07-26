@@ -19,17 +19,24 @@ if (-not $nodeOk) {
 }
 Write-Host "  Node.js : $nodeOk" -ForegroundColor DarkGray
 
-# â”€â”€ Dossier de sortie â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+try { $pnpmOk = & pnpm --version 2>$null } catch {}
+if (-not $pnpmOk) {
+    Write-Host "  [ERREUR] pnpm introuvable. Installez-le avec: npm install -g pnpm" -ForegroundColor Red
+    exit 1
+}
+Write-Host "  pnpm : $pnpmOk" -ForegroundColor DarkGray
+
+# €”€” Dossier de sortie €”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 
-# â”€â”€ Installer les dependances si besoin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# €”€” Installer les dependances si besoin €”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”
 $nodeModules = Join-Path $SrcDir "node_modules"
 if (-not (Test-Path $nodeModules)) {
-    Write-Host "  [1/3] npm install --legacy-peer-deps..." -ForegroundColor DarkGray
+    Write-Host "  [1/3] pnpm install..." -ForegroundColor DarkGray
     Push-Location $SrcDir
-    & npm install --legacy-peer-deps
+    & pnpm install
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "  [ERREUR] npm install a echoue." -ForegroundColor Red
+        Write-Host "  [ERREUR] pnpm install a echoue." -ForegroundColor Red
         Pop-Location
         exit 1
     }
@@ -39,10 +46,10 @@ if (-not (Test-Path $nodeModules)) {
     Write-Host "  [1/3] node_modules present, installation ignoree." -ForegroundColor DarkGray
 }
 
-# â”€â”€ Compilation webpack â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# €”€” Compilation webpack €”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”
 Write-Host "  [2/3] electron-webpack (compilation)..." -ForegroundColor DarkGray
 Push-Location $SrcDir
-& npm run compile
+& pnpm run compile
 if ($LASTEXITCODE -ne 0) {
     Write-Host "  [ERREUR] Compilation webpack echouee." -ForegroundColor Red
     Pop-Location
@@ -51,10 +58,11 @@ if ($LASTEXITCODE -ne 0) {
 Pop-Location
 Write-Host "  [2/3] Webpack OK." -ForegroundColor Green
 
-# â”€â”€ Packaging electron-builder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-Write-Host "  [3/3] electron-builder --win (packaging)..." -ForegroundColor DarkGray
+# €”€” Packaging electron-builder €”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”
+$platform = if ($env:OS -and $env:OS -match "Windows") { "win" } else { "mac" }
+Write-Host "  [3/3] electron-builder --$platform (packaging)..." -ForegroundColor DarkGray
 Push-Location $SrcDir
-& npx electron-builder --win -p never
+& pnpm exec electron-builder --$platform -p never
 if ($LASTEXITCODE -ne 0) {
     Write-Host "  [ERREUR] electron-builder a echoue." -ForegroundColor Red
     Pop-Location

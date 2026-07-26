@@ -34,5 +34,5 @@ export default globalExternalsWithRegExp({
             type: "cjs"
         };
     },
-    modulePathFilter: /^@[Nn]ightcord\/types.+$/
+    modulePathFilter: /^@[Yy]ou[Cc]ord\/types.+$/
 });

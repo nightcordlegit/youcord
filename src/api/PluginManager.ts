@@ -31,7 +31,7 @@ import { disableStyle, enableStyle } from "@api/Styles";
 import { Logger } from "@utils/Logger";
 import { onlyOnce } from "@utils/onlyOnce";
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
-import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
+import { OptionType, Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
 import { FluxEvents } from "@vencord/discord-types";
 import { FluxDispatcher } from "@webpack/common";
 import { patches } from "@webpack/patcher";
@@ -87,7 +87,7 @@ export function isSettingDisabled(definedSettings: any, setting: any): boolean {
 export function hasAnyVisibleSettings(plugin: Plugin): boolean {
     if (!plugin.settings) return false;
     return Object.values(plugin.settings.def).some(
-        s => s.type !== undefined && !s.hidden
+        s => s.type !== OptionType.CUSTOM && !s.hidden
     );
 }
 

@@ -36,7 +36,7 @@ import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
 import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
-import { FluxDispatcher, React, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { FluxDispatcher, React, Toasts, Tooltip, UserStore, useMemo } from "@webpack/common";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
@@ -48,7 +48,7 @@ const AvatarStyles = findCssClassesLazy("moreUsers", "avatar", "clickableAvatar"
 const CloseButton = findComponentByCodeLazy("CLOSE_BUTTON_LABEL");
 const ConfirmModal = findComponentByCodeLazy('parentComponent:"ConfirmModal"');
 const WarningIcon = findComponentByCodeLazy("3.15H3.29c-1.74");
-const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
+const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser()?.constructor ?? Object) as any;
 
 interface PluginModalProps extends ModalProps {
     plugin: Plugin;
@@ -80,6 +80,15 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         openWarningModal(plugin, onRestartNeeded);
     }
 
+    const debouncedOnChange = useMemo(() => debounce((key: string, newValue: any) => {
+        const opt = plugin.settings?.def[key];
+        if (!opt || opt.type === OptionType.CUSTOM) return;
+
+        pluginSettings[key] = newValue;
+
+        if (opt.restartNeeded) onRestartNeeded(key);
+    }), []);
+
     function renderSettings() {
         const { settings } = plugin;
         if (!hasSettings || !settings)
@@ -88,15 +97,6 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         const options = Object.entries(settings.def).map(([key, option]) => {
             if (option.type === OptionType.CUSTOM || option.hidden) return null;
 
-            function onChange(newValue: any) {
-                const opt = plugin.settings!.def[key];
-                if (!opt || opt.type === OptionType.CUSTOM) return;
-
-                pluginSettings[key] = newValue;
-
-                if (opt.restartNeeded) onRestartNeeded(key);
-            }
-
             const Component = OptionComponentMap[option.type];
             if (!Component) return null;
             return (
@@ -104,7 +104,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     <Component
                         id={key}
                         option={option}
-                        onChange={debounce(onChange)}
+                        onChange={v => debouncedOnChange(key, v)}
                         pluginSettings={pluginSettings}
                         definedSettings={settings}
                     />

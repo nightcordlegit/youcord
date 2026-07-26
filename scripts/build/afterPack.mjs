@@ -35,7 +35,7 @@ async function copyArRPCBinaries(context) {
         cpSync(binarySourcePath, binaryDestPath);
     } else {
         console.warn(`Warning: arRPC binary not found: ${binarySourcePath}`);
-        console.warn("Run 'bun compileArrpc' to build arRPC binaries");
+        console.warn("Place arRPC binaries in static/dist/ to bundle them");
     }
 }
 

@@ -1,6 +1,6 @@
 ﻿#!/usr/bin/env bash
-# â”€â”€â”€ YouCord Installer â€” Build â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-# Equivalent bash de build-installer.ps1 (converti depuis build-installer.bat)
+# €”€”€ YouCord Installer — Build €”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”
+# Builds YouCord-Installer for the current platform (Windows .exe or macOS .dmg)
 
 set -euo pipefail
 
@@ -12,23 +12,35 @@ echo "  YouCord Installer - Build"
 echo " ================================"
 echo ""
 
-# â”€â”€ VÃ©rifie que node est disponible â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# €”€” Vérifie que node est disponible €”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”
 if ! command -v node &>/dev/null; then
     echo " [ERREUR] Node.js introuvable. Installez Node.js depuis https://nodejs.org"
     exit 1
 fi
 
-# â”€â”€ CrÃ©e le dossier de sortie si besoin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+if ! command -v pnpm &>/dev/null; then
+    echo " [ERREUR] pnpm introuvable. Installez-le avec: npm install -g pnpm"
+    exit 1
+fi
+
+# €”€” Détection de la plateforme €”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”
+OS=$(uname -s)
+case "$OS" in
+    Darwin) PLATFORM="mac"; EXPECTED="release/installer/YouCord-Installer.dmg" ;;
+    *)      PLATFORM="win"; EXPECTED="release/installer/YouCord-Installer.exe" ;;
+esac
+
+# €”€” Crée le dossier de sortie si besoin €”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”
 mkdir -p "release/installer"
 
-# â”€â”€ Entre dans le dossier installer-src â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# €”€” Entre dans le dossier installer-src €”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”
 cd installer-src
 
-# â”€â”€ 1. Installe les dÃ©pendances si node_modules absent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# €”€” 1. Installe les dépendances si node_modules absent €”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”
 if [[ ! -d "node_modules" ]]; then
-    echo " [1/3] Installation des dependances npm..."
-    if ! npm install --legacy-peer-deps; then
-        echo " [ERREUR] npm install a echoue."
+    echo " [1/3] Installation des dependances pnpm..."
+    if ! pnpm install; then
+        echo " [ERREUR] pnpm install a echoue."
         cd ..
         exit 1
     fi
@@ -37,11 +49,11 @@ else
     echo " [1/3] Dependances deja presentes, on passe."
 fi
 
-# â”€â”€ 2. Compile avec electron-webpack â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# €”€” 2. Compile avec electron-webpack €”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”
 echo ""
 echo " [2/3] Compilation webpack (electron-webpack)..."
 
-if ! npm run compile; then
+if ! pnpm run compile; then
     echo " [ERREUR] Compilation webpack echouee."
     cd ..
     exit 1
@@ -49,11 +61,11 @@ fi
 
 echo " [2/3] Compilation webpack reussie."
 
-# â”€â”€ 3. Packaging electron-builder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# €”€” 3. Packaging electron-builder €”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”
 echo ""
-echo " [3/3] Packaging electron-builder..."
+echo " [3/3] Packaging electron-builder --$PLATFORM..."
 
-if ! npx electron-builder --win -p never; then
+if ! pnpm exec electron-builder --$PLATFORM -p never; then
     echo " [ERREUR] electron-builder a echoue."
     cd ..
     exit 1
@@ -61,17 +73,17 @@ fi
 
 cd ..
 
-# â”€â”€ VÃ©rification â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-if [[ ! -f "release/installer/YouCord-Installer.exe" ]]; then
+# €”€” Vérification €”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”
+if [[ ! -f "$EXPECTED" ]]; then
     echo ""
-    echo " [ERREUR] YouCord-Installer.exe introuvable apres build."
+    echo " [ERREUR] $EXPECTED introuvable apres build."
     exit 1
 fi
 
-SIZE=$(stat -c%s "release/installer/YouCord-Installer.exe" 2>/dev/null \
-    || stat -f%z "release/installer/YouCord-Installer.exe")
+SIZE=$(stat -c%s "$EXPECTED" 2>/dev/null \
+    || stat -f%z "$EXPECTED")
 
 echo ""
 echo " [OK] Build reussi !"
-echo " Fichier : release/installer/YouCord-Installer.exe  ($SIZE octets)"
+echo " Fichier : $EXPECTED  ($SIZE octets)"
 echo ""

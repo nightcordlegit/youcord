@@ -16,11 +16,28 @@ import { React, useEffect, useRef, useState } from "@webpack/common";
 const API_BASE = "https://discord.com/api/v9";
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
+async function botFetch(token: string, url: string, options: RequestInit = {}): Promise<any> {
+    const res = await fetch(url, {
+        ...options,
+        headers: {
+            ...options.headers,
+            "Authorization": `Bot ${token}`,
+            "Content-Type": "application/json",
+        },
+    });
+    if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`);
+    }
+    if (res.status === 204) return null;
+    return res.json();
+}
+
 async function fetchGuildMembers(token: string, guildId: string) {
     const members: any[] = [];
     let after = "0";
     while (true) {
-        const batch = await VencordNative.pluginHelpers.MassDMBot.botFetch(
+        const batch = await botFetch(
             token,
             `${API_BASE}/guilds/${guildId}/members?limit=1000&after=${after}`
         );
@@ -102,13 +119,13 @@ async function startSending(token: string, guildIds: string[], message: string, 
 
             const name = m.user?.globalName ?? m.user?.username ?? m.user?.id ?? "?";
             try {
-                const dm = await VencordNative.pluginHelpers.MassDMBot.botFetch(
+                const dm = await botFetch(
                     token,
                     `${API_BASE}/users/@me/channels`,
                     { method: "POST", body: JSON.stringify({ recipient_id: m.user.id }) }
                 );
                 const content = mention ? `<@${m.user.id}> ${message}` : message;
-                await VencordNative.pluginHelpers.MassDMBot.botFetch(
+                await botFetch(
                     token,
                     `${API_BASE}/channels/${dm.id}/messages`,
                     { method: "POST", body: JSON.stringify({ content }) }
@@ -222,7 +239,7 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
         setLoadingGuilds(true);
         setGuildError("");
         try {
-            const gs = await VencordNative.pluginHelpers.MassDMBot.botFetch(selectedToken, `${API_BASE}/users/@me/guilds`);
+            const gs = await botFetch(selectedToken, `${API_BASE}/users/@me/guilds`);
             setGuilds(Array.isArray(gs) ? gs : []);
         } catch (e: any) {
             setGuildError(e.message);
