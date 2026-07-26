@@ -8,68 +8,33 @@ echo   YouCord Installer - Build
 echo  ================================
 echo.
 
-:: Verifie que node est disponible
-where node >nul 2>&1
+:: Verifie que dotnet est disponible
+where dotnet >nul 2>&1
 if errorlevel 1 (
-    echo  [ERREUR] Node.js introuvable. Installez Node.js depuis https://nodejs.org
+    echo  [ERREUR] .NET SDK introuvable. Installez-le depuis https://dotnet.microsoft.com/download
     pause
     exit /b 1
 )
+for /f "delims=" %%v in ('dotnet --version') do echo  .NET SDK : %%v
 
 :: Cree le dossier de sortie si besoin
 if not exist "release\installer" mkdir "release\installer"
 
-:: Entre dans le dossier installer-src
+:: Build avec dotnet publish
+echo.
+echo  [1/1] dotnet publish -c Release...
 cd installer-src
-
-:: Verifie que pnpm est disponible
-where pnpm >nul 2>&1
+call dotnet publish -c Release
 if errorlevel 1 (
-    echo  [ERREUR] pnpm introuvable. Installez-le avec: npm install -g pnpm
+    echo  [ERREUR] dotnet publish a echoue.
     cd ..
     pause
     exit /b 1
 )
-
-:: Installe les dependances si node_modules absent
-if not exist "node_modules" (
-    echo  [1/3] Installation des dependances pnpm...
-    call pnpm install
-    if errorlevel 1 (
-        echo  [ERREUR] pnpm install a echoue.
-        cd ..
-        pause
-        exit /b 1
-    )
-    echo  [1/3] Dependances installees.
-) else (
-    echo  [1/3] Dependances deja presentes, on passe.
-)
-
-:: Compile avec electron-webpack
-echo.
-echo  [2/3] Compilation webpack (electron-webpack)...
-call pnpm run compile
-if errorlevel 1 (
-    echo  [ERREUR] Compilation webpack echouee.
-    cd ..
-    pause
-    exit /b 1
-)
-echo  [2/3] Compilation webpack reussie.
-
-:: Build electron-builder -> YouCord-Installer.exe dans ../release/installer/
-echo.
-echo  [3/3] Packaging electron-builder...
-call pnpm exec electron-builder --win -p never
-if errorlevel 1 (
-    echo  [ERREUR] electron-builder a echoue.
-    cd ..
-    pause
-    exit /b 1
-)
-
 cd ..
+
+:: Copie vers release/installer/
+copy /Y "installer-src\bin\Release\net8.0-windows\win-x64\publish\YouCord-Installer.exe" "release\installer\YouCord-Installer.exe" >nul
 
 :: Verification
 if not exist "release\installer\YouCord-Installer.exe" (
