@@ -736,7 +736,7 @@
       setLoading(true, "Starting installation...", 2);
       setStatus('loading', `Injecting into ${selected.name}...`);
 
-      const started = window.youcord.frartInject(selected.path);
+      const started = window.youcord.startInject(selected.path);
       if (!started || !started.started) {
         setLoading(false);
         setStatus('error', `Error: ${started?.error || 'Could not start inject'}`);

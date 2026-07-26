@@ -190,7 +190,7 @@ namespace YouCordInstaller
             _form = form;
             _webView = webView;
             _http = new HttpClient();
-            _http.Timeout = TimeSpan.FromSeconds(30);
+            _http.Timeout = TimeSpan.FromSeconds(120); // 2 min — youcord-dist.zip is ~26MB
             _exeDir = Path.GetDirectoryName(Application.ExecutablePath);
             _distDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "YouCord", "dist");
         }
