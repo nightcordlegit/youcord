@@ -1,6 +1,6 @@
 import { net } from "electron";
 
-export async function botFetch(token: string, url: string, options?: { method?: string; body?: string }) {
+export async function botFetch(_event: Electron.IpcMainInvokeEvent, token: string, url: string, options?: { method?: string; body?: string }) {
     const headers: Record<string, string> = {
         Authorization: `Bot ${token}`,
         "Content-Type": "application/json",
