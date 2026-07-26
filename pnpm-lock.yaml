@@ -135,7 +135,7 @@ importers:
         specifier: ^17.4.2
         version: 17.4.2
       electron:
-        specifier: ^41.10.3
+        specifier: 41.10.3
         version: 41.10.3
       electron-builder:
         specifier: ^26.15.3
