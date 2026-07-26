@@ -91,6 +91,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-mac:
+    needs: [build]
     runs-on: macos-latest
 
     steps:
@@ -133,6 +134,16 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="${GITHUB_REF#refs/tags/}"
+          found=0
           for f in release/*.dmg release/*.zip release/*.app.tar.gz; do
-            [ -f "$f" ] && gh release upload "$tag" --clobber "$f"
+            if [ -f "$f" ]; then
+              echo "Uploading $f..."
+              gh release upload "$tag" --clobber "$f" || echo "WARN: failed to upload $f (release may not exist yet)"
+              found=$((found+1))
+            fi
           done
+          echo "Uploaded $found artifact(s)"
+          if [ "$found" -eq 0 ]; then
+            echo "WARN: no macOS artifacts found in release/"
+            ls -la release/ 2>/dev/null || echo "release/ does not exist"
+          fi
