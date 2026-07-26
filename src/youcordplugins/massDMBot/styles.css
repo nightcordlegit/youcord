@@ -6,25 +6,26 @@
 }
 
 .mdb-content {
-    padding: 20px;
+    padding: 20px 24px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
 }
 
 .mdb-section {
     background: var(--background-secondary);
     border-radius: 8px;
-    padding: 14px;
+    padding: 16px;
+    border: 1px solid var(--border-subtle, transparent);
 }
 
 .mdb-section-title {
-    color: var(--header-primary);
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    color: var(--text-strong);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+    font-family: var(--font-display);
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -34,7 +35,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     max-height: 120px;
     overflow-y: auto;
 }
@@ -42,11 +43,12 @@
 .mdb-token-item {
     display: flex;
     align-items: center;
-    padding: 6px 10px;
+    padding: 8px 12px;
     border-radius: 6px;
     cursor: pointer;
-    transition: background 0.1s;
+    transition: background 0.1s, border-color 0.1s;
     background: var(--background-tertiary);
+    border: 1px solid transparent;
 }
 
 .mdb-token-item:hover {
@@ -54,12 +56,13 @@
 }
 
 .mdb-token-selected {
-    border: 1px solid var(--brand-experiment);
+    border-color: var(--brand-500);
+    background: var(--background-modifier-selected, var(--background-tertiary));
 }
 
 .mdb-token-preview {
     flex: 1;
-    color: var(--text-normal);
+    color: var(--text-default);
     font-size: 13px;
     font-family: var(--font-code);
     font-weight: 500;
@@ -71,8 +74,16 @@
     color: var(--status-danger);
     cursor: pointer;
     font-size: 18px;
-    padding: 0 4px;
+    padding: 0 6px;
     line-height: 1;
+    opacity: 0.7;
+    transition: opacity 0.1s;
+    border-radius: 4px;
+}
+
+.mdb-token-remove:hover {
+    opacity: 1;
+    background: var(--background-modifier-hover);
 }
 
 .mdb-token-add {
@@ -83,46 +94,49 @@
 
 .mdb-input {
     flex: 1;
-    background: var(--background-tertiary);
-    border: 1px solid var(--background-modifier-accent);
+    background: var(--input-background, var(--background-tertiary));
+    border: 1px solid var(--input-border-default, var(--background-modifier-accent));
     border-radius: 6px;
     padding: 10px 12px;
-    color: var(--text-normal);
-    font-size: 13px;
+    color: var(--text-default);
+    font-size: 14px;
     font-family: var(--font-code);
     outline: none;
     transition: border-color 0.15s;
 }
 
 .mdb-input:focus {
-    border-color: var(--brand-experiment);
+    border-color: var(--brand-500);
 }
 
 .mdb-loading {
     color: var(--text-muted);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 400;
-    text-transform: none;
-    letter-spacing: 0;
 }
 
 .mdb-hint {
-    color: var(--text-muted);
-    font-size: 12px;
+    color: var(--text-subtle);
+    font-size: 13px;
     padding: 8px 0;
+    line-height: 1.4;
 }
 
 .mdb-error {
-    color: var(--status-danger);
-    font-size: 12px;
-    padding: 8px 0;
+    color: var(--text-feedback-critical, var(--status-danger));
+    font-size: 13px;
+    padding: 8px 12px;
+    background: var(--background-feedback-critical, transparent);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    line-height: 1.4;
 }
 
 .mdb-guild-list {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    max-height: 200px;
+    max-height: 220px;
     overflow-y: auto;
 }
 
@@ -130,11 +144,12 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 10px;
+    padding: 8px 12px;
     border-radius: 6px;
     cursor: pointer;
-    transition: background 0.1s;
+    transition: background 0.1s, border-color 0.1s;
     background: var(--background-tertiary);
+    border: 1px solid transparent;
 }
 
 .mdb-guild-item:hover {
@@ -142,7 +157,8 @@
 }
 
 .mdb-guild-selected {
-    border: 1px solid var(--brand-experiment);
+    border-color: var(--brand-500);
+    background: var(--background-modifier-selected, var(--background-tertiary));
 }
 
 .mdb-guild-icon {
@@ -173,29 +189,29 @@
 
 .mdb-guild-name {
     flex: 1;
-    color: var(--header-primary);
+    color: var(--text-default);
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .mdb-guild-check {
-    color: var(--brand-experiment);
+    color: var(--brand-500);
     font-weight: 700;
-    font-size: 15px;
+    font-size: 16px;
 }
 
 .mdb-textarea {
     width: 100%;
-    background: var(--background-tertiary);
-    border: 1px solid var(--background-modifier-accent);
+    background: var(--input-background, var(--background-tertiary));
+    border: 1px solid var(--input-border-default, var(--background-modifier-accent));
     border-radius: 8px;
     padding: 12px 14px;
-    color: var(--text-normal);
+    color: var(--text-default);
     font-size: 14px;
-    font-family: var(--font-primary, inherit);
+    font-family: var(--font-primary);
     resize: vertical;
     outline: none;
     box-sizing: border-box;
@@ -204,49 +220,63 @@
 }
 
 .mdb-textarea:focus {
-    border-color: var(--brand-experiment);
+    border-color: var(--brand-500);
 }
 
 .mdb-examples-toggle {
     color: var(--text-link);
-    font-size: 12px;
+    font-size: 13px;
     cursor: pointer;
     user-select: none;
-    margin-top: 4px;
+    margin-top: 8px;
+    padding: 4px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .mdb-examples-toggle:hover {
+    color: var(--interactive-hover);
     text-decoration: underline;
 }
 
 .mdb-examples-box {
     background: var(--background-tertiary);
-    border-radius: 6px;
-    padding: 10px;
-    margin-top: 4px;
-    font-size: 12px;
-    line-height: 1.6;
-}
-
-.mdb-examples-box code {
-    background: var(--background-modifier-accent);
-    padding: 1px 4px;
-    border-radius: 3px;
-    font-family: var(--font-code);
-    font-size: 11px;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 8px;
+    border: 1px solid var(--border-subtle, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .mdb-examples-box .mdb-example-label {
-    color: var(--text-muted);
+    color: var(--text-subtle);
+    font-size: 12px;
+    font-weight: 500;
     display: block;
+    margin-bottom: 2px;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 .mdb-examples-box .mdb-example-code {
-    color: var(--text-normal);
+    color: var(--text-default);
     display: block;
-    margin-bottom: 6px;
     font-family: var(--font-code);
     font-size: 12px;
+    padding: 6px 10px;
+    background: var(--background-modifier-accent);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+}
+
+.mdb-examples-box .mdb-example-code:hover {
+    background: var(--brand-500);
+    color: #fff;
 }
 
 .mdb-options {
@@ -254,24 +284,30 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
+    background: var(--background-secondary);
+    border-radius: 8px;
+    padding: 12px 16px;
+    border: 1px solid var(--border-subtle, transparent);
 }
 
 .mdb-checkbox-label {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--text-normal);
-    font-size: 13px;
+    color: var(--text-default);
+    font-size: 14px;
     cursor: pointer;
+    user-select: none;
 }
 
 .mdb-checkbox-label input[type="checkbox"] {
     cursor: pointer;
+    accent-color: var(--brand-500);
 }
 
 .mdb-delay {
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: 13px;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -283,53 +319,59 @@
     text-decoration: underline;
     text-decoration-style: dotted;
     text-underline-offset: 2px;
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 14px;
 }
 
 .mdb-delay-value:hover {
     text-decoration-style: solid;
+    color: var(--interactive-hover);
 }
 
 .mdb-delay-input {
-    width: 60px;
-    background: var(--background-tertiary);
-    border: 1px solid var(--brand-experiment);
+    width: 64px;
+    background: var(--input-background, var(--background-tertiary));
+    border: 1px solid var(--brand-500);
     border-radius: 4px;
-    color: var(--text-normal);
-    padding: 2px 6px;
-    font-size: 12px;
-    font-family: inherit;
+    color: var(--text-default);
+    padding: 4px 8px;
+    font-size: 13px;
+    font-family: var(--font-primary);
     outline: none;
     text-align: center;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .mdb-summary {
-    color: var(--header-primary);
-    font-size: 13px;
-    font-weight: 600;
+    color: var(--text-strong);
+    font-size: 14px;
+    font-weight: 500;
     text-align: center;
     background: var(--background-secondary-alt);
     border-radius: 8px;
-    padding: 8px 12px;
+    padding: 10px 16px;
+    border: 1px solid var(--brand-500);
+    line-height: 1.4;
 }
 
 .mdb-stats {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .mdb-stats-count {
-    color: var(--header-primary);
-    font-size: 14px;
+    color: var(--text-strong);
+    font-size: 15px;
     font-weight: 600;
+    font-family: var(--font-display);
 }
 
 .mdb-stats-pct {
-    color: var(--text-muted);
-    font-size: 13px;
+    color: var(--text-subtle);
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .mdb-bar-bg {
@@ -337,21 +379,22 @@
     background: var(--background-modifier-accent);
     border-radius: 99px;
     overflow: hidden;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .mdb-bar-fill {
     height: 100%;
-    background: var(--brand-experiment);
+    background: var(--brand-500);
     border-radius: 99px;
     transition: width 0.4s ease;
 }
 
 .mdb-done {
-    color: var(--status-positive-text);
-    font-size: 14px;
+    color: var(--text-feedback-positive, var(--status-positive));
+    font-size: 15px;
     font-weight: 600;
     margin-bottom: 12px;
+    font-family: var(--font-display);
 }
 
 .mdb-log {
@@ -359,34 +402,42 @@
     min-height: 100px;
     background: var(--background-tertiary);
     border-radius: 8px;
-    padding: 8px;
+    padding: 10px 12px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    border: 1px solid var(--border-subtle, transparent);
 }
 
 .mdb-log-line {
-    color: var(--text-normal);
+    color: var(--text-default);
     font-size: 12px;
     font-family: var(--font-code);
-    margin-bottom: 2px;
+    margin-bottom: 3px;
+    line-height: 1.5;
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+.mdb-log-line:last-child {
+    margin-bottom: 0;
 }
 
 .mdb-log-ok {
-    color: var(--status-positive-text);
+    color: var(--text-feedback-positive, var(--status-positive));
 }
 
 .mdb-log-fail {
-    color: var(--status-danger-text);
+    color: var(--text-feedback-critical, var(--status-danger));
 }
 
 .mdb-badge {
     margin-right: 12px;
-    background: var(--brand-experiment);
+    background: var(--brand-500);
     color: #fff;
     font-size: 11px;
     font-weight: 700;
-    padding: 2px 8px;
+    padding: 3px 10px;
     border-radius: 99px;
     animation: mdb-pulse 1.5s ease-in-out infinite;
 }
@@ -403,4 +454,18 @@
 @keyframes mdb-icon-pulse {
     0%, 100% { filter: drop-shadow(0 0 2px rgba(88,101,242,0.6)); }
     50% { filter: drop-shadow(0 0 8px rgba(88,101,242,1)); }
+}
+
+.mdb-token-counter {
+    color: var(--text-subtle);
+    font-size: 12px;
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
+.mdb-guild-counter {
+    color: var(--text-subtle);
+    font-size: 12px;
+    margin-top: 6px;
+    line-height: 1.4;
 }

@@ -280,7 +280,7 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
             <ModalHeader>
                 <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
                     <BotIcon style={{ marginRight: 10 }} className="mdb-icon-glow" />
-                    <span style={{ flex: 1, fontWeight: 700, fontSize: 16, color: "#fff" }}>Mass DM Bot</span>
+                    <span style={{ flex: 1, fontWeight: 700, fontSize: 18, color: "var(--text-strong)", fontFamily: "var(--font-display)" }}>Mass DM Bot</span>
                     {s.running && <span className="mdb-badge">Running...</span>}
                     <ModalCloseButton onClick={rootProps.onClose} />
                 </div>
@@ -325,8 +325,8 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
                                 />
                             </div>
                             {tokens.length > 0 && (
-                                <div style={{ color: "var(--text-muted)", fontSize: 11, marginTop: 6 }}>
-                                    {tokens.length} token(s) — click a token to load its guilds
+                                <div className="mdb-token-counter">
+                                    {tokens.length} token{tokens.length > 1 ? "s" : ""} — click to select
                                 </div>
                             )}
                         </div>
@@ -360,8 +360,8 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
                                     ))}
                                 </div>
                                 {guilds.length > 0 && (
-                                    <div style={{ color: "var(--text-muted)", fontSize: 11, marginTop: 6 }}>
-                                        {selectedGuildIds.size} / {guilds.length} selected
+                                    <div className="mdb-guild-counter">
+                                        {selectedGuildIds.size} / {guilds.length} guild{guilds.length > 1 ? "s" : ""} selected
                                     </div>
                                 )}
                             </div>
@@ -388,21 +388,22 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
                             </div>
                             {showExamples && (
                                 <div className="mdb-examples-box">
-                                    {exampleItems.map((item, i) => (
-                                        <div key={i}>
-                                            <span className="mdb-example-label">{item.label}</span>
-                                            <span
-                                                className="mdb-example-code"
-                                                style={{ cursor: "pointer" }}
-                                                onClick={() => insertExample(item.code)}
-                                                title="Click to insert"
-                                            >
-                                                {item.code}
-                                            </span>
-                                        </div>
-                                    ))}
-                                    <div style={{ color: "var(--text-muted)", marginTop: 4, fontSize: 11 }}>
-                                        Click an example to insert it into your message.
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                                        {exampleItems.map((item, i) => (
+                                            <div key={i}>
+                                                <span className="mdb-example-label">{item.label}</span>
+                                                <span
+                                                    className="mdb-example-code"
+                                                    onClick={() => insertExample(item.code)}
+                                                    title="Click to insert"
+                                                >
+                                                    {item.code}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div style={{ color: "var(--text-muted)", fontSize: 11 }}>
+                                        Click any example to insert it into your message.
                                     </div>
                                 </div>
                             )}
@@ -453,7 +454,7 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
 
                         {selectedGuildIds.size > 0 && message.trim() && (
                             <div className="mdb-summary">
-                                Will send to members of {selectedGuildIds.size} guild(s) via {tokens.length} bot(s)
+                                Send to {selectedGuildIds.size} guild{selectedGuildIds.size > 1 ? "s" : ""} via {tokens.length} bot{tokens.length > 1 ? "s" : ""}
                             </div>
                         )}
                     </>
