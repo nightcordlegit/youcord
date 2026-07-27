@@ -82,7 +82,7 @@
         "@types/chrome": "^0.1.43",
         "@types/diff": "^7.0.2",
         "@types/lodash": "^4.17.24",
-        "@types/node": "^24.13.3",
+        "@types/node": "^26.1.1",
         "@types/react": "^19.2.17",
         "@types/react-dom": "^19.2.3",
         "@types/yazl": "^3.3.1",
