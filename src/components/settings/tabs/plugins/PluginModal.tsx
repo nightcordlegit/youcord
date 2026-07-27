@@ -36,7 +36,7 @@ import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
 import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
-import { FluxDispatcher, React, Toasts, Tooltip, UserStore, useMemo } from "@webpack/common";
+import { FluxDispatcher, React, Toasts, Tooltip, useMemo,UserStore } from "@webpack/common";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";

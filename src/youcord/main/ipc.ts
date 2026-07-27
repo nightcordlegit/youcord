@@ -39,7 +39,7 @@ import { enableHardwareAcceleration } from "./startup";
 import { handle, handleSync } from "./utils/ipcWrappers";
 import { PopoutWindows } from "./utils/popout";
 import { isDeckGameMode, showGamePage } from "./utils/steamOS";
-import { isValidVencordInstall, getVencordPath } from "./utils/vencordLoader";
+import { getVencordPath,isValidVencordInstall } from "./utils/vencordLoader";
 
 handleSync(IpcEvents.DEPRECATED_GET_VENCORD_PRELOAD_SCRIPT_PATH, () => join(getVencordPath(), "preload.js"));
 handleSync(IpcEvents.GET_VENCORD_PRELOAD_SCRIPT, () => readFileSync(join(getVencordPath(), "preload.js"), "utf-8"));
