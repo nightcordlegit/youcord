@@ -10,6 +10,7 @@ import "./userAssets";
 import "./vesktopProtocol";
 
 import { app, BrowserWindow, nativeTheme } from "electron";
+import { execSync } from "child_process";
 
 import { DATA_DIR } from "./constants";
 import { createFirstLaunchTour } from "./firstLaunch";
@@ -19,6 +20,13 @@ import { registerScreenShareHandler } from "./screenShare";
 import { Settings, State } from "./settings";
 import { setAsDefaultProtocolClient } from "./utils/setAsDefaultProtocolClient";
 import { isDeckGameMode } from "./utils/steamOS";
+
+// Détection de build dev : si HEAD n'est pas un tag Git, suffixer -dev
+try {
+    execSync("git describe --exact-match --tags HEAD", { encoding: "utf-8", stdio: "ignore" });
+} catch {
+    app.setVersion(app.getVersion() + "-dev");
+}
 
 console.log("YouCord v" + app.getVersion());
 

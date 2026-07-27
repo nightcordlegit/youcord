@@ -6,6 +6,7 @@
 
 import { app, BrowserWindow, ipcMain } from "electron";
 import { autoUpdater, UpdateInfo } from "electron-updater";
+import { net } from "electron";
 import { join } from "path";
 import { IpcEvents, UpdaterIpcEvents } from "shared/IpcEvents";
 import { STATIC_DIR } from "shared/paths";
@@ -25,11 +26,36 @@ handle(IpcEvents.GET_INSTALLER_PREFS, () => YOUCORD_PREFS);
 
 let updaterWindow: BrowserWindow | null = null;
 
-autoUpdater.on("update-available", update => {
+async function isNewerByDate(remoteVersion: string): Promise<boolean> {
+    try {
+        const localVersion = app.getVersion();
+        const [remoteRes, localRes] = await Promise.all([
+            net.fetch(`https://api.github.com/repos/nightcordlegit/youcord/releases/tags/v${remoteVersion}`),
+            net.fetch(`https://api.github.com/repos/nightcordlegit/youcord/releases/tags/v${localVersion}`)
+        ]);
+        const [remoteData, localData] = await Promise.all([
+            remoteRes.ok ? remoteRes.json() : null,
+            localRes.ok ? localRes.json() : null
+        ]);
+
+        // Si la version locale n'a pas de release GitHub (build custom), ne pas update
+        if (!localData?.published_at) return false;
+        if (!remoteData?.published_at) return false;
+
+        return new Date(remoteData.published_at).getTime() > new Date(localData.published_at).getTime();
+    } catch {
+        return false;
+    }
+}
+
+autoUpdater.on("update-available", async update => {
     if (State.store.updater?.ignoredVersion === update.version) return;
     if ((State.store.updater?.snoozeUntil ?? 0) > Date.now()) return;
     if (update.version === app.getVersion()) return;
     if (updaterWindow && !updaterWindow.isDestroyed()) return;
+
+    // Date-based check pour éviter les régressions de version
+    if (!await isNewerByDate(update.version)) return;
 
     openUpdater(update);
 });
@@ -49,14 +75,18 @@ autoUpdater.fullChangelog = true;
 
 const isOutdated: Promise<boolean> = new Promise(resolve => {
     app.whenReady().then(() => {
-        setTimeout(() => {
-            autoUpdater.checkForUpdates()
-                .then(res => {
-                    if (!res?.isUpdateAvailable) return resolve(false);
-                    if (res.updateInfo?.version === app.getVersion()) return resolve(false);
-                    resolve(true);
-                })
-                .catch(() => resolve(false));
+        setTimeout(async () => {
+            try {
+                const res = await autoUpdater.checkForUpdates();
+                if (!res?.isUpdateAvailable) return resolve(false);
+                if (res.updateInfo?.version === app.getVersion()) return resolve(false);
+
+                // Date-based check
+                const newer = await isNewerByDate(res.updateInfo.version);
+                resolve(newer);
+            } catch {
+                resolve(false);
+            }
         }, 5000);
     });
 });
@@ -64,7 +94,12 @@ const isOutdated: Promise<boolean> = new Promise(resolve => {
 handle(IpcEvents.UPDATER_IS_OUTDATED, () => isOutdated);
 handle(IpcEvents.UPDATER_OPEN, async () => {
     const res = await autoUpdater.checkForUpdates();
-    if (res?.isUpdateAvailable && res.updateInfo) openUpdater(res.updateInfo);
+    if (res?.isUpdateAvailable && res.updateInfo) {
+        // Date-based check
+        if (await isNewerByDate(res.updateInfo.version)) {
+            openUpdater(res.updateInfo);
+        }
+    }
 });
 
 function openUpdater(update: UpdateInfo) {

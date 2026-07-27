@@ -8,28 +8,11 @@ import definePlugin from "@utils/types";
 import { waitFor } from "@webpack";
 import { React, useEffect, useState } from "@webpack/common";
 
-// Config
-const REMOTE_VERSION_URL = "https://api.github.com/repos/nightcordlegit/youcord/releases/latest";
-
 // Version locale (injectee au build via define)
 declare const VERSION: string;
 
 function getLocalVersion(): string {
     try { return VERSION; } catch { return "0.0.0"; }
-}
-
-// Comparaison semver : true seulement si remote > local
-function isStrictlyNewer(remote: string, local: string): boolean {
-    const parse = (v: string) => v.replace(/^v/, "").split(".").map(n => parseInt(n, 10) || 0);
-    const r = parse(remote);
-    const l = parse(local);
-    for (let i = 0; i < Math.max(r.length, l.length); i++) {
-        const rv = r[i] ?? 0;
-        const lv = l[i] ?? 0;
-        if (rv > lv) return true;
-        if (rv < lv) return false;
-    }
-    return false;
 }
 
 interface UpdateInfo {
@@ -46,31 +29,55 @@ function notify() { listeners.forEach(f => f()); }
 async function checkForUpdates() {
     try {
         const localVersion = getLocalVersion();
-        const data = await new Promise<any>((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error("timeout")), 8000);
-            const xhr = new XMLHttpRequest();
-            xhr.open("GET", REMOTE_VERSION_URL, true);
-            xhr.onload = () => {
-                clearTimeout(timeout);
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    try { resolve(JSON.parse(xhr.responseText)); }
-                    catch { reject(new Error("parse error")); }
-                } else {
-                    reject(new Error(`HTTP ${xhr.status}`));
-                }
-            };
-            xhr.onerror = () => { clearTimeout(timeout); reject(new Error("network error")); };
-            xhr.send();
-        });
-        if (!data?.tag_name) return;
+        const GITHUB_API = "https://api.github.com/repos/nightcordlegit/youcord";
+        const [remoteData, localData] = await Promise.all([
+            new Promise<any>((resolve, reject) => {
+                const timeout = setTimeout(() => reject(new Error("timeout")), 8000);
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", GITHUB_API + "/releases/latest", true);
+                xhr.onload = () => {
+                    clearTimeout(timeout);
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try { resolve(JSON.parse(xhr.responseText)); }
+                        catch { reject(new Error("parse error")); }
+                    } else {
+                        reject(new Error(`HTTP ${xhr.status}`));
+                    }
+                };
+                xhr.onerror = () => { clearTimeout(timeout); reject(new Error("network error")); };
+                xhr.send();
+            }),
+            new Promise<any>((resolve) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", GITHUB_API + "/releases/tags/v" + localVersion, true);
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try { resolve(JSON.parse(xhr.responseText)); }
+                        catch { resolve(null); }
+                    } else {
+                        resolve(null);
+                    }
+                };
+                xhr.onerror = () => resolve(null);
+                xhr.send();
+            })
+        ]);
 
-        const remoteVersion: string = data.tag_name;
-        console.log(`[YouCordUpdater] local=${localVersion} remote=${remoteVersion}`);
+        if (!remoteData?.tag_name) return;
 
-        if (isStrictlyNewer(remoteVersion, localVersion)) {
-            pendingUpdate = { remoteVersion, localVersion };
-            notify();
-        }
+        // Si la version locale n'existe pas sur GitHub (build custom), ne pas update
+        if (!localData?.published_at) return;
+
+        const remoteDate = new Date(remoteData.published_at).getTime();
+        const localDate = new Date(localData.published_at).getTime();
+
+        if (remoteDate <= localDate) return;
+
+        const remoteVersion: string = remoteData.tag_name;
+        console.log(`[YouCordUpdater] local=${localVersion} remote=${remoteVersion} (${new Date(remoteDate).toISOString()} > ${new Date(localDate).toISOString()})`);
+
+        pendingUpdate = { remoteVersion, localVersion };
+        notify();
     } catch (e: any) {
         console.error("[YouCordUpdater] Error:", e);
     }

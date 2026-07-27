@@ -32,23 +32,22 @@ async function githubGet<T = any>(endpoint: string): Promise<T> {
     });
 }
 
-function isNewer(a: string, b: string): boolean {
-    const parse = (v: string) => v.replace(/^v/, "").split(".").map(n => parseInt(n, 10) || 0);
-    const av = parse(a), bv = parse(b);
-    for (let i = 0; i < Math.max(av.length, bv.length); i++) {
-        if ((bv[i] ?? 0) > (av[i] ?? 0)) return true;
-        if ((bv[i] ?? 0) < (av[i] ?? 0)) return false;
-    }
-    return false;
-}
-
 async function fetchUpdates(): Promise<boolean> {
-    const data = await githubGet("/releases/latest");
-    const latestTag: string = data.tag_name ?? "";
+    const [latestData, currentData] = await Promise.all([
+        githubGet<any>("/releases/latest"),
+        githubGet<any>(`/releases/tags/v${VERSION}`).catch(() => null)
+    ]);
 
-    if (!latestTag || !isNewer(CURRENT_VERSION, latestTag)) return false;
+    // Si la version locale n'existe pas sur GitHub, c'est un build custom → ne pas update
+    if (!currentData?.published_at) return false;
 
-    const asset = (data.assets as any[])?.find(
+    const latestTag: string = latestData.tag_name ?? "";
+    const latestDate = new Date(latestData.published_at).getTime();
+    const currentDate = new Date(currentData.published_at).getTime();
+
+    if (!latestTag || latestDate <= currentDate) return false;
+
+    const asset = (latestData.assets as any[])?.find(
         (a: any) => a.name === ZIP_FILE
     );
     if (!asset) return false;

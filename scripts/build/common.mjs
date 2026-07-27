@@ -35,7 +35,14 @@ import { getPluginTarget } from "../utils.mjs";
 
 const PackageJSON = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../package.json"), "utf-8"));
 
-export const VERSION = PackageJSON.version;
+// Détection automatique de build dev : si HEAD n'est pas un tag Git, suffixer -dev
+let VERSION = PackageJSON.version;
+try {
+    execSync("git describe --exact-match --tags HEAD", { encoding: "utf-8", stdio: "ignore" });
+} catch {
+    VERSION += "-dev";
+}
+export { VERSION };
 // https://reproducible-builds.org/docs/source-date-epoch/
 export const BUILD_TIMESTAMP = Number(process.env.SOURCE_DATE_EPOCH) * 1000 || Date.now();
 
@@ -584,7 +591,7 @@ export const commonOpts = {
     logLevel: "info",
     bundle: true,
     minify: !watch && !IS_REPORTER,
-    drop: (!watch && !IS_REPORTER) ? ["console", "debugger"] : undefined,
+    drop: (!watch && !IS_REPORTER) ? ["debugger"] : undefined,
     sourcemap: (!watch && !IS_REPORTER) ? false : watch ? "inline" : "external",
     legalComments: "linked",
     banner,

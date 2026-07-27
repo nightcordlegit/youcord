@@ -18,8 +18,6 @@ import { OptionType, Plugin } from "@utils/types";
 import { React, showToast, Text, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
 
-const { memo } = React;
-
 import { PluginMeta } from "~plugins";
 
 import { openPluginModal } from "./PluginModal";
@@ -38,7 +36,19 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     onMouseLeave?: React.MouseEventHandler<HTMLDivElement>;
 }
 
-export const PluginCard = memo(function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew, hasTutorial }: PluginCardProps) {
+function PluginCardInner(props: PluginCardProps) {
+    try {
+        return _PluginCardInner(props);
+    } catch (e: any) {
+        return <div style={{ color: "red", padding: 16, fontSize: 13, border: "2px solid red", margin: 4 }}>
+            <b>Failed to render {props.plugin.name}</b><br />
+            {e?.message || String(e)}<br />
+            <pre style={{ fontSize: 11, marginTop: 8, maxHeight: 200, overflow: "auto" }}>{e?.stack || "(no stack)"}</pre>
+        </div>;
+    }
+}
+
+function _PluginCardInner({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew, hasTutorial }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
     const isEnabled = () => isPluginEnabled(plugin.name);
 
@@ -294,4 +304,6 @@ export const PluginCard = memo(function PluginCard({ plugin, disabled, onRestart
                 </div>
             } />
     );
-});
+}
+
+export const PluginCard = /*#__PURE__*/ PluginCardInner;
