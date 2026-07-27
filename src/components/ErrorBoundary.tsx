@@ -46,10 +46,24 @@ const NO_ERROR = {};
 
 // We might want to import this in a place where React isn't ready yet.
 // Thus, wrap in a LazyComponent
-const ErrorBoundary = LazyComponent(() => {
+function getBaseClass(): any {
+    try {
+        const R = Vencord?.Webpack?.Common?.React;
+        if (R?.PureComponent) return R.PureComponent;
+    } catch { }
+    // Minimal fallback: accept props, init state, provide render
+    return class {
+        props: any; state: any;
+        constructor(props: any) { this.props = props; this.state = {}; }
+        render() { return null; }
+        setState(v: any) { this.state = typeof v === "function" ? v(this.state) : { ...this.state, ...v }; }
+    };
+}
+const ErrorBoundary = LazyComponent((): any => {
     // This component is used in a lot of files which end up importing other Webpack commons and causing circular imports.
     // For this reason, use a non import access here.
-    return class ErrorBoundary extends Vencord.Webpack.Common.React.PureComponent<React.PropsWithChildren<Props>> {
+    const BaseClass = getBaseClass();
+    return class ErrorBoundary extends BaseClass<React.PropsWithChildren<Props>> {
         state = {
             error: NO_ERROR as any,
             stack: "",
