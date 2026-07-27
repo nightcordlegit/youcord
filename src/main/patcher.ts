@@ -276,12 +276,10 @@ if (!IS_VANILLA) {
         BrowserWindow
     };
 
-    // Enable DevTools only in development mode
-    if (IS_DEV) {
-        onceDefined(global, "appSettings", s => {
-            s.set("DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING", true);
-        });
-    }
+    // Enable DevTools for debugging (production + dev)
+    onceDefined(global, "appSettings", s => {
+        s.set("DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING", true);
+    });
 
     process.env.DATA_DIR = join(app.getPath("userData"), "..", "YouCord");
 
