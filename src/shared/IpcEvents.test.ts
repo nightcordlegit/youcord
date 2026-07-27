@@ -1,5 +1,12 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { describe, expect, it } from "vitest";
-import { IpcEvents, IpcCommands, UpdaterIpcEvents } from "./IpcEvents";
+
+import { IpcCommands, IpcEvents, UpdaterIpcEvents } from "./IpcEvents";
 
 describe("IpcEvents", () => {
     it("all events have string values", () => {

@@ -1,14 +1,21 @@
-import { describe, expect, it, vi } from "vitest";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { describe, expect, it } from "vitest";
+
 import {
     classes,
+    identity,
+    interpolateIfDefined,
     isObject,
     isObjectEmpty,
     parseUrl,
-    identity,
     pluralise,
-    interpolateIfDefined,
-    tryOrElse,
     removeFromArray,
+    tryOrElse,
 } from "./misc";
 
 describe("classes", () => {
