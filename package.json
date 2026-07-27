@@ -113,7 +113,7 @@
         "standalone-electron-types": "^41.2.1",
         "stylelint": "^16.26.1",
         "stylelint-config-standard": "^39.0.1",
-        "ts-patch": "^3.3.0",
+        "ts-patch": "^4.0.1",
         "ts-pattern": "^5.9.0",
         "tsx": "^4.23.1",
         "type-fest": "^5.8.0",
