@@ -260,7 +260,7 @@ function PasscodeLocker({ type, button, onDone }: LockerProps) {
     const [newCode, setNewCode] = useState("");
     const [delay, setDelay] = useState(false);
     const [delayLeft, setDelayLeft] = useState(0);
-    const iconRef = useRef<HTMLImageElement>();
+    const iconRef = useRef<HTMLImageElement>(null);
     const len = codeLength();
 
     const getBg = () => rootRef.current?.querySelector(".PCL--layout-bg") as HTMLElement | null;

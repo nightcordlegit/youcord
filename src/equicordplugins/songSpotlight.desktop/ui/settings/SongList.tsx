@@ -188,7 +188,7 @@ export default function SongList({ localData, setLocalData }: SongListProps) {
 
         const adjusted = insert > i ? insert - 1 : insert;
         setLocalData(localData.toSpliced(i, 1).toSpliced(adjusted, 0, song));
-    }, [localData, insert]);
+    }, [localData, insert, setLocalData]);
 
     const handleAdd = useCallback((song: Song) => {
         if (localData.length >= apiConstants.songLimit) return "Not enough space";
@@ -199,7 +199,7 @@ export default function SongList({ localData, setLocalData }: SongListProps) {
             ...localData,
             song,
         ]);
-    }, [localData]);
+    }, [localData, setLocalData]);
 
     const handleRemove = useCallback((song: Song) => {
         const i = localData.indexOf(song);
@@ -207,7 +207,7 @@ export default function SongList({ localData, setLocalData }: SongListProps) {
 
         showToast("Removed song!");
         setLocalData(localData.toSpliced(i, 1));
-    }, [localData]);
+    }, [localData, setLocalData]);
 
     return (
         <Flex flexDirection="column" gap="6px">

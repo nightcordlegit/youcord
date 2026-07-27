@@ -33,7 +33,7 @@ export default function SongLinker({ url, onResolved }: SongLinkerProps) {
             onResolved?.(url, sd);
         }
         doStuff();
-    }, [url]);
+    }, [url, onResolved]);
 
     return <BaseText>
         {

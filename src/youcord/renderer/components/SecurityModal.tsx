@@ -44,7 +44,7 @@ export function SecurityModal(props: ModalProps) {
     return (
         <ModalRoot {...props} size="medium">
             <ModalHeader separator={false} style={{ paddingTop: "20px", paddingBottom: "4px" }}>
-                <Flex direction={Flex.Direction.VERTICAL} align={Flex.Align.CENTER} style={{ width: "100%", gap: "8px" }}>
+                <Flex direction={(Flex as any).Direction.VERTICAL} align={(Flex as any).Align.CENTER} style={{ width: "100%", gap: "8px" }}>
                     <WarningIcon />
                     <Heading level={2} variant="heading-xl/semibold" style={{ textAlign: "center" }}>
                         Important Security Reminder
@@ -74,7 +74,7 @@ export function SecurityModal(props: ModalProps) {
                     padding: "14px 16px",
                     marginBottom: "16px"
                 }}>
-                    <Flex align={Flex.Align.CENTER} style={{ marginBottom: "10px" }}>
+                    <Flex align={(Flex as any).Align.CENTER} style={{ marginBottom: "10px" }}>
                         <ShieldIcon />
                         <Heading level={3} variant="heading-md/semibold">Official Team</Heading>
                     </Flex>
@@ -105,10 +105,10 @@ export function SecurityModal(props: ModalProps) {
             </ModalContent>
             <ModalFooter style={{ justifyContent: "flex-end" }}>
                 <Button
-                    color={canClose ? Button.Colors.BRAND : Button.Colors.PRIMARY}
+                    color={canClose ? (Button as any).Colors.BRAND : (Button as any).Colors.PRIMARY}
                     disabled={!canClose}
                     onClick={onClose}
-                    look={Button.Looks.FILLED}
+                    look={(Button as any).Looks.FILLED}
                     style={{ minWidth: "110px" }}
                 >
                     {canClose ? "OK" : `OK (${timeLeft}s)`}

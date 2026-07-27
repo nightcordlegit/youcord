@@ -253,7 +253,7 @@ function IconModal({ iconName, Icon, onClose, transitionState }: { iconName: str
     };
 
     return (
-        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
+        <ModalRoot transitionState={transitionState} onClose={onClose} size={ModalSize.MEDIUM as any}>
             <ModalHeader separator={false} className="vc-ic-modal-header">
                 <div className="vc-ic-modal-header-content">
                     <BaseText size="lg" weight="semibold" className="vc-ic-modal-title">{iconName}</BaseText>

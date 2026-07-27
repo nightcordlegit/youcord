@@ -95,7 +95,10 @@ const playerState = new PlayerState();
 
 function usePlayerState() {
     const [, forceUpdate] = useState(0);
-    useEffect(() => playerState.subscribe(() => forceUpdate(n => n + 1)), []);
+    useEffect(() => {
+        const unsub = playerState.subscribe(() => forceUpdate(n => n + 1));
+        return () => { unsub(); };
+    }, []);
     return playerState;
 }
 
@@ -699,7 +702,7 @@ export default definePlugin({
                 ));
             }).catch(console.error);
         };
-        window.addEventListener("youtube-watch-together", onWatchTogetherHandler);
+        window.addEventListener("youtube-watch-together" as any, onWatchTogetherHandler as any);
     },
 
     stop() {
@@ -708,6 +711,6 @@ export default definePlugin({
         if (rpcUnsub) { rpcUnsub(); rpcUnsub = null; }
         clearRichPresence();
         if (onMessageHandler) { window.removeEventListener("message", onMessageHandler); onMessageHandler = null; }
-        if (onWatchTogetherHandler) { window.removeEventListener("youtube-watch-together", onWatchTogetherHandler); onWatchTogetherHandler = null; }
+        if (onWatchTogetherHandler) { window.removeEventListener("youtube-watch-together" as any, onWatchTogetherHandler as any); onWatchTogetherHandler = null; }
     },
 });

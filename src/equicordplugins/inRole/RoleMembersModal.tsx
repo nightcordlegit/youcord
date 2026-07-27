@@ -7,6 +7,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Paragraph } from "@components/Paragraph";
 import { classNameFactory } from "@utils/css";
+import { ModalSize } from "@utils/modal";
 import { GuildMember, RenderModalProps } from "@vencord/discord-types";
 import { Modal,openModal, Parser, React } from "@webpack/common";
 
@@ -17,7 +18,7 @@ export function showInRoleModal(members: GuildMember[], roleId: string, channelI
         <ErrorBoundary>
             <Modal
                 {...props}
-                size="md"
+                size={ModalSize.MEDIUM}
                 title={
                     <Paragraph style={{ fontSize: "1.2rem", fontWeight: "bold", marginRight: "7px" }}>
                         Members of role {Parser.parse(`<@&${roleId}>`, true, { channelId, viewingChannelId: channelId })} ({members.length})

@@ -84,6 +84,13 @@ export function isSettingDisabled(definedSettings: any, setting: any): boolean {
     return setting.disabled ?? false;
 }
 
+export function isSettingHidden(definedSettings: any, setting: any): boolean {
+    if (typeof setting.hidden === "function") {
+        return setting.hidden.call(definedSettings);
+    }
+    return setting.hidden ?? false;
+}
+
 export function hasAnyVisibleSettings(plugin: Plugin): boolean {
     if (!plugin.settings) return false;
     return Object.values(plugin.settings.def).some(

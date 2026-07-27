@@ -111,10 +111,6 @@ const settings = definePluginSettings({
         default: true,
         restartNeeded: true,
     },
-}, {
-    regexHelper: {
-        hidden() { return !this.store.useRegex; }
-    }
 });
 
 export function containsBlockedKeywords(message: Message) {

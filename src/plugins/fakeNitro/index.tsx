@@ -836,7 +836,7 @@ export default definePlugin({
                 if (!s.enableStickerBypass)
                     break stickerBypass;
 
-                const sticker = StickersStore.getStickerById(options.stickerIds?.[0]!);
+                const sticker = StickersStore.getStickerById(options.stickers?.[0]!);
                 if (!sticker)
                     break stickerBypass;
 
@@ -882,7 +882,7 @@ export default definePlugin({
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", sticker.name);
 
                     messageObj.content += `${getWordBoundary(messageObj.content, messageObj.content.length - 1)}${s.useStickerHyperLinks ? `[${linkText}](${url})` : url}`;
-                    options.stickerIds!.length = 0;
+                    options.stickers!.length = 0;
                 }
             }
 

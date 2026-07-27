@@ -17,9 +17,9 @@ if (Settings.store.customTitleBar)
                     {
                         match: /case \i\.\i\.WINDOWS:/,
                         replace: 'case "WEB":'
-                    }
-                ]
-            },
+                    } as any
+                ] as any
+            } as any,
             // Visual Refresh
             {
                 find: '"refresh-title-bar-small"',
@@ -32,7 +32,7 @@ if (Settings.store.customTitleBar)
                         match: /\i===\i\.PlatformTypes\.WEB/g,
                         replace: "false"
                     }
-                ]
-            }
+                ] as any
+            } as any
         ]
     });

@@ -37,7 +37,7 @@ export function setBadge() {
 let toFind = 3;
 
 function waitForAndSubscribeToStore(name: string, cb?: (m: any) => void) {
-    waitFor(filters.byStoreName(name), store => {
+    waitFor((filters as any).byStoreName(name), store => {
         cb?.(store);
         store.addChangeListener(setBadge);
 

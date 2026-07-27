@@ -130,3 +130,13 @@ export function removeFromArray<T>(arr: T[], predicate: (e: T) => boolean) {
     const idx = arr.findIndex(predicate);
     if (idx !== -1) arr.splice(idx, 1);
 }
+
+import { User } from "discord-types/general";
+export function getUserAvatarUrl(user: User, guildId?: string, canAnimate?: boolean, size?: number): string {
+    const { id } = user;
+    const { avatar } = user;
+    const hash = avatar || user.discriminator ? `avatars/${id}/${avatar || Number(user.discriminator) % 5}` : `embed/avatars/${Number(user.discriminator) % 5}`;
+    const format = avatar?.startsWith("a_") && canAnimate !== false ? "gif" : "png";
+    const sizeParam = size ? `?size=${size}` : "";
+    return `https://cdn.discordapp.com/${hash}.${format}${sizeParam}`;
+}

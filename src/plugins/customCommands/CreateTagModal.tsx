@@ -72,7 +72,7 @@ function CreateTagDialog({ initialValue, modalProps }: { initialValue: Tag; moda
 
                 <section>
                     <HeadingSecondary>Response</HeadingSecondary>
-                    <TextArea value={message} onChange={setMessage} placeholder={EXAMPLE_RESPONSE} autosize />
+                    <TextArea value={message} onChange={setMessage} placeholder={EXAMPLE_RESPONSE} {...{ autosize: true } as any} />
                 </section>
 
                 {detectedArguments.length > 0 && (

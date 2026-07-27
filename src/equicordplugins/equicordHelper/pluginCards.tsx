@@ -61,6 +61,7 @@ export function ChatPluginCard({ url, description }: { url: string, description:
 
     const onRestartNeeded = () => showToast("A restart is required for the change to take effect!");
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const depMap = useMemo(() => {
         const o = {} as Record<string, string[]>;
         for (const plugin in plugins) {

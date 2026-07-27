@@ -1444,6 +1444,7 @@ export default definePlugin({
 
     headerBarButton: {
         icon: EditIcon,
+        render: () => null,
     },
 
     patches: [

@@ -24,7 +24,7 @@ export const Editor = (props: { url?: string; }) => {
                 setFile(new File([blob], "remix.png"));
             });
         });
-    }, []);
+    }, [props.url]);
 
     return (
         <div className="vc-remix-editor">

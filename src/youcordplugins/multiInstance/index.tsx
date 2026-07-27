@@ -550,6 +550,7 @@ export default definePlugin({
 
     headerBarButton: {
         icon: MultiInstanceIcon,
+        render: () => null,
     },
 
     _fluxUnsub: null as (() => void) | null,

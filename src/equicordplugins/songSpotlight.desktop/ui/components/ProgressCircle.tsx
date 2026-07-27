@@ -46,7 +46,7 @@ export default function ProgressCircle({ border, audioRef, playingRef, ...props 
         });
 
         return () => cancelAnimationFrame(handle);
-    }, [audioRef]);
+    }, [audioRef, playingRef]);
 
     return (
         <svg

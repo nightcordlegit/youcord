@@ -7,7 +7,7 @@
 import "./styles.css";
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
-import definePlugin from "@utils/types";
+import definePlugin, { IconComponent } from "@utils/types";
 import { CloudUploadPlatform } from "@vencord/discord-types/enums";
 import {
     CloudUploader,
@@ -156,7 +156,7 @@ function GifConvertorPopover({ position, onClose }: PopoverProps) {
 
         try {
             const gif = await encodeGIF(file, setProgress);
-            const blob = new Blob([gif], { type: "image/gif" });
+            const blob = new Blob([gif as BlobPart], { type: "image/gif" });
             const url = URL.createObjectURL(blob);
             setGifBlob(blob);
             setPreviewUrl(url);
@@ -394,7 +394,7 @@ export default definePlugin({
     enabledByDefault: true,
 
     chatBarButton: {
-        icon: GifIcon,
+        icon: GifIcon as IconComponent,
         render: GifConvertorChatBarButton,
     },
 });

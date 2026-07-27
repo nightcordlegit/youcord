@@ -102,22 +102,6 @@ function UploadClipFileModal({ modalProps, channelId, clip }: { modalProps: Rend
     return (
         <Modal
             {...modalProps}
-            title="Upload Clip File"
-            notice={notice}
-            actions={[
-                {
-                    text: "Cancel",
-                    variant: "secondary",
-                    onClick: modalProps.onClose,
-                    disabled: uploading
-                },
-                {
-                    text: uploading ? "Uploading" : "Upload",
-                    variant: "primary",
-                    onClick: () => void submit(),
-                    disabled: !canUpload
-                }
-            ]}
         >
             <Flex flexDirection="column" gap={12}>
                 <section>

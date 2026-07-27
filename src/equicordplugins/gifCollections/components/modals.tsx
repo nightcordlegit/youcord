@@ -8,6 +8,7 @@ import { Flex } from "@components/Flex";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { classes } from "@utils/misc";
+import { ModalSize } from "@utils/modal";
 import { RenderModalProps } from "@vencord/discord-types";
 import { Button, FluxDispatcher, Modal, openModal, TextInput, useCallback, useState } from "@webpack/common";
 
@@ -53,7 +54,7 @@ function InfoModal({ props, title, rows }: { props: RenderModalProps; title: str
     return (
         <Modal
             {...props}
-            size="sm"
+            size={ModalSize.SMALL}
             title={title}
             actions={[
                 { text: "Close", variant: "secondary", onClick: props.onClose }
@@ -75,7 +76,7 @@ function MoveToCollectionModal({ props, gifId }: { props: RenderModalProps; gifI
     return (
         <Modal
             {...props}
-            size="sm"
+            size={ModalSize.SMALL}
             title="Move To Collection"
             actions={[
                 { text: "Close", variant: "secondary", onClick: props.onClose }
@@ -118,7 +119,7 @@ function CreateCollectionModal({ props, gif }: { props: RenderModalProps; gif: G
     return (
         <Modal
             {...props}
-            size="sm"
+            size={ModalSize.SMALL}
             title="Create Collection"
             actions={[
                 { text: "Create", onClick: onSubmit, disabled: !name.length, variant: "primary" }
@@ -148,7 +149,7 @@ function RenameCollectionModal({ props, name }: { props: RenderModalProps; name:
     return (
         <Modal
             {...props}
-            size="sm"
+            size={ModalSize.SMALL}
             title="Rename Collection"
             actions={[
                 { text: "Rename", onClick: onSubmit, disabled: !newName.length || tooLong, variant: "primary" }

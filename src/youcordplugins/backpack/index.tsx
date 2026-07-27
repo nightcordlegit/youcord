@@ -107,12 +107,13 @@ function BackpackPopout({ chatBarProps, closePopout }: { chatBarProps: ChatBarPr
                             }}
                         >
                             <ErrorBoundary noop>
-                                <data.render
-                                    {...chatBarProps}
-                                    isMainChat={true}
-                                    isAnyChat={true}
-                                    popoutContainer={popoutContainerRef.current}
-                                />
+                            {/* @ts-ignore */}
+                            <data.render
+                                {...(chatBarProps as any)}
+                                isMainChat={true}
+                                isAnyChat={true}
+                                popoutContainer={popoutContainerRef.current}
+                            />
                             </ErrorBoundary>
                         </div>
                     )}

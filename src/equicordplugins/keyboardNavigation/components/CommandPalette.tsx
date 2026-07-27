@@ -9,6 +9,7 @@ import "./style.css";
 import { actions } from "@equicordplugins/keyboardNavigation/commands";
 import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
+import { ModalSize } from "@utils/modal";
 import { RenderModalProps } from "@vencord/discord-types";
 import { closeAllModals, Modal,openModal, React, TextInput, useEffect, useState } from "@webpack/common";
 
@@ -100,7 +101,7 @@ export function CommandPalette({ modalProps }: { modalProps: RenderModalProps; }
     }, [queryEh]);
 
     return (
-        <Modal {...modalProps} size="md" title="Command Palette">
+        <Modal {...modalProps} size={ModalSize.MEDIUM} title="Command Palette">
             <div className={cl("root")} onKeyDown={handleKeyDown} onWheel={handleWheel}>
                 <TextInput
                     value={queryEh}

@@ -17,6 +17,7 @@
 */
 
 import { Heading } from "@components/Heading";
+import { ModalSize } from "@utils/modal";
 import { RenderModalProps } from "@vencord/discord-types";
 import { Modal, openModal, React, TextInput } from "@webpack/common";
 
@@ -36,7 +37,7 @@ export function DecModal(props: RenderModalProps & { message: any; }) {
     return (
         <Modal
             {...props}
-            size="sm"
+            size={ModalSize.SMALL}
             title="Decrypt Message"
             actions={[
                 {

@@ -295,7 +295,7 @@ function PluginSettings({ premiumOnly = false }: PluginSettingsProps) {
     const BATCH_SIZE = 40;
     const [visibleCount, setVisibleCount] = React.useState(BATCH_SIZE);
 
-    const observer = React.useRef<IntersectionObserver>();
+    const observer = React.useRef<IntersectionObserver>(null);
     const sentinelRef = React.useCallback((node: HTMLDivElement | null) => {
         if (observer.current) observer.current.disconnect();
         if (node) {

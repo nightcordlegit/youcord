@@ -90,7 +90,7 @@ if (!IS_VANILLA) {
             // Règle : on injecte SEULEMENT si le preload vient de nous (pointe vers notre preload.js).
             // Toute fenêtre créée par Discord avec son propre preload ou un preload tiers est laissée intacte.
             const ourPreload = join(__dirname, "preload.js");
-            const preloadIsOurs = options.webPreferences.preload === ourPreload;
+            const preloadIsOurs = options.webPreferences?.preload === ourPreload;
             // Exception : la fenêtre principale Discord a un preload à elle (l'original Discord),
             // et c'est précisément ce qu'on veut remplacer — donc on accepte aussi le cas où
             // le titre est une fenêtre YouCord/Equicord/Discord connue.
@@ -124,7 +124,7 @@ if (!IS_VANILLA) {
                 }
 
                 // Windows 11 acrylic/mica effect
-                const winMaterial = settings.windowMaterial as string | undefined;
+                const winMaterial = settings.windowsMaterial as string | undefined;
                 if (process.platform === "win32" && winMaterial && winMaterial !== "none") {
                     options.transparent = true;
                     options.backgroundColor = "#00000000";
@@ -236,12 +236,12 @@ if (!IS_VANILLA) {
                         let applied = false;
                         // @ts-ignore
                         if (typeof this.setBackgroundMaterial === "function") {
-                            this.setBackgroundMaterial(winMaterial);
+                            (this as any).setBackgroundMaterial(winMaterial);
                             applied = true;
                         }
                         // @ts-ignore
                         if (!applied && typeof this.setVibrancy === "function") {
-                            this.setVibrancy(winMaterial === "acrylic" ? "acrylic" : "under-window");
+                            (this as any).setVibrancy(winMaterial === "acrylic" ? "acrylic" : "under-window");
                             applied = true;
                         }
                         if (!applied) {

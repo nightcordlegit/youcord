@@ -28,7 +28,7 @@ interface Props<T = any> {
     /** Render nothing if an error occurs */
     noop?: boolean;
     /** Fallback component to render if an error occurs */
-    fallback?: React.ComponentType<React.PropsWithChildren<{ error: any; message: string; stack: string; wrappedProps: T; }>>;
+    fallback?: React.ComponentType<React.PropsWithChildren<{ error: any; message: string; stack: string; wrappedProps: T; }>> | React.ReactNode;
     /** called when an error occurs. The props property is only available if using .wrap */
     onError?(data: { error: Error, errorInfo: React.ErrorInfo, props: T; }): void;
     /** Custom error message */

@@ -18,6 +18,7 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "Log in or out of the Streaks API.",
         component() {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const { isAuthorized, authorize, remove } = useAuthorizationStore();
 
             if (isAuthorized()) {

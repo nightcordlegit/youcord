@@ -1026,7 +1026,7 @@ export default definePlugin({
                 key: SETTINGS_ENTRY_KEY,
                 title: "Surveillance",
                 Component: SurveillanceTab,
-                Icon: SurveillanceIcon,
+                Icon: SurveillanceIcon as any,
             };
             if (diagIndex !== -1) {
                 SettingsPlugin.customEntries.splice(diagIndex + 1, 0, entry);

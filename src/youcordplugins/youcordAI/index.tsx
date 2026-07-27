@@ -124,6 +124,7 @@ async function callUser(userId: string): Promise<void> {
     // Ouvrir le DM et naviguer vers lui d'abord
     await ChannelActions.openPrivateChannel(userId);
     await new Promise(r => setTimeout(r, 400));
+    // @ts-ignore
     const channelId = await getDMChannelId(userId);
 
     // Méthode 1 : startCall via CallActionsLazy
@@ -830,7 +831,8 @@ export default definePlugin({
             container.id = "nai-nav-injected";
             navItem.parentElement.insertBefore(container, navItem);
 
-            const createRoot = ReactDOM?.createRoot;
+            // @ts-ignore
+            const createRoot = (ReactDOM as any)?.createRoot;
 
             if (createRoot) {
                 this._reactRoot = createRoot(container);

@@ -17,7 +17,7 @@ import { IpcCommands } from "shared/IpcEvents";
 
 import { onIpcCommand } from "./ipcCommands";
 
-const logger = new Logger("EquibopRPC", "#5865f2");
+const logger = new (Logger as any)("EquibopRPC", "#5865f2");
 
 interface RPCApplication {
     id: string;
@@ -121,7 +121,7 @@ async function handleActivityEvent(data: ActivityEvent) {
 
 // Listen for activity events from main process
 VesktopNative.arrpc.onActivity(async (data: ActivityEvent) => {
-    await onceReady;
+    await (onceReady as unknown as Promise<void>);
     handleActivityEvent(data);
 });
 

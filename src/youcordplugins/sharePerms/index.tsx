@@ -551,6 +551,7 @@ export default definePlugin({
 
     headerBarButton: {
         icon: InternalFolderIcon,
+        render: () => null,
     },
 
     start() {

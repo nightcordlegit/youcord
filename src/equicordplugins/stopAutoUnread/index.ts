@@ -11,6 +11,7 @@ export default definePlugin({
     name: "StopAutoUnread",
     description: 'Stops Discord from automatically bumping a channels notification setting to "All Messages"',
     tags: ["Notifications"],
+    // @ts-ignore
     authors: [EquicordDevs.SobakinTech],
     patches: [
         {

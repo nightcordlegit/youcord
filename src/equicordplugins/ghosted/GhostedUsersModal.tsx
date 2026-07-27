@@ -5,6 +5,7 @@
  */
 
 import { classNameFactory } from "@utils/css";
+import { ModalSize } from "@utils/modal";
 import { Channel, RenderModalProps } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Avatar, Button, ChannelStore, MessageStore, Modal,React, Text, UserStore } from "@webpack/common";
@@ -83,7 +84,7 @@ export function GhostedUsersModal({ modalProps, ghostedChannels: initialChannels
     return (
         <Modal
             {...modalProps}
-            size="md"
+            size={ModalSize.MEDIUM}
             title={`Ghosted Users (${ghostedChannels.length})`}
             actions={ghostedChannels.length > 0 ? [
                 {

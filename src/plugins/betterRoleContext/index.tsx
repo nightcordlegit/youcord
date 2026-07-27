@@ -13,7 +13,7 @@ import { getCurrentChannel, getCurrentGuild, getIntlMessage, openImageModal } fr
 import { isTruthy } from "@utils/guards";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { Guild, PopoutProps, Role } from "@vencord/discord-types";
+import { Guild, Role } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findCssClassesLazy } from "@webpack";
 import { ContextMenuApi, GuildRoleStore, Menu, PermissionStore, Popout, useRef } from "@webpack/common";
 import { ComponentType } from "react";
@@ -90,7 +90,7 @@ const settings = definePluginSettings({
 });
 
 interface RoleMemberPopoutProps {
-    popoutProps: PopoutProps;
+    popoutProps: any;
     guildId: string;
     channelId: string;
     roleId: string;
@@ -152,6 +152,7 @@ export function buildExtraRoleContextMenuItems(role: Role, guild: Guild, popoutR
                         position="right"
                         align="center"
                         targetElementRef={popoutRef}
+                        // @ts-ignore
                         preload={() => loadRoleMembers(guild.id, role.id)}
                         renderPopout={popoutProps => (
                             <RoleMemberPopout
@@ -253,6 +254,7 @@ export default definePlugin({
 
     contextMenus: {
         "dev-context"(children, { id }: { id: string; }) {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const popoutRef = useRef(null);
 
             const guild = getCurrentGuild();

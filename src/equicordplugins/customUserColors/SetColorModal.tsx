@@ -8,6 +8,7 @@ import { set } from "@api/DataStore";
 import { HeadingSecondary } from "@components/Heading";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
+import { ModalSize } from "@utils/modal";
 import { RenderModalProps } from "@vencord/discord-types";
 import { ColorPicker, Modal, React, useState } from "@webpack/common";
 
@@ -46,7 +47,7 @@ export function SetColorModal({ id, modalProps }: { id: string, modalProps: Rend
     return (
         <Modal
             {...modalProps}
-            size="sm"
+            size={ModalSize.SMALL}
             title="Custom Color"
             actions={[
                 {

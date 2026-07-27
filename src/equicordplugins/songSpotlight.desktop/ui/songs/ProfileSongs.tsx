@@ -51,9 +51,10 @@ export default function ProfileSongs({ user, isSideBar }: ProfileSongsProps) {
     const { profileSongsLimit, collapseSongList } = settings.use();
     const userId = user.id;
     const data = users[userId]?.data;
+    const authorized = isAuthorized();
     useEffect(() => {
-        if (isAuthorized() && !data) listData(userId).catch(() => setFailed(true));
-    }, [isAuthorized()]);
+        if (authorized && !data) listData(userId).catch(() => setFailed(true));
+    }, [authorized, data, userId]);
 
     const [clamped, setClamped] = useState(true);
     const clampedData = useMemo(() => data && (clamped ? data.slice(0, profileSongsLimit) : data), [

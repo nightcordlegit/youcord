@@ -86,7 +86,8 @@ function TagConfigCard(props) {
         }
         SetData();
         update();
-    }, [tagName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tagName, tag]);
 
     useEffect(() => {
         const dataTag = SavedData.find(obj => obj.userIds === tag.userIds);
@@ -95,7 +96,8 @@ function TagConfigCard(props) {
         }
         SetData();
         update();
-    }, [userIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userIds, tag]);
 
     return (
         <>

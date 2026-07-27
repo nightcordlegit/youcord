@@ -77,7 +77,7 @@ export function cleanupTraySubscriptions() {
     subscriptions.length = 0;
 }
 
-onceReady.then(() => {
+(onceReady as unknown as Promise<void>).then(() => {
     const userID = UserStore.getCurrentUser()?.id;
 
     const speakingCallback = (params: any) => {

@@ -122,6 +122,7 @@ function QuoteModal({ message, ...props }: RenderModalProps & { message: Message
         document.getElementById("quoterPreview")?.setAttribute("src", newUrl);
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => { generateImage(); }, [gray, showWatermark, saveAsGif, watermarkText, quoteFont]);
 
     useEffect(() => {

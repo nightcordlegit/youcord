@@ -190,7 +190,7 @@ export function Boo({ channel }: { channel: Channel; }) {
                 setBooCount(getBooCount() + 1);
             }
         }
-    }, [state.isCurrentUser, state.isDataProcessed, id, lastMessage?.id, isInactive]);
+    }, [state.isCurrentUser, state.isDataProcessed, id, lastMessage?.id, isInactive, channel, lastMessage?.author?.bot]);
 
     if (!state.isDataProcessed || !currentUserId || !lastMessage || state.isCurrentUser || isChannelExempted(channel) || isCleared || (settings.store.ignoreBots && lastMessage.author.bot) || isInactive)
         return null;

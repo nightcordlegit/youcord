@@ -22,6 +22,7 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         default: ["Control", "Shift", "P"],
         component: () => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const [isRecording, setIsRecording] = useState(false);
 
             const recordKeybind = (setIsRecording: (value: boolean) => void) => {

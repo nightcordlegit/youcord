@@ -140,6 +140,7 @@ function ThemeTab() {
             const filteredThemes = sortedThemes.filter(themeFilter);
             setFilteredThemes(filteredThemes);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchValue, themes]);
 
     return (

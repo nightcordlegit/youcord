@@ -19,6 +19,7 @@
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { insertTextIntoChatInputBox } from "@utils/discord";
+import { ModalSize } from "@utils/modal";
 import { RenderModalProps } from "@vencord/discord-types";
 import { Modal, openModal, React, TextInput } from "@webpack/common";
 
@@ -46,7 +47,7 @@ function EncModal(props: RenderModalProps) {
     return (
         <Modal
             {...props}
-            size="sm"
+            size={ModalSize.SMALL}
             title="Encrypt Message"
             actions={[
                 {

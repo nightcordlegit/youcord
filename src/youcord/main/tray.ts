@@ -21,7 +21,7 @@ type TrayVariant = "tray" | "trayUnread" | "traySpeaking" | "trayIdle" | "trayMu
 
 const isLinux = process.platform === "linux";
 
-let nativeSNI: typeof import("libvesktop") | null = null;
+let nativeSNI: any = null;
 if (isLinux) {
     try {
         nativeSNI = require(join(STATIC_DIR, `dist/libvesktop-${process.arch}.node`));

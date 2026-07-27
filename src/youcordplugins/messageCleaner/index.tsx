@@ -92,7 +92,7 @@ function canDeleteMessage(message: Message, currentUserId: string): boolean {
         if (message.author?.id !== currentUserId) return false;
         if (settings.store.skipSystemMessages && message.type !== 0 && message.type !== 19) return false;
 
-        const isReply = message.type === 19 || !!message.messageReference || !!(message as any).message_reference;
+        const isReply = message.type === 19 || !!(message as any).messageReference || !!(message as any).message_reference;
         if (isReply && settings.store.skipReplies) return false;
 
         if (settings.store.maxAge > 0) {
@@ -254,7 +254,7 @@ async function cleanGuild(guildId: string) {
                 }
 
                 // Unique messages
-                const uniqueMsgs = [];
+                const uniqueMsgs: any[] = [];
                 const seen = new Set();
                 for (const m of messages) {
                     if (!seen.has(m.id)) {

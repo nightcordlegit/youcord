@@ -9,6 +9,7 @@ import { parseUrl } from "@utils/misc";
 import { Activity } from "@vencord/discord-types";
 import { ActivityFlags, ActivityStatusDisplayType } from "@vencord/discord-types/enums";
 import { ApplicationAssetUtils, FluxDispatcher } from "@webpack/common";
+// @ts-ignore
 import md5 from "md5";
 
 import { settings } from "../settings";

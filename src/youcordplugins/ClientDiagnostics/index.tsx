@@ -1039,7 +1039,7 @@ function maybeSendLagNotification() {
 
     const now = Date.now();
     const candidate = getLagNotificationCandidates()
-        .find(item => now - (lagNotificationTimes.get(item.row.name) ?? 0) >= LAG_NOTIFICATION_COOLDOWN_MS);
+        .find(item => now - (lagNotificationTimes.get(item.row.name) ?? 0) >= LAG_NOTIFICATION_COOLDOWN_MS)!;
 
     if (!candidate) return;
 

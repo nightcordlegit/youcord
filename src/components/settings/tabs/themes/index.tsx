@@ -93,6 +93,7 @@ function ThemesTab() {
 
     useEffect(() => {
         void updateThemes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     async function updateThemes() {
@@ -101,7 +102,7 @@ function ThemesTab() {
 
     async function refreshLocalThemes() {
         const themes = await VencordNative.themes.getThemesList();
-        setUserThemes(themes);
+        setUserThemes(themes.map(t => getThemeInfo(t.content, t.fileName)));
     }
 
     function onLocalThemeChange(fileName: string, value: boolean) {

@@ -19,7 +19,7 @@ const validKeycodes = [
     "NumpadDivide", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "NumLock", "ScrollLock",
 ];
 
-function showIcon() {
+function useShowIcon() {
     const [show, setShow] = useState(false);
     const { keyBind, reqCtrl, reqShift, reqAlt } = settings.store;
 
@@ -97,7 +97,7 @@ export default definePlugin({
         }
     ],
     TrashIcon: channel => {
-        const show = showIcon();
+        const show = useShowIcon();
 
         if (!show || !PermissionStore.can(PermissionsBits.MANAGE_CHANNELS, channel)) return null;
 

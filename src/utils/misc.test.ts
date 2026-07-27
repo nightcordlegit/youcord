@@ -116,16 +116,16 @@ describe("pluralise", () => {
 
 describe("interpolateIfDefined", () => {
     it("interpolates when all args defined", () => {
-        const result = interpolateIfDefined(["Hello ", ""], "World");
+        const result = interpolateIfDefined(["Hello ", ""] as any, "World");
         expect(result).toBe("Hello World");
     });
 
     it("returns empty string when any arg is null", () => {
-        expect(interpolateIfDefined(["Hello ", ""], null)).toBe("");
+        expect(interpolateIfDefined(["Hello ", ""] as any, null)).toBe("");
     });
 
     it("returns empty string when any arg is undefined", () => {
-        expect(interpolateIfDefined(["Hello ", ""], undefined)).toBe("");
+        expect(interpolateIfDefined(["Hello ", ""] as any, undefined)).toBe("");
     });
 });
 
@@ -141,7 +141,7 @@ describe("tryOrElse", () => {
     it("returns fallback on async rejection", async () => {
         const result = tryOrElse(
             () => Promise.reject(new Error("fail")),
-            "fallback"
+            "fallback" as any
         );
         await expect(result).resolves.toBe("fallback");
     });
@@ -149,7 +149,7 @@ describe("tryOrElse", () => {
     it("returns async result on success", async () => {
         const result = tryOrElse(
             () => Promise.resolve(42),
-            0
+            0 as any
         );
         await expect(result).resolves.toBe(42);
     });

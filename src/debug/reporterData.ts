@@ -8,7 +8,8 @@
  * this file is needed to avoid an import of plugins in ./runReporter.ts
  */
 import { Patch } from "@utils/types";
-import { TypeWebpackSearchHistory } from "@webpack";
+
+type TypeWebpackSearchHistory = "find" | "findByProps" | "findByCode" | "findStore" | "findCssClasses" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks" | "mapMangledModule";
 
 interface EvaledPatch extends Patch {
     id: PropertyKey;

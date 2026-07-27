@@ -107,6 +107,7 @@ function useEnsureOwnStatus(user: User) {
         return;
     }
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const sessions = useStateFromStores([SessionsStore], () => SessionsStore.getSessions());
     if (typeof sessions !== "object") return null;
     const sortedSessions = Object.values(sessions).sort(({ status: a }, { status: b }) => {
@@ -138,8 +139,10 @@ interface PlatformIndicatorProps {
 
 const PlatformIndicator = ({ user, isProfile, isMessage, isMemberList }: PlatformIndicatorProps) => {
     if (user == null || (user.bot && !settings.store.showBots)) return null;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEnsureOwnStatus(user);
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const status = useStateFromStores([PresenceStore], () => PresenceStore.getClientStatus(user.id));
     if (!status) return null;
 

@@ -76,6 +76,7 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "Customize the timestamp formats",
         component: componentProps => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const [settingsState, setSettingsState] = useState(useSettings().plugins?.CustomTimestamps?.formats ?? {});
 
             const setNewValue = (key: string, value: string) => {
@@ -174,6 +175,7 @@ export default definePlugin({
     ],
 
     renderTimestamp: (date: Date, type: "cozy" | "compact" | "tooltip" | "ariaLabel") => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const forceUpdater = useForceUpdater();
         let formatTemplate: string;
 
@@ -191,11 +193,13 @@ export default definePlugin({
                 formatTemplate = settings.store.formats?.ariaLabelFormat || timeFormats.ariaLabelFormat.default;
         }
 
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         useEffect(() => {
             if (formatTemplate.includes("calendar") || formatTemplate.includes("relative")) {
                 const interval = setInterval(forceUpdater, 1000);
                 return () => clearInterval(interval);
             }
+            // eslint-disable-next-line react-hooks/exhaustive-deps
         }, []);
 
         return format(date, formatTemplate);

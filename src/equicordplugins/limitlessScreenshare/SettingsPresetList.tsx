@@ -27,7 +27,7 @@ export function SettingsPresetList(isResolution: boolean) {
         }
         if (value < MIN_FPS)
             return `Must be >${MIN_FPS}`;
-    }, [value]);
+    }, [value, isResolution]);
 
     function handleAddPreset() {
         if (!value) return;

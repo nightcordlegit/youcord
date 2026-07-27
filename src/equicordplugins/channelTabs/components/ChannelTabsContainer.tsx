@@ -104,6 +104,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
         _update();
         const currentUserId = UserStore.getCurrentUser()?.id;
         if (save && currentUserId) void saveTabs(currentUserId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const ref = useRef<HTMLDivElement>(null);
@@ -140,6 +141,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
 
     useEffect(() => {
         _update();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [widerTabsAndBookmarks]);
     useEffect(() => {
         const scroller = scrollerRef.current;
@@ -160,6 +162,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
         observer.observe(scroller);
 
         return () => observer.disconnect();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [openedTabs.length, newTabButtonBehavior]);
 
     useEffect(() => {
@@ -261,6 +264,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
         return () => {
             document.removeEventListener("keydown", handleKeyDown, true);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         enableNumberKeySwitching,
         numberKeySwitchCount,
@@ -290,6 +294,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
             // Clean up any stale navigation contexts
             clearStaleNavigationContext();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userId, props.channelId, props.guildId]);
 
     if (!userId) return null;
@@ -364,6 +369,7 @@ export function ChannelTabsPreview(p: { setValue: (v: TabSet) => void; }) {
     const { tabSet }: { tabSet: TabSet; } = settings.use(["tabSet"]);
 
     const placeholder = [{ guildId: "@me", channelId: undefined as any }];
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [currentTabs, setCurrentTabs] = useState(tabSet?.[id] ?? placeholder);
 
     return (

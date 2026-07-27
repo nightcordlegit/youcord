@@ -8,6 +8,7 @@ import { BaseText } from "@components/BaseText";
 import { Button, TextButton } from "@components/Button";
 import { images } from "@equicordplugins/loginWithQR/images";
 import { getIntlMessage } from "@utils/discord";
+import { ModalSize } from "@utils/modal";
 import { RenderModalProps } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import {
@@ -39,7 +40,7 @@ function VerifyModal({
     const [state, setState] = useState(
         !token ? VerifyState.NotFound : VerifyState.Verifying
     );
-    useEffect(() => () => void (state !== VerifyState.LoggedIn && onAbort()), []);
+    useEffect(() => () => void (state !== VerifyState.LoggedIn && onAbort()), []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const [inProgress, setInProgress] = useState(false);
     const buttonRef = useRef<HTMLButtonElement>(null);
@@ -103,10 +104,10 @@ function VerifyModal({
 
         if (state === VerifyState.Verifying) requestAnimationFrame(update);
         return () => cancelAnimationFrame(frame);
-    }, [state]);
+    }, [state, controllerRef]);
 
     return (
-        <Modal size="sm" {...props} title="Verify Login">
+        <Modal size={ModalSize.SMALL} {...props} title="Verify Login">
             <div className={cl("device-content")}>
                 {state === VerifyState.LoggedIn ? (
                     <>

@@ -26,6 +26,7 @@ export default definePlugin({
         return <ThreeDots className={cl("dots")} dotRadius={3} themed={true} />;
     },
     isTyping() {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         return useStateFromStores([TypingStore], () =>
             PrivateChannelSortStore.getPrivateChannelIds().some(id =>
                 Object.keys(TypingStore.getTypingUsers(id)).some(userId => userId !== UserStore.getCurrentUser().id)

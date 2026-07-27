@@ -10,16 +10,18 @@ import { IpcCommands, IpcEvents, UpdaterIpcEvents } from "./IpcEvents";
 
 describe("IpcEvents", () => {
     it("all events have string values", () => {
+        // @ts-ignore
         const values = Object.values(IpcEvents);
         expect(values.length).toBeGreaterThan(0);
 
         for (const v of values) {
             expect(typeof v).toBe("string");
-            expect(v.length).toBeGreaterThan(0);
+            expect((v as string).length).toBeGreaterThan(0);
         }
     });
 
     it("all event values follow naming convention", () => {
+        // @ts-ignore
         const values = Object.values(IpcEvents);
 
         for (const v of values) {
@@ -29,6 +31,7 @@ describe("IpcEvents", () => {
     });
 
     it("no duplicate event values", () => {
+        // @ts-ignore
         const values = Object.values(IpcEvents).map(v => v as string);
         const unique = new Set(values);
         expect(unique.size).toBe(values.length);
@@ -37,13 +40,15 @@ describe("IpcEvents", () => {
 
 describe("UpdaterIpcEvents", () => {
     it("all events have the VCD_ prefix", () => {
+        // @ts-ignore
         const values = Object.values(UpdaterIpcEvents);
         for (const v of values) {
-            expect(v).toMatch(/^VCD_UPDATER_/);
+            expect(v as string).toMatch(/^VCD_UPDATER_/);
         }
     });
 
     it("no duplicate values", () => {
+        // @ts-ignore
         const values = Object.values(UpdaterIpcEvents);
         const unique = new Set(values);
         expect(unique.size).toBe(values.length);
@@ -52,13 +57,15 @@ describe("UpdaterIpcEvents", () => {
 
 describe("IpcCommands", () => {
     it("all commands follow the prefix:action or prefix.pattern pattern", () => {
+        // @ts-ignore
         const values = Object.values(IpcCommands);
         for (const v of values) {
-            expect(v).toMatch(/^[a-z]+(:|\..+)/);
+            expect(v as string).toMatch(/^[a-z]+(:|\..+)/);
         }
     });
 
     it("no duplicate values", () => {
+        // @ts-ignore
         const values = Object.values(IpcCommands);
         const unique = new Set(values);
         expect(unique.size).toBe(values.length);

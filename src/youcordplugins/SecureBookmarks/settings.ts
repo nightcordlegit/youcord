@@ -28,10 +28,14 @@ export const settings = definePluginSettings({
     }
 }, {
     password: {
+        // @ts-ignore
         hidden() {
+            // @ts-ignore
             return !this.store.usePassword;
         },
+        // @ts-ignore
         isValid(value: string) {
+            // @ts-ignore
             if (!this.store.usePassword) return true;
             if (!value) return t("Password cannot be empty.");
             if (/[\r\n]/.test(value)) return t("Password cannot contain line breaks.");

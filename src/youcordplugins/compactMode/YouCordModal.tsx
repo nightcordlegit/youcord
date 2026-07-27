@@ -93,7 +93,7 @@ function YouCordModalInner({ onClose }: { onClose: () => void; }) {
         setActiveTab(tabId);
     }
 
-    let TabContent = null;
+    let TabContent: React.ReactNode | null = null;
     switch (activeTab) {
         case "youcord": TabContent = <VencordTab />; break;
         case "plugins": TabContent = <PluginsTab />; break;

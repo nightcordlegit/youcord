@@ -23,7 +23,7 @@ addPatch({
                     match: /,getEnableHardwareAcceleration/,
                     replace: "$&:VesktopNative.app.getEnableHardwareAcceleration,_oldGetEnableHardwareAcceleration"
                 }
-            ]
-        }
+            ] as any
+        } as any
     ]
 });

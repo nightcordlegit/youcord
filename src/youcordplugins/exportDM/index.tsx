@@ -531,6 +531,7 @@ export default definePlugin({
 
     headerBarButton: {
         icon: ExportIcon,
+        render: () => null,
     },
 
     start() { addHeaderBarButton("youcord-export-dm", () => <ExportButton />, 4); },

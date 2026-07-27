@@ -29,13 +29,13 @@ describe("mergeDefaults", () => {
 
     it("returns the same object reference", () => {
         const obj = { a: 1 };
-        const result = mergeDefaults(obj, { b: 2 });
+        const result = mergeDefaults(obj as any, { b: 2 });
         expect(result).toBe(obj);
     });
 
     it("handles empty defaults", () => {
         const obj = { a: 1 };
-        mergeDefaults(obj, {});
+        mergeDefaults(obj as any, {});
         expect(obj).toEqual({ a: 1 });
     });
 

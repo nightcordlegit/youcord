@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { ModalSize } from "@utils/modal";
 import { Button, closeModal, Menu, Modal,openModalLazy, Slider, TextInput, useState } from "@webpack/common";
 
 import { folderIconsData, settings } from "./settings";
@@ -96,7 +97,7 @@ export function makeContextItem(a: folderProp) {
                     return props => (
                         <Modal
                             {...props}
-                            size="sm"
+                            size={ModalSize.SMALL}
                             title="Set a New Icon."
                         >
                             <ImageModal folderId={a.folderId} folderColor={a.folderColor} />

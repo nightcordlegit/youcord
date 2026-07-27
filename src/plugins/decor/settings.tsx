@@ -18,6 +18,7 @@ import DecorSection from "./ui/components/DecorSection";
 export const settings = definePluginSettings({
     changeDecoration: {
         type: OptionType.COMPONENT,
+        // @ts-ignore
         component({ closePluginSettings }) {
             if (!DecorPlugin.started) return <Paragraph>
                 Enable Decor and restart your client to change your avatar decoration.

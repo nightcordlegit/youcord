@@ -6,4 +6,4 @@
 
 import { Logger } from "@YouCord/types/utils";
 
-export const VesktopLogger = new Logger("YouCord", "#d3869b");
+export const VesktopLogger = new (Logger as any)("YouCord", "#d3869b");

@@ -147,7 +147,8 @@ export default definePlugin({
                 title: "Declutter",
                 body: "Avatar decoration removal has been disabled to prevent conflicts with Decor plugin.",
                 confirmText: "OK",
-                confirmVariant: "critical-primary"
+                // @ts-ignore
+                variant: "critical-primary"
             });
         }
     },

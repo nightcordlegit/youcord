@@ -226,6 +226,7 @@ export function FormPage({ spec, ctx, formRef }: FormPageProps) {
         const { recipient } = values;
         if (typeof recipient !== "string" || !recipient) return null;
         return ChannelStore.getDMFromUserId(recipient) ?? null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [values.recipient]);
 
     return (

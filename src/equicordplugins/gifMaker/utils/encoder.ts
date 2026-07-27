@@ -7,6 +7,7 @@
 import { sleep } from "@utils/misc";
 import type { PluginNative } from "@utils/types";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
+// @ts-ignore
 import { decompressFrames, parseGIF } from "gifuct-js";
 
 import { CAPTIONS } from "../captions";

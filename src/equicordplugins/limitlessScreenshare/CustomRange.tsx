@@ -22,7 +22,7 @@ export const CustomRange = ({ onChange, initialValue, minMax, group, id, suffix 
     const [value, setValue] = useState(initialValue);
     const [minValue, maxValue] = minMax;
 
-    const changeStreamSettings = useMemo(() => lodash.throttle((value: number) => onChange(value), COOLDOWN_MS), []);
+    const changeStreamSettings = useMemo(() => lodash.throttle((value: number) => onChange(value), COOLDOWN_MS), []); // eslint-disable-line react-hooks/exhaustive-deps
     useEffect(() => () => changeStreamSettings.cancel(), [changeStreamSettings]);
 
     const onChangeHandler = (newValue: number) => {

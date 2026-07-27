@@ -895,3 +895,21 @@ export function ChevronSmallUpIcon(props: IconProps) {
         </svg>
     );
 }
+
+export function RightArrow(props: IconProps) {
+    return (
+        <Icon viewBox="0 0 24 24" {...props}>
+            <path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+        </Icon>
+    );
+}
+
+export function ShieldIcon(props: IconProps) {
+    return (
+        <Icon viewBox="0 0 24 24" {...props}>
+            <path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
+        </Icon>
+    );
+}
+
+export const LogsIcon = LogIcon;

@@ -8,6 +8,7 @@ import { PickerContent, PickerContentHeader, PickerContentRow, PickerContentRowG
 import { sendSticker } from "@equicordplugins/moreStickers/upload";
 import { clPicker, FFmpegStateContext } from "@equicordplugins/moreStickers/utils";
 import { debounce } from "@shared/debounce";
+import { ModalSize } from "@utils/modal";
 import { Modal,openModal, React, TextInput } from "@webpack/common";
 import { JSX } from "react";
 
@@ -70,7 +71,7 @@ export const PickerSidebar = ({ packMetas, onPackSelect }: SidebarProps) => {
                     onClick={() => {
                         openModal(modalProps => {
                             return (
-                                <Modal size="lg" title="Stickers+" {...modalProps}>
+                                <Modal size={ModalSize.LARGE} title="Stickers+" {...modalProps}>
                                     <Packs />
                                 </Modal>
                             );
@@ -99,6 +100,7 @@ function PickerContentRowGrid({
         return <div>FFmpegStateContext is undefined</div>;
     }
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const ffmpegState = React.useContext(FFmpegStateContext);
 
     return (
@@ -197,7 +199,7 @@ export function PickerContentHeader({
 
             afterScroll();
         }
-    }, [isSelected]);
+    }, [isSelected, afterScroll, beforeScroll]);
 
     return (
         <span>
@@ -278,7 +280,7 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
         if (currentStickerPack?.id !== currentSticker?.stickerPackId) {
             setCurrentStickerPack(stickerPacks.find(p => p.id === currentSticker?.stickerPackId) ?? currentStickerPack);
         }
-    }, [currentSticker]);
+    }, [currentSticker, currentStickerPack, stickerPacks]);
 
     const stickersToRows = (stickers: Sticker[]): JSX.Element[] => stickers
         .reduce((acc, sticker, i) => {

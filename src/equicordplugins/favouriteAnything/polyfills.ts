@@ -57,7 +57,7 @@ const map = new Map(chars.split("").map((c, i) => [c, i]));
 
 export function uint8ArrayToBase64(arr: Uint8Array): string {
     if (supportsToBase64(arr)) {
-        return arr.toBase64({ alphabet: "base64url", omitPadding: true });
+        return (arr as any).toBase64({ alphabet: "base64url", omitPadding: true });
     }
 
     if ("detached" in arr.buffer && arr.buffer.detached) {

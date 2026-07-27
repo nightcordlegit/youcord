@@ -57,7 +57,7 @@ function ImportButton({ overwrite, pending, setPending, onImport }: ImportButton
         onImport(data);
         setPending(false);
         showToast("Imported songs from clipboard!", Toasts.Type.SUCCESS);
-    }, [pending]);
+    }, [onImport, setPending]);
 
     return (
         <Button
@@ -102,9 +102,10 @@ export default function Settings({ templateData }: SettingsProps) {
             ? self.data.length === localData.length && self.data.map(sid).join(",") === localData.map(sid).join(",")
             : true, [self?.data, localData]);
 
+    const isAuth = isAuthorized();
     useEffect(() => {
-        if (isAuthorized() && !localData) getData().then(() => setPending(false));
-    }, [isAuthorized()]);
+        if (isAuth && !localData) getData().then(() => setPending(false));
+    }, [isAuth, localData]);
 
     if (!isAuthorized()) return <Button onClick={() => presentOAuth2Modal()}>Sign in to Song Spotlight</Button>;
 

@@ -148,7 +148,7 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
             document.removeEventListener("mouseup", onMouseUp);
             document.removeEventListener("wheel", onWheel);
         };
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const imageSrc = useMemo(() => {
         try {

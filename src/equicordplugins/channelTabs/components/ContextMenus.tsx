@@ -11,6 +11,7 @@ import { bookmarkFolderColors, bookmarkPlaceholderName, closeOtherTabs, closeTab
 import { Bookmark, BookmarkFolder, Bookmarks, ChannelTabsProps, UseBookmarkMethods } from "@equicordplugins/channelTabs/util/types";
 import { getIntlMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
+import { ModalSize } from "@utils/modal";
 import { RenderModalProps } from "@vencord/discord-types";
 import { Button, ChannelStore, closeModal, ColorPicker, FluxDispatcher, Menu, Modal, openModal, ReadStateStore, ReadStateUtils, Select, TextInput, useMemo, useState } from "@webpack/common";
 
@@ -135,7 +136,7 @@ function FolderIconPickerModal({ modalProps, modalKey, name, color, iconName, on
     return (
         <Modal
             {...modalProps}
-            size="sm"
+            size={ModalSize.SMALL}
             title={<BaseText size="lg" weight="semibold">Choose Folder Icon</BaseText>}
             actions={[
                 {
@@ -275,7 +276,7 @@ export function EditModal({ modalProps, modalKey, bookmark, onSave }: {
     return (
         <Modal
             {...modalProps}
-            size="sm"
+            size={ModalSize.SMALL}
             title={<BaseText size="lg" weight="semibold">Edit Bookmark</BaseText>}
             actions={[
                 {
@@ -326,7 +327,7 @@ function AddToFolderModal({ modalProps, modalKey, bookmarks, onSave }: {
     return (
         <Modal
             {...modalProps}
-            size="sm"
+            size={ModalSize.SMALL}
             title={<BaseText size="lg" weight="semibold">Add Bookmark to Folder</BaseText>}
             actions={[
                 {
@@ -378,7 +379,7 @@ function DeleteFolderConfirmationModal({ modalProps, modalKey, onConfirm }: {
     return (
         <Modal
             {...modalProps}
-            size="sm"
+            size={ModalSize.SMALL}
             title={<BaseText size="lg" weight="semibold">Are you sure?</BaseText>}
             actions={[
                 {

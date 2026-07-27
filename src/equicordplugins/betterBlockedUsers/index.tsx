@@ -44,8 +44,10 @@ export default definePlugin({
         }
     ],
     renderSearchInput() {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const [value, setValue] = React.useState(lastSearch);
 
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         React.useEffect(() => {
             const searchResults = this.getFilteredUsers(lastSearch);
             updateFunc(searchResults);

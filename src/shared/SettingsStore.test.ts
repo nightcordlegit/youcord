@@ -138,6 +138,7 @@ describe("SettingsStore", () => {
         const listener = vi.fn();
 
         store.addChangeListener("b", listener);
+        // @ts-ignore
         delete store.store.b;
 
         expect(listener).toHaveBeenCalledWith(undefined);

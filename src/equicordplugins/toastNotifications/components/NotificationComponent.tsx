@@ -82,7 +82,7 @@ export default ErrorBoundary.wrap(function NotificationComponent(props: Notifica
         }, 10);
 
         return () => clearInterval(intervalId);
-    }, [isHover, props.permanent, timeout]);
+    }, [isHover, props.permanent, timeout, props.onClose]);
 
     const timeoutProgress = elapsed / timeout;
 
