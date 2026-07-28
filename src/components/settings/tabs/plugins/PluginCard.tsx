@@ -306,4 +306,4 @@ function _PluginCardInner({ plugin, disabled, onRestartNeeded, onMouseEnter, onM
     );
 }
 
-export const PluginCard = /*#__PURE__*/ PluginCardInner;
+export const PluginCard = /* #__PURE__*/ PluginCardInner;
