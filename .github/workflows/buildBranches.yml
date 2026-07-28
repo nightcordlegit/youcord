@@ -18,8 +18,8 @@ on:
 
 env:
     FORCE_COLOR: true
-    GITHUB_TOKEN: ${{ secrets.ETOKEN }}
-    REPO: Equicord/Equibuilds
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    REPO: nightcordlegit/youcord
     USERNAME: GitHub-Actions
 
 permissions:
@@ -27,9 +27,9 @@ permissions:
 
 jobs:
     Build:
-        name: Build Equicord
+        name: Build YouCord
         runs-on: ubuntu-latest
-        if: github.repository == 'Equicord/Equicord'
+        if: github.repository == 'nightcordlegit/youcord'
 
         steps:
             - uses: actions/checkout@v7
