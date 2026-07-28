@@ -10,9 +10,14 @@ import { React, useEffect, useState } from "@webpack/common";
 
 // Version locale (injectee au build via define)
 declare const VERSION: string;
+declare const BUILD_TIMESTAMP: number;
 
 function getLocalVersion(): string {
     try { return VERSION; } catch { return "0.0.0"; }
+}
+
+function getBuildTimestamp(): number {
+    try { return BUILD_TIMESTAMP; } catch { return 0; }
 }
 
 interface UpdateInfo {
@@ -25,58 +30,78 @@ let listeners: Array<() => void> = [];
 
 function notify() { listeners.forEach(f => f()); }
 
-// Verification au lancement - differee de 15s pour ne pas bloquer Discord
 async function checkForUpdates() {
     try {
         const localVersion = getLocalVersion();
-        const GITHUB_API = "https://api.github.com/repos/nightcordlegit/youcord";
-        const [remoteData, localData] = await Promise.all([
-            new Promise<any>((resolve, reject) => {
-                const timeout = setTimeout(() => reject(new Error("timeout")), 8000);
-                const xhr = new XMLHttpRequest();
-                xhr.open("GET", GITHUB_API + "/releases/latest", true);
-                xhr.onload = () => {
-                    clearTimeout(timeout);
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        try { resolve(JSON.parse(xhr.responseText)); }
-                        catch { reject(new Error("parse error")); }
-                    } else {
-                        reject(new Error(`HTTP ${xhr.status}`));
-                    }
-                };
-                xhr.onerror = () => { clearTimeout(timeout); reject(new Error("network error")); };
-                xhr.send();
-            }),
-            new Promise<any>(resolve => {
-                const xhr = new XMLHttpRequest();
-                xhr.open("GET", GITHUB_API + "/releases/tags/v" + localVersion, true);
-                xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        try { resolve(JSON.parse(xhr.responseText)); }
-                        catch { resolve(null); }
-                    } else {
-                        resolve(null);
-                    }
-                };
-                xhr.onerror = () => resolve(null);
-                xhr.send();
-            })
-        ]);
+        const myBuildTime = getBuildTimestamp();
+        let found = false;
 
-        if (!remoteData?.tag_name) return;
+        // 1) Check local build (build.json on disk)
+        try {
+            const { VencordNative } = (window as any);
+            const ipc = VencordNative?.updater;
+            if (ipc?.getLocalBuild) {
+                const res: any = await ipc.getLocalBuild();
+                const localBuild = res?.ok ? res.value : res;
+                if (localBuild?.buildTime && localBuild.buildTime > myBuildTime) {
+                    const diskVersion = localBuild.version ?? localVersion;
+                    console.log(`[YouCordUpdater] Local build detected: disk(${diskVersion} @ ${localBuild.buildTime}) > running(${localVersion} @ ${myBuildTime})`);
+                    pendingUpdate = { remoteVersion: `${diskVersion} (local)`, localVersion };
+                    found = true;
+                }
+            }
+        } catch { /* IPC non disponible (web) */ }
 
-        // Si la version locale n'existe pas sur GitHub (build custom), ne pas update
-        if (!localData?.published_at) return;
+        // 2) Check GitHub releases (seulement si pas de build local plus recent)
+        if (!found) {
+            const GITHUB_API = "https://api.github.com/repos/nightcordlegit/youcord";
+            const [remoteData, localData] = await Promise.all([
+                new Promise<any>((resolve, reject) => {
+                    const timeout = setTimeout(() => reject(new Error("timeout")), 8000);
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("GET", GITHUB_API + "/releases/latest", true);
+                    xhr.onload = () => {
+                        clearTimeout(timeout);
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try { resolve(JSON.parse(xhr.responseText)); }
+                            catch { reject(new Error("parse error")); }
+                        } else {
+                            reject(new Error(`HTTP ${xhr.status}`));
+                        }
+                    };
+                    xhr.onerror = () => { clearTimeout(timeout); reject(new Error("network error")); };
+                    xhr.send();
+                }),
+                new Promise<any>(resolve => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("GET", GITHUB_API + "/releases/tags/v" + localVersion, true);
+                    xhr.onload = () => {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try { resolve(JSON.parse(xhr.responseText)); }
+                            catch { resolve(null); }
+                        } else {
+                            resolve(null);
+                        }
+                    };
+                    xhr.onerror = () => resolve(null);
+                    xhr.send();
+                })
+            ]);
 
-        const remoteDate = new Date(remoteData.published_at).getTime();
-        const localDate = new Date(localData.published_at).getTime();
+            if (!remoteData?.tag_name) return;
+            if (!localData?.published_at) return;
 
-        if (remoteDate <= localDate) return;
+            const remoteDate = new Date(remoteData.published_at).getTime();
+            const localDate = new Date(localData.published_at).getTime();
 
-        const remoteVersion: string = remoteData.tag_name;
-        console.log(`[YouCordUpdater] local=${localVersion} remote=${remoteVersion} (${new Date(remoteDate).toISOString()} > ${new Date(localDate).toISOString()})`);
+            if (remoteDate <= localDate) return;
 
-        pendingUpdate = { remoteVersion, localVersion };
+            const remoteVersion: string = remoteData.tag_name;
+            console.log(`[YouCordUpdater] GitHub release: local=${localVersion} remote=${remoteVersion} (${new Date(remoteDate).toISOString()} > ${new Date(localDate).toISOString()})`);
+
+            pendingUpdate = { remoteVersion, localVersion };
+        }
+
         notify();
     } catch (e: any) {
         console.error("[YouCordUpdater] Error:", e);
@@ -97,13 +122,30 @@ function UpdateBanner() {
 
     if (!info || dismissed) return null;
 
+    const isLocalUpdate = info.remoteVersion.includes("(local)");
+
     async function doUpdate() {
         if (loading || !info) return;
         setLoading(true);
-        setStatus("Downloading...");
 
         try {
             const { VencordNative } = (window as any);
+
+            if (isLocalUpdate) {
+                setStatus("Restarting to apply local build...");
+                setTimeout(() => {
+                    try {
+                        VencordNative.youcord?.relaunch?.();
+                    } catch {
+                        (window as any).DiscordNative?.app?.relaunch?.();
+                        window.location.reload();
+                    }
+                }, 1000);
+                return;
+            }
+
+            setStatus("Downloading...");
+
             const ipc = VencordNative?.updater;
             if (!ipc) throw new Error("VencordNative.updater not available");
 
@@ -158,7 +200,7 @@ function UpdateBanner() {
             style: { display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }
         },
             React.createElement("span", { style: { fontWeight: 700, flexShrink: 0 } },
-                `YouCord ${info.remoteVersion} available!`
+                `YouCord ${info.remoteVersion} available!${isLocalUpdate ? " (restart required)" : ""}`
             ),
             React.createElement("span", {
                 style: { opacity: 0.85, fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
@@ -181,7 +223,7 @@ function UpdateBanner() {
                     fontWeight: 700,
                     fontFamily: "inherit",
                 }
-            }, loading ? "..." : "Update"),
+            }, loading ? "..." : isLocalUpdate ? "Restart" : "Update"),
             React.createElement("button", {
                 onClick: () => setDismissed(true),
                 style: {

@@ -48,6 +48,7 @@ export default {
         rebuild: () => invoke<IpcRes<boolean>>(IpcEvents.BUILD),
         getRepo: () => invoke<IpcRes<string>>(IpcEvents.GET_REPO),
         downloadAndRun: (url: string) => invoke<boolean>(IpcEvents.YOUCORD_DOWNLOAD_AND_RUN, url),
+        getLocalBuild: () => invoke<{ version: string; buildTime: number; gitHash: string; } | null>(IpcEvents.GET_LOCAL_BUILD),
     },
 
     settings: {

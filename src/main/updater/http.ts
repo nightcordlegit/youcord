@@ -9,7 +9,7 @@ import { IpcEvents } from "@shared/IpcEvents";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { exec } from "child_process";
 import { app,ipcMain } from "electron";
-import { rmSync,writeFileSync } from "original-fs";
+import { readFileSync, rmSync,writeFileSync } from "original-fs";
 import { join } from "path";
 
 import { serializeErrors } from "./common";
@@ -123,3 +123,11 @@ ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => "https://github.com/nig
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(getUpdates));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors(fetchUpdates));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));
+ipcMain.handle(IpcEvents.GET_LOCAL_BUILD, serializeErrors(async () => {
+    try {
+        const data = readFileSync(join(__dirname, "build.json"), "utf-8");
+        return JSON.parse(data);
+    } catch {
+        return null;
+    }
+}));
