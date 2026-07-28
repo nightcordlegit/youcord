@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { HeaderBarButton } from "@api/HeaderBar";
 import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
@@ -615,6 +616,7 @@ function DmServeurStatusToggle() {
         }
         setIsActive(v);
         settings.store.isActive = v;
+        console.log("[Dmserveur] handleToggle ->", v, "store.isActive now:", settings.store.isActive);
     }
 
     return (
@@ -681,13 +683,11 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
             setSelectedGuildIds(saved);
             const chs = (settings.store.channelIds ?? "").split(",").map(s => s.trim()).filter(Boolean);
             setSelectedChannelIds(chs);
-            const all = Object.values(GuildStore.getGuilds()) as any[];
-            setGuilds(all.sort((a, b) => a.name?.localeCompare?.(b.name) ?? 0));
-            setReady(true);
-        } catch { setReady(true); }
+        } catch { }
+        setReady(true);
     }, []);
 
-    React.useEffect(() => {
+    function loadChannelsForGuilds() {
         if (selectedGuildIds.length === 0) { setGuildChannelsMap({}); return; }
         try {
             const map: Record<string, string[]> = {};
@@ -700,6 +700,11 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
             }
             setGuildChannelsMap(map);
         } catch { setGuildChannelsMap({}); }
+    }
+
+    React.useEffect(() => {
+        if (selectedGuildIds.length === 0) { setGuildChannelsMap({}); return; }
+        loadChannelsForGuilds();
     }, [selectedGuildIds]);
 
     // Close the guild dropdown on any click outside of it (was staying open
@@ -719,6 +724,12 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
     }, [showGuildList]);
 
     function openGuildList() {
+        if (guilds.length === 0) {
+            try {
+                const all = Object.values(GuildStore.getGuilds()) as any[];
+                setGuilds(all.sort((a, b) => a.name?.localeCompare?.(b.name) ?? 0));
+            } catch { }
+        }
         const rect = guildTriggerRef.current?.getBoundingClientRect();
         if (rect) {
             setGuildListPos({ top: rect.bottom + 2, left: rect.left, width: rect.width });
