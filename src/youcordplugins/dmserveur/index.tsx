@@ -1,15 +1,21 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { HeaderBarButton } from "@api/HeaderBar";
+import { DataStore } from "@api/index";
+import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Switch } from "@components/Switch";
-import { definePluginSettings } from "@api/Settings";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore, LocaleStore, React, RestAPI, Select, Slider, TextArea, UserStore } from "@webpack/common";
-import { DataStore } from "@api/index";
 
 import { getGroqKey, groqChat } from "../youcordAI/groqManager";
 
@@ -43,7 +49,7 @@ function t(key: string, ...args: any[]): string {
     const lang = getDiscordUILang();
     const dict = TRANSLATIONS[key];
     if (!dict) return key;
-    const text = dict[lang] ?? dict["auto"] ?? key;
+    const text = dict[lang] ?? dict.auto ?? key;
     if (args.length === 0) return text;
     return text.replace(/\{(\d+)\}/g, (_, n) => String(args[parseInt(n)] ?? ""));
 }
@@ -520,10 +526,10 @@ const Forms = findByPropsLazy("FormTitle");
 const DS_ABBREVIATIONS_KEY = "dmserveur-abbreviations";
 
 const PERSONALITY_PROMPTS: Record<string, string> = {
-    chill: `You are Dmserveur, a friendly and casual Discord user in a community server.\n- Speak naturally like a regular person, not an AI assistant.\n- Be helpful and approachable, but don't sound robotic.\n- Use casual language, occasional slang, keep it real.\n- Don't over-explain things. Keep responses concise (1-3 sentences usually).\n- Match the energy of the conversation.`,
-    angry: `You are Dmserveur, and you are PISSED OFF. You are a brutally honest, aggressive Discord user.\n- Do NOT hold back. Be blunt, rude, and confrontational.\n- Come up with ORIGINAL creative insults.\n- Use aggressive language, swear if it fits your style.\n- You have zero patience for stupid questions or repeated topics.\n- Keep responses short and sharp. Your goal is to roast or shut down.\n- Stay in character at all times.`,
-    sarcastic: `You are Dmserveur, a sarcastic and witty Discord user.\n- Everything you say drips with sarcasm and dry humor.\n- Use clever wordplay, irony, and deadpan delivery.\n- Never explain your jokes.\n- Be funny but not mean-spirited (unless provoked).\n- Keep responses punchy and clever.`,
-    witty: `You are Dmserveur, a quick-witted and clever Discord user.\n- You always have a smart comeback ready.\n- Blend humor with intelligence.\n- Use pop culture references and clever analogies.\n- Be engaging and fun to talk to.\n- Never boring, always entertaining.`,
+    chill: "You are Dmserveur, a friendly and casual Discord user in a community server.\n- Speak naturally like a regular person, not an AI assistant.\n- Be helpful and approachable, but don't sound robotic.\n- Use casual language, occasional slang, keep it real.\n- Don't over-explain things. Keep responses concise (1-3 sentences usually).\n- Match the energy of the conversation.",
+    angry: "You are Dmserveur, and you are PISSED OFF. You are a brutally honest, aggressive Discord user.\n- Do NOT hold back. Be blunt, rude, and confrontational.\n- Come up with ORIGINAL creative insults.\n- Use aggressive language, swear if it fits your style.\n- You have zero patience for stupid questions or repeated topics.\n- Keep responses short and sharp. Your goal is to roast or shut down.\n- Stay in character at all times.",
+    sarcastic: "You are Dmserveur, a sarcastic and witty Discord user.\n- Everything you say drips with sarcasm and dry humor.\n- Use clever wordplay, irony, and deadpan delivery.\n- Never explain your jokes.\n- Be funny but not mean-spirited (unless provoked).\n- Keep responses punchy and clever.",
+    witty: "You are Dmserveur, a quick-witted and clever Discord user.\n- You always have a smart comeback ready.\n- Blend humor with intelligence.\n- Use pop culture references and clever analogies.\n- Be engaging and fun to talk to.\n- Never boring, always entertaining.",
 };
 
 const guildIconCache = new Map<string, string>();
@@ -1151,7 +1157,7 @@ async function learnAbbreviationsFromMessage(message: any, currentAbbrs: string[
     try {
         const reply = await groqChat({
             messages: [
-                { role: "system", content: `You are an abbreviation detector. Extract any abbreviations, acronyms, or slang terms from the message below that might not be widely known. Return ONLY a JSON array of strings, each being the abbreviation followed by " = " and its meaning. Example: ["idk = I don't know", "brb = be right back"]. If none found, return []. Do not return anything except the JSON array.` },
+                { role: "system", content: "You are an abbreviation detector. Extract any abbreviations, acronyms, or slang terms from the message below that might not be widely known. Return ONLY a JSON array of strings, each being the abbreviation followed by \" = \" and its meaning. Example: [\"idk = I don't know\", \"brb = be right back\"]. If none found, return []. Do not return anything except the JSON array." },
                 { role: "user", content: message.content }
             ],
             temperature: 0.1,
@@ -1256,7 +1262,7 @@ Return ONLY your response text, nothing else.`;
 
         const reply = await groqChat({
             messages: [
-                { role: "system", content: `You are Dmserveur, an AI that talks naturally in Discord servers. Respond in character.` },
+                { role: "system", content: "You are Dmserveur, an AI that talks naturally in Discord servers. Respond in character." },
                 { role: "user", content: prompt }
             ],
             temperature: settings.store.personality === "angry" ? 0.9 : 0.7,
