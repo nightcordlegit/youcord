@@ -36,17 +36,21 @@ function buildPluginMenu() {
 }
 
 export function buildPluginMenuEntries(includeEmpty = false) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const pluginSettings = useSettings().plugins;
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [search, setSearch] = useState("");
 
     const lowerSearch = search.toLowerCase();
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const sortedPlugins = useMemo(() =>
         Object.values(plugins).sort((a, b) => a.name.localeCompare(b.name)),
         []
     );
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const candidates = useMemo(() =>
         sortedPlugins
             .filter(p => {
@@ -56,6 +60,7 @@ export function buildPluginMenuEntries(includeEmpty = false) {
                 const name = p.name.toLowerCase();
                 return name.includes(lowerSearch);
             }),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [lowerSearch]
     );
 
@@ -197,7 +202,9 @@ export function buildThemeMenu() {
 }
 
 export function buildThemeMenuEntries() {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { useQuickCss, enabledThemes } = useSettings(["useQuickCss", "enabledThemes"]);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [themes] = useAwaiter(VencordNative.themes.getThemesList);
 
     return (

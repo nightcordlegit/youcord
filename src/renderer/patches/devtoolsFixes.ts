@@ -14,7 +14,7 @@ addPatch({
             replacement: {
                 match: /"discord\.com"===location\.host/,
                 replace: "false"
-            }
+            } as any
         },
 
         // Discord Web uses an incredibly broken devtools detector with false positives.
@@ -34,6 +34,6 @@ addPatch({
                     replace: "VesktopNative.win.setDevtoolsCallbacks"
                 }
             ]
-        }
+        } as any
     ]
 });

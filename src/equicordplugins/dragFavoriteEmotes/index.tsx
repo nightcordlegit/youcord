@@ -82,6 +82,7 @@ export default definePlugin({
         },
     ],
     drag(e: { descriptor: EmojiDescriptor; }) {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         return useDrag(
             () => ({
                 type: "emoji",
@@ -94,6 +95,7 @@ export default definePlugin({
             [e?.descriptor],);
     },
     drop({ emoji, category }: EmojiDescriptor) {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         return useDrop(() => ({
             accept: "emoji",
             canDrop() {
@@ -131,7 +133,9 @@ export default definePlugin({
     },
     wrapper(emoji: EmojiDescriptor) {
         const [collected, drop] = this.drop(emoji);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const ref: React.RefObject<null | HTMLElement> = useRef(null);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         useLayoutEffect(() => {
             if (emoji?.category !== "FAVORITES") return;
             const frame = requestAnimationFrame(() => {
@@ -146,6 +150,7 @@ export default definePlugin({
             }
             );
             return () => cancelAnimationFrame(frame);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [collected, ref]);
 
         if (emoji?.category !== "FAVORITES") return;

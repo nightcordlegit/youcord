@@ -295,7 +295,7 @@ function PluginSettings({ premiumOnly = false }: PluginSettingsProps) {
     const BATCH_SIZE = 40;
     const [visibleCount, setVisibleCount] = React.useState(BATCH_SIZE);
 
-    const observer = React.useRef<IntersectionObserver>();
+    const observer = React.useRef<IntersectionObserver>(null);
     const sentinelRef = React.useCallback((node: HTMLDivElement | null) => {
         if (observer.current) observer.current.disconnect();
         if (node) {
@@ -590,7 +590,7 @@ function PluginSettings({ premiumOnly = false }: PluginSettingsProps) {
     const othersVisibleData = othersData.slice(0, Math.max(0, visibleCount - youcordData.length));
 
     const makeCard = (p: typeof sortedPlugins[number]) => (
-        <ErrorBoundary fallback={<div style={{ color: "red", padding: 8 }}>Failed to render {p.name}.</div>} key={p.name}>
+        <ErrorBoundary fallback={({ message, stack }) => <div style={{ color: "red", padding: 8, fontSize: 12 }}><b>Failed to render {p.name}.</b><br />{message}{stack ? <pre style={{ fontSize: 10, marginTop: 4 }}>{stack}</pre> : null}</div>} key={p.name}>
             <PluginCard
                 onRestartNeeded={handleRestartNeeded}
                 disabled={false}
@@ -606,7 +606,7 @@ function PluginSettings({ premiumOnly = false }: PluginSettingsProps) {
             ? "This plugin is required for YouCord to function."
             : <PluginDependencyList deps={depMap[p.name]?.filter(d => isPluginEnabled(d))} />;
         return (
-            <ErrorBoundary fallback={<div style={{ color: "red", padding: 8 }}>Failed to render {p.name}.</div>} key={p.name}>
+            <ErrorBoundary fallback={({ message, stack }) => <div style={{ color: "red", padding: 8, fontSize: 12 }}><b>Failed to render {p.name}.</b><br />{message}{stack ? <pre style={{ fontSize: 10, marginTop: 4 }}>{stack}</pre> : null}</div>} key={p.name}>
                 <Tooltip text={tooltipText}>
                     {({ onMouseLeave, onMouseEnter }) => (
                         <PluginCard

@@ -275,10 +275,10 @@ async function fetchPublicProfileIfNeeded(userId: string) {
 
     try {
         const UPS = (Vencord as any).Webpack?.findByProps?.("getUserProfile", "getGuildMemberProfile");
-        if (UPS && UPS.emitChange) UPS.emitChange();
+        if (UPS && UPS.emitChange) queueMicrotask(() => UPS.emitChange());
 
         const US = (Vencord as any).Webpack?.findByStoreName("UserStore");
-        if (US && US.emitChange) US.emitChange();
+        if (US && US.emitChange) queueMicrotask(() => US.emitChange());
     } catch {}
 }
 
@@ -930,15 +930,15 @@ function BadgePicker({ selected, onChange, nitroType, onNitroType, boostLevel, o
 
 function forceAccountPanelRerender() {
     try {
-        if (UserStore && UserStore.emitChange) UserStore.emitChange();
+        if (UserStore && UserStore.emitChange) queueMicrotask(() => UserStore.emitChange());
 
         // Force UserProfileStore (side profile panel and popouts)
-        if (UserProfileStore && UserProfileStore.emitChange) UserProfileStore.emitChange();
+        if (UserProfileStore && UserProfileStore.emitChange) queueMicrotask(() => UserProfileStore.emitChange());
 
         // Force MultiAccountStore to re-notify the "Switch Account" switcher
         const WP = (Vencord as any).Webpack;
         const MAS = WP?.findByProps?.("getUsers", "getValidUsers", "getHasLoggedInAccounts");
-        if (MAS && MAS.emitChange) MAS.emitChange();
+        if (MAS && MAS.emitChange) queueMicrotask(() => MAS.emitChange());
 
         // Dispatch local update without corrupting global store
         // Forces React to re-calculate useCurrentUser hooks
@@ -1444,6 +1444,7 @@ export default definePlugin({
 
     headerBarButton: {
         icon: EditIcon,
+        render: () => null,
     },
 
     patches: [

@@ -9,7 +9,7 @@ import "./styles.css";
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { IconComponent, OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { React, UserStore,useState, useStateFromStores } from "@webpack/common";
 
@@ -187,7 +187,7 @@ export default definePlugin({
     settings,
 
     chatBarButton: {
-        icon: EyeSlashIcon,
+        icon: EyeSlashIcon as IconComponent,
         render: StreamProofButton,
     },
 

@@ -10,7 +10,7 @@ import { Margins } from "@utils/margins";
 import { RenderModalProps } from "@vencord/discord-types";
 import { Modal, SearchableSelect, useEffect, useMemo, useState } from "@webpack/common";
 
-import { DATASTORE_KEY, getSystemTimezone, resolveUserTimezone, settings, timezones } from ".";
+import { DATASTORE_KEY, getSystemTimezone, resolveUserTimezone, timezones } from ".";
 import { setTimezone, setUserDatabaseTimezone } from "./database";
 
 export async function setUserTimezone(userId: string, timezone: string | null) {
@@ -24,7 +24,7 @@ export function SetTimezoneModal({ userId, modalProps, database }: { userId: str
     useEffect(() => {
         const resolvedTimezone = resolveUserTimezone(userId);
         setCurrentValue(resolvedTimezone ?? getSystemTimezone());
-    }, [userId, settings.store.useDatabase, settings.store.preferDatabaseOverLocal]);
+    }, [userId]);
 
     const options = useMemo(() => {
         return Intl.supportedValuesOf("timeZone").map(timezone => {

@@ -214,6 +214,7 @@ function BookmarksList({ password }: BookmarksListProps) {
             title: t("Clear SecureBookmarks"),
             body: t("Are you sure you want to delete all saved bookmarks? This action is irreversible."),
             confirmText: t("Clear all"),
+            // @ts-ignore
             confirmVariant: "critical-primary",
             cancelText: t("Cancel"),
             onConfirm: () => {
@@ -377,7 +378,6 @@ function SecureBookmarksModalInner({ modalProps, close }: SecureBookmarksModalPr
                         </div>
                         <Button
                             size="small"
-                            variant="secondary"
                             onClick={() => {
                                 close();
                             }}
@@ -393,7 +393,7 @@ function SecureBookmarksModalInner({ modalProps, close }: SecureBookmarksModalPr
                 )}
             </ModalContent>
             <ModalFooter>
-                <Button onClick={close} variant="secondary">
+                <Button onClick={close}>
                     Close
                 </Button>
             </ModalFooter>

@@ -123,7 +123,7 @@ export const NotificationDot = ({ channelIds }: { channelIds: string[]; }) => {
     useEffect(() => {
         if (!userId || !persistUnreadCountFallback) return;
         updateUnreadFallbackCounts(userId, channelStates);
-    }, [channelStateKey, persistUnreadCountFallback, stateSignature, userId]);
+    }, [channelStateKey, persistUnreadCountFallback, stateSignature, userId, channelStates]);
 
     return shouldShow ?
         <div

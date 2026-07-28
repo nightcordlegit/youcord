@@ -141,7 +141,7 @@ function UserPluginsTab() {
                                 return "Invalid URL, read the notice above";
                             }
                         }}
-                        initialValue={url}
+                        value={url}
                     />
                 </div>
                 <div className={cl("button-container")}>

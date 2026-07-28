@@ -434,7 +434,7 @@ export default definePlugin({
 
             if (combinedMessageCache.size > 1000) {
                 const firstKey = combinedMessageCache.keys().next().value;
-                combinedMessageCache.delete(firstKey);
+                combinedMessageCache.delete(firstKey!);
             }
 
             return combined;

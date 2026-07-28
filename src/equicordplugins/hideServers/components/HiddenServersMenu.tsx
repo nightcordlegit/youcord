@@ -10,6 +10,7 @@ import { HiddenServersStore } from "@equicordplugins/hideServers/HiddenServersSt
 import { classNameFactory } from "@utils/css";
 import { getGuildAcronym } from "@utils/discord";
 import { classes } from "@utils/misc";
+import { ModalSize } from "@utils/modal";
 import { Guild, RenderModalProps } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
 import { Button, closeModal, IconUtils, Modal,openModal, useStateFromStores } from "@webpack/common";
@@ -22,7 +23,7 @@ const IconClasses = findCssClassesLazy("icon", "acronym", "childWrapper");
 function HiddenServersModal({ modalProps, close }: { modalProps: RenderModalProps; close(): void; }) {
     const guilds = useStateFromStores([HiddenServersStore], () => HiddenServersStore.hiddenGuildsDetail());
     return (
-        <Modal {...modalProps} size="lg" title="Hidden Servers">
+        <Modal {...modalProps} size={ModalSize.LARGE} title="Hidden Servers">
             <HiddenServersMenu guilds={guilds} />
         </Modal>
     );

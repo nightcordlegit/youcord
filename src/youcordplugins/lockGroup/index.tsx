@@ -52,7 +52,7 @@ function interceptAddMember(originalMethod: any) {
                 const channel = ChannelStore.getChannel(channelId);
                 const currentUserId = UserStore.getCurrentUser()?.id;
 
-                if (channel && channel.type === 3 && channel.ownerId === currentUserId) {
+                    if (channel && channel.type === 3 && (channel as any).ownerId === currentUserId) {
                     debugLog("\u2705 Propri\u00e9taire autoris\u00e9 \u00e0 ajouter des membres");
                     return originalMethod.apply(this, args);
                 }
@@ -99,7 +99,7 @@ function toggleGroupLock(channelId: string) {
 
     const channelName = channel.name || "Groupe sans nom";
 
-    if (channel.ownerId !== currentUserId) {
+    if ((channel as any).ownerId !== currentUserId) {
         if (settings.store.showNotifications) {
             showNotification({
                 title: "\u274C LockGroup",
@@ -139,7 +139,7 @@ const GroupContextMenuPatch: NavContextMenuPatchCallback = (children, { channel 
     if (!channel || channel.type !== 3) return;
 
     const currentUserId = UserStore.getCurrentUser()?.id;
-    if (channel.ownerId !== currentUserId) return;
+    if ((channel as any).ownerId !== currentUserId) return;
 
     const isLocked = lockedGroups.has(channel.id);
     const group = findGroupChildrenByChildId("leave-channel", children);
@@ -206,7 +206,7 @@ export default definePlugin({
                 const channelId = message.channel_id;
                 if (lockedGroups.has(channelId)) {
                     const channel = ChannelStore.getChannel(channelId);
-                    if (channel && channel.type === 3 && channel.ownerId === currentUserId) {
+                if (channel && channel.type === 3 && (channel as any).ownerId === currentUserId) {
                         const channelName = channel.name || "Groupe sans nom";
                         const addedUserId = message.mentions?.[0]?.id;
                         const addedByUserId = message.author?.id;

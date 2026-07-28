@@ -59,7 +59,7 @@ function NewPluginsModal({ modalProps, newPlugins, newSettings }: ModalComponent
             ...mapPlugins([...newPlugins]),
             ...mapPlugins([...newSettings.keys()].filter(p => !newPlugins.has(p)))
         ];
-    }, []);
+    }, [newPlugins, newSettings]);
 
     const onRestartNeeded = (name: string) => {
         changes.handleChange(name);

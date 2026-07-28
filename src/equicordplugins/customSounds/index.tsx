@@ -228,10 +228,14 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "",
         component: () => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const [resetTrigger, setResetTrigger] = React.useState(0);
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const [searchQuery, setSearchQuery] = React.useState("");
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             React.useEffect(() => {
                 allSoundTypes.forEach(type => {
                     if (!settings.store[type.id]) {

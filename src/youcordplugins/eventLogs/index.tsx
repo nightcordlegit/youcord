@@ -841,6 +841,7 @@ export default definePlugin({
 
     headerBarButton: {
         icon: LogsIconWithBadge,
+        render: () => null,
     },
 
     start() {

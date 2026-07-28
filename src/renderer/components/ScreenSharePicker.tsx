@@ -43,7 +43,7 @@ import { SimpleErrorBoundary } from "./SimpleErrorBoundary";
 const StreamResolutions = ["480", "720", "1080", "1440", "2160"] as const;
 const StreamFps = ["15", "30", "60"] as const;
 
-const cl = classNameFactory("vcd-screen-picker-");
+const cl = classNameFactory("vcd-screen-picker-") as (...args: string[]) => string;
 
 export type StreamResolution = (typeof StreamResolutions)[number];
 export type StreamFps = (typeof StreamFps)[number];
@@ -123,7 +123,7 @@ addPatch({
 let streamCloseCallback: ((data: any) => void) | null = null;
 
 if (isLinux) {
-    onceReady.then(() => {
+    (onceReady as unknown as Promise<void>).then(() => {
         streamCloseCallback = ({ streamKey }: { streamKey: string; }) => {
             const owner = streamKey.split(":").at(-1);
 
@@ -176,7 +176,7 @@ export function openScreenSharePicker(screens: Source[], skipPicker: boolean) {
             ),
             {
                 onCloseRequest() {
-                    closeModal(key);
+                    closeModal(key as any);
                     reject("Aborted");
                 },
                 onCloseCallback() {
@@ -364,7 +364,7 @@ function StreamSettingsUi({
     const Settings = useSettings();
     const qualitySettings = State.store.screenshareQuality!;
 
-    const [thumb] = useAwaiter(
+    const [thumb] = (useAwaiter as any)(
         () => (skipPicker ? Promise.resolve(source.url) : VesktopNative.capturer.getLargeThumbnail(source.id)),
         {
             fallbackValue: source.url,
@@ -591,16 +591,16 @@ function AudioSourcePickerLinux({
     setIncludeSources: (s: AudioSources) => void;
     setExcludeSources: (s: AudioSources) => void;
 }) {
-    const [audioSourcesSignal, refreshAudioSources] = useForceUpdater(true);
-    const [sources, _, loading] = useAwaiter(() => VesktopNative.virtmic.list(), {
-        fallbackValue: { ok: true, targets: [], hasPipewirePulse: true },
+    const [audioSourcesSignal, refreshAudioSources] = (useForceUpdater as any)(true);
+    const [sources, _, loading] = (useAwaiter as any)(() => VesktopNative.virtmic.list(), {
+        fallbackValue: { ok: true, targets: [] as any[], hasPipewirePulse: true } as any,
         deps: [audioSourcesSignal]
     });
 
-    const hasPipewirePulse = sources.ok ? sources.hasPipewirePulse : true;
+    const hasPipewirePulse = (sources as any)?.ok ? (sources as any).hasPipewirePulse : true;
     const [ignorePulseWarning, setIgnorePulseWarning] = useState(false);
 
-    if (!sources.ok && sources.isGlibCxxOutdated) {
+    if (!(sources as any)?.ok && (sources as any)?.isGlibCxxOutdated) {
         return (
             <Paragraph>
                 Failed to retrieve Audio Sources because your C++ library is too old to run
@@ -644,8 +644,8 @@ function AudioSourcePickerLinux({
     const uniqueName = (value: AudioItem, index: number, list: AudioItem[]) =>
         list.findIndex(x => x.name === value.name) === index;
 
-    const allSources = sources.ok
-        ? [...specialSources, ...sources.targets]
+    const allSources = (sources as any)?.ok
+        ? [...specialSources, ...(sources as any).targets]
             .map(target => mapToAudioItem(target, granularSelect, deviceSelect))
             .flat()
             .filter(uniqueName)
@@ -746,7 +746,7 @@ function ModalComponent({
                     <StreamSettingsUi
                         source={screens.find(s => s.id === selected)!}
                         settings={settings}
-                        setSettings={setSettings}
+                        setSettings={setSettings as Dispatch<SetStateAction<StreamSettings>>}
                         skipPicker={skipPicker}
                     />
                 )}

@@ -493,7 +493,7 @@ function StereoInstallerPanel() {
                         {t("Clear logs")}
                     </Button>
                 </div>
-                <ScrollerThin fade className="vc-stereo-installer-log" role="log" aria-live="polite">
+                <ScrollerThin fade className="vc-stereo-installer-log">
                     {logs.length
                         ? logs.slice(-200).map(entry => <LogLine key={entry.id} entry={entry} />)
                         : <div className="vc-stereo-installer-log-empty">{t("StereoInstaller activity will appear here.")}</div>}

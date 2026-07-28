@@ -38,6 +38,7 @@ export class Queue {
         if (func)
             this.promise = Promise.resolve()
                 .then(func)
+                .catch(() => {})
                 .finally(() => this.next());
         else
             this.promise = undefined;

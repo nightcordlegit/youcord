@@ -145,6 +145,7 @@ function SaveThemSettings({ closePluginSettings }: { closePluginSettings: () => 
             title: t("Remove Saved User"),
             body: t(`Are you sure you want to remove ${name} from your saved users list?`),
             confirmText: t("Remove"),
+            // @ts-ignore
             confirmVariant: "critical-primary",
             cancelText: t("Cancel"),
             onConfirm: async () => {
@@ -209,7 +210,7 @@ function SaveThemSettings({ closePluginSettings }: { closePluginSettings: () => 
     );
 }
 
-const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => {
+const UserContextMenuPatch: any = (children: any, { user }: UserContextProps) => {
     if (!user) return;
 
     children.push(
@@ -228,7 +229,8 @@ const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: U
 export const settings = definePluginSettings({
     presetsManager: {
         type: OptionType.COMPONENT,
-        component({ closePluginSettings }) {
+        component: (option: any) => {
+            const { closePluginSettings } = option;
             return (
                 <ErrorBoundary>
                     <SaveThemSettings closePluginSettings={closePluginSettings} />

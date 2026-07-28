@@ -113,7 +113,7 @@ function SaveProfileSettings({ closePluginSettings }: { closePluginSettings: () 
             const avatarDataUrl = await imageUrlToBase64(avatarUrl);
 
             // Get banner image base64 (if user has custom banner)
-            let bannerDataUrl = null;
+            let bannerDataUrl: string | null = null;
             if (userProfile?.banner) {
                 const isAnimated = userProfile.banner.startsWith("a_");
                 const bannerUrl = `https://cdn.discordapp.com/banners/${currentUser.id}/${userProfile.banner}.${isAnimated ? "gif" : "png"}?size=480`;
@@ -215,6 +215,7 @@ function SaveProfileSettings({ closePluginSettings }: { closePluginSettings: () 
             title: t("Delete Profile Configuration"),
             body: t("Are you sure you want to delete this profile configuration?"),
             confirmText: t("Delete"),
+            // @ts-ignore
             confirmVariant: "critical-primary",
             cancelText: t("Cancel"),
             onConfirm: async () => {
@@ -365,7 +366,8 @@ function SaveProfileSettings({ closePluginSettings }: { closePluginSettings: () 
 export const settings = definePluginSettings({
     presetsManager: {
         type: OptionType.COMPONENT,
-        component({ closePluginSettings }) {
+        component: (option: any) => {
+            const { closePluginSettings } = option;
             return (
                 <ErrorBoundary>
                     <SaveProfileSettings closePluginSettings={closePluginSettings} />

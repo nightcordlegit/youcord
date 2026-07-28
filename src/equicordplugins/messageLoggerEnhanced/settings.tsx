@@ -306,7 +306,8 @@ export const settings = definePluginSettings({
                 onClick={() => Alerts.show({
                     title: "Clear Logs",
                     body: "Are you sure you want to clear all logs?",
-                    confirmVariant: "critical-primary",
+                    // @ts-ignore
+                    variant: "critical-primary",
                     confirmText: "Clear",
                     cancelText: "Cancel",
                     onConfirm: async () => {

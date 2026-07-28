@@ -2,6 +2,8 @@ name: autofix.ci
 
 on:
     pull_request:
+    push:
+        branches: [ "main" ]
 
 permissions:
     contents: read
@@ -11,7 +13,7 @@ jobs:
         name: autofix
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - uses: pnpm/action-setup@v6
 
@@ -30,4 +32,4 @@ jobs:
             - name: Run stylelint fix
               run: pnpm lint-styles:fix
 
-            - uses: autofix-ci/action@v1
+            - uses: autofix-ci/action@c5b2d67aa2274e7b5a18224e8171550871fc7e4a

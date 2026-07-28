@@ -12,6 +12,7 @@ import { Paragraph } from "@components/Paragraph";
 import { TooltipContainer } from "@components/TooltipContainer";
 import { copyWithToast, getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
+import { ModalSize } from "@utils/modal";
 import { saveFile } from "@utils/web";
 import { Icon, RenderModalProps } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
@@ -248,7 +249,7 @@ function IconModal({ iconName, Icon, onClose, transitionState }: { iconName: str
         <Modal
             transitionState={transitionState}
             onClose={onClose}
-            size="md"
+            size={ModalSize.MEDIUM}
             title={iconName}
             actions={[
                 {

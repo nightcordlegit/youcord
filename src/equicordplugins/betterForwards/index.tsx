@@ -67,7 +67,6 @@ const settings = definePluginSettings({
     forwardPreface: {
         description: "What should the forwarded message be prefaced with",
         type: OptionType.SELECT,
-        hidden: () => !settings.store.resendOnFail,
         options: [
             { label: ">", value: ">", default: true },
             { label: "-#", value: "-#" }
@@ -75,7 +74,6 @@ const settings = definePluginSettings({
     },
     dontFollowForwards: {
         description: "After forwarding a single message, don't jump to it. Hold shift to ignore this behavior.",
-        displayName: "Don't Follow Forwards",
         type: OptionType.BOOLEAN,
         default: false,
         restartNeeded: true

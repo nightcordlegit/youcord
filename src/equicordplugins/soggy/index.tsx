@@ -27,15 +27,15 @@ function assignBoop(url: string, volume: number) {
 }
 
 function SoggyModal(props: RenderModalProps) {
-    if (settings.store.songVolume !== 0) {
-        React.useEffect(() => {
-            song?.loop();
+    React.useEffect(() => {
+        if (settings.store.songVolume === 0) return;
 
-            return () => {
-                song?.stop();
-            };
-        }, []);
-    }
+        song?.loop();
+
+        return () => {
+            song?.stop();
+        };
+    }, []);
 
     const boop = (e: React.MouseEvent<HTMLImageElement>) => {
         const { offsetX, offsetY } = e.nativeEvent;

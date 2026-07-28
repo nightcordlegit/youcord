@@ -35,8 +35,9 @@ import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
+import type { User } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
-import { FluxDispatcher, React, Toasts, Tooltip, useMemo,UserStore } from "@webpack/common";
+import { FluxDispatcher, React, Toasts, Tooltip, useMemo, UserStore } from "@webpack/common";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
@@ -87,7 +88,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         pluginSettings[key] = newValue;
 
         if (opt.restartNeeded) onRestartNeeded(key);
-    }), []);
+    }), [onRestartNeeded, plugin.settings?.def, pluginSettings]);
 
     function renderSettings() {
         const { settings } = plugin;
@@ -123,7 +124,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     const isEquicordPlugin = pluginMeta?.folderName?.startsWith("src/equicordplugins/") ?? false;
 
     return (
-        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
+        <ModalRoot transitionState={transitionState} size={ModalSize.DYNAMIC} onClose={onClose}>
             <ModalHeader separator={false} className={cl("header")}>
                 <div className={cl("header-content")}>
                     <BaseText size="lg" weight="semibold" className={cl("title")}>{tPlugin(plugin.name)}</BaseText>

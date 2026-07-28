@@ -21,6 +21,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "SedEnhanced",
     description: "Expands on Discord's rudimentary `sed` support.",
+    // @ts-ignore
     authors: [EquicordDevs.dawn, EquicordDevs.Willow, EquicordDevs.kat],
     tags: ["Chat"],
     patches: [

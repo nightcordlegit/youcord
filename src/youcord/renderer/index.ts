@@ -51,7 +51,7 @@ VesktopNative.voice.onToggleSelfDeaf(() => VoiceActions.toggleSelfDeaf());
 
 // Afficher le SecurityModal uniquement au premier lancement
 const SECURITY_MODAL_KEY = "youcord_security_modal_seen";
-onceReady.then(() => {
+(onceReady as unknown as Promise<void>).then(() => {
     if (!localStorage.getItem(SECURITY_MODAL_KEY)) {
         setTimeout(() => {
             openModal(props => React.createElement(SecurityModal, props));

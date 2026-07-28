@@ -48,7 +48,7 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
                         <Flex flexDirection="column" gap="6" >
                             {users.map(user => (
                                 <Flex key={user.id} flexDirection="row" gap="6" alignContent="center">
-                                    <img className={cl("user-avatar")} src={getUserAvatarUrl(user, guildId, true, 80)} alt="" />
+                                    <img className={cl("user-avatar")} src={getUserAvatarUrl(user as any, guildId, true, 80)} alt="" />
                                     {getUsername(user)}
                                 </Flex>
                             ))}
@@ -151,7 +151,7 @@ export default definePlugin({
                                     >
                                         <img
                                             className={AvatarStyles.avatar}
-                                            src={getUserAvatarUrl(user, guildId, true, 80)}
+                                            src={getUserAvatarUrl(user as any, guildId, true, 80)}
                                             alt={user.username}
                                             title={user.username}
                                         />

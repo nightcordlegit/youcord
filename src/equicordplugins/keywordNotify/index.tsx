@@ -525,6 +525,7 @@ export default definePlugin({
     tryKeywordMenu(onJump) {
         const channel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
 
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const [tempLogs, setKeywordLog] = useState(keywordLog);
         this.onUpdate = () => {
             const newLog = Array.from(keywordLog);

@@ -99,7 +99,7 @@ export default definePlugin({
             } else if (media.tagName === "VIDEO") {
                 changeSpeed(settings.store.defaultVideoSpeed);
             }
-        }, [mediaRef]);
+        }, [mediaRef]); // eslint-disable-line react-hooks/exhaustive-deps
 
         return (
             <Tooltip text="Playback speed">

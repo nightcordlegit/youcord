@@ -43,7 +43,7 @@ function LyricsProviderSettings() {
 
     return (
         <>
-            <SettingsSection id="lyrics-provider" name="Lyrics Provider" description="Where lyrics are fetched from.">
+            <SettingsSection name="Lyrics Provider" description="Where lyrics are fetched from.">
                 <Select
                     options={[
                         { value: Provider.Lrclib, label: "LRCLIB", default: true },
@@ -58,7 +58,6 @@ function LyricsProviderSettings() {
 
             {store.lyricsProvider === Provider.Spotify && (
                 <SettingsSection
-                    id="spotify-lyrics-provider"
                     name="Spotify Lyrics API Base URL"
                     description="Custom instance base URL (for example: http://localhost:8080)."
                 >

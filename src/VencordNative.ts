@@ -79,7 +79,8 @@ export default {
         onRendererCssUpdate: (cb: (newCss: string) => void) => {
             if (!IS_DEV) return;
             ipcRenderer.on(IpcEvents.RENDERER_CSS_UPDATE, (_e, newCss: string) => cb(newCss));
-        }
+        },
+        supportsWindowsMaterial: () => false as boolean,
     },
 
     csp: {

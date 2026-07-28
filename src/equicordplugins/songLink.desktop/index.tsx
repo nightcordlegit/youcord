@@ -89,9 +89,11 @@ function SongLinkerList({ urls }: { urls: string[]; }) {
         () => Object.fromEntries(urls.map(u => [u, null]))
     );
 
+    const urlsKey = urls.join("\n");
     useEffect(() => {
         setResolvedKeys(Object.fromEntries(urls.map(u => [u, null])));
-    }, [urls.join("\n")]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [urlsKey]);
 
     function onResolved(url: string, result: SongLinkResult) {
         const key = result.info

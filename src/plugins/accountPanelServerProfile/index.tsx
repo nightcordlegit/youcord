@@ -147,6 +147,7 @@ function ServerProfileLauncher({ popoutProps, userId, guildId }: { popoutProps: 
         fetchUserProfile(userId, { guild_id: guildId }, false).then(user => {
             if (user) openUserProfile(user.userId);
         });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     return null;
 }

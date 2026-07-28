@@ -61,9 +61,12 @@ const settings = definePluginSettings({
     delete: {
         type: OptionType.COMPONENT,
         component: () => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const [size, setSize] = useState(0);
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const [deleteKeys, setDeleteKeys] = useState<string[]>([]);
 
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             useEffect(() => {
                 DataStore.entries().then(entries => {
                     let size = 0;
@@ -79,6 +82,7 @@ const settings = definePluginSettings({
                     setSize(size);
                     setDeleteKeys(keys);
                 });
+
             }, []);
 
             return <Button
@@ -231,6 +235,7 @@ function TranscriptionModal(props: { modalProps: RenderModalProps, src: string, 
             active = false;
             workerRef.current?.terminate();
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [src, retryCount]);
 
     const retry = () => {

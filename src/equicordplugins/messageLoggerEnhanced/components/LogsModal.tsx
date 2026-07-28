@@ -9,6 +9,7 @@ import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
 import { InfoIcon } from "@components/Icons";
 import { copyWithToast, openUserProfile } from "@utils/discord";
+import { ModalSize } from "@utils/modal";
 import { LazyComponent } from "@utils/react";
 import { RenderModalProps, type User } from "@vencord/discord-types";
 import { find, findByCode, findByCodeLazy } from "@webpack";
@@ -76,7 +77,7 @@ export function LogsModal({ modalProps, initalQuery }: Props) {
     return (
         <Modal
             {...modalProps}
-            size="lg"
+            size={ModalSize.LARGE}
             title={
                 <div className={cl("modal")}>
                     <TabBar
@@ -135,7 +136,8 @@ export function LogsModal({ modalProps, initalQuery }: Props) {
                         title: "Clear Logs",
                         body: `Are you sure you want to clear ${messages.length} logs`,
                         confirmText: "Clear",
-                        confirmVariant: "critical-primary",
+                        // @ts-ignore
+                        variant: "critical-primary",
                         cancelText: "Cancel",
                         onConfirm: async () => {
                             await deleteMessagesBulkIDB(messages.map(e => e.message_id));
@@ -150,7 +152,8 @@ export function LogsModal({ modalProps, initalQuery }: Props) {
                         title: "Clear Logs",
                         body: "Are you sure you want to clear all the logs",
                         confirmText: "Clear",
-                        confirmVariant: "critical-primary",
+                        // @ts-ignore
+                        variant: "critical-primary",
                         cancelText: "Cancel",
                         onConfirm: async () => {
                             await clearLogs();

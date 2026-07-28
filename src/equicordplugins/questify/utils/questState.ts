@@ -216,6 +216,7 @@ function getMostRecentlyCompletedUnclaimedQuest(): Quest | null {
 }
 
 export function getQuestPanelOverride(quest: Quest | null): Quest | null {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const panelState = useQuestifySettings(["disableQuestsEverything", "disableAccountPanelPromo", "disableAccountPanelQuestProgress"]);
 
     if (panelState.disableQuestsEverything) {

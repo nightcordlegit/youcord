@@ -94,8 +94,10 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { msg }: { msg: 
     const group = findGroupChildrenByChildId("copy-text", children);
     if (!group) return;
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const forceUpdate = useForceUpdater();
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         const handler = () => {
             forceUpdate();
@@ -108,7 +110,7 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { msg }: { msg: 
             window.removeEventListener("keydown", handler);
             window.removeEventListener("keyup", handler);
         };
-    }, []);
+    }, [forceUpdate]);
 
     group.splice(group.findIndex(c => c?.props?.id === "reply") + 1, 0, (
         <Menu.MenuItem

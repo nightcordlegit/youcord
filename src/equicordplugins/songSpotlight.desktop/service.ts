@@ -13,6 +13,7 @@ import { useEffect, useState } from "@webpack/common";
 export function useRender(song: Song) {
     const [failed, setFailed] = useState(false);
     const [render, setRender] = useState<RenderSongInfo | null>(null);
+    const songId = sid(song);
 
     useEffect(() => {
         setFailed(false);
@@ -20,7 +21,7 @@ export function useRender(song: Song) {
         Native.renderSong(song)
             .catch(() => null)
             .then(info => info ? setRender(info) : setFailed(true));
-    }, [sid(song)]);
+    }, [songId, song]);
 
     return { failed, render };
 }

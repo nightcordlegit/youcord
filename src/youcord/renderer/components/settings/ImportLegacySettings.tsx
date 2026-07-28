@@ -50,7 +50,7 @@ export function ImportLegacySettingsButton({ settings }: { settings: any; }) {
     const [dragging, setDragging] = useState(false);
     const [status, setStatus] = useState<null | "success" | "error" | "loading">(null);
     const [message, setMessage] = useState("");
-    const inputRef = useRef<HTMLInputElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null as any);
 
     async function processFile(file: File) {
         setStatus("loading");

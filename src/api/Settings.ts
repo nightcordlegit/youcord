@@ -48,6 +48,8 @@ export type SettingsPluginUiElements = {
     [id: string]: SettingsPluginUiElement;
 };
 
+export type ThemeActivationMode = "light" | "dark" | "sync" | "always";
+
 export interface Settings {
     autoUpdate: boolean;
     autoUpdateNotification: boolean;
@@ -82,7 +84,7 @@ export interface Settings {
     winNativeTitleBar: boolean;
     seeAllCustomProfile: boolean;
     syncOwnCustomProfile: boolean;
-    language: "en" | "fr" | "es" | "ru" | "zh";
+    language: "en" | "fr" | "es" | "ru" | "zh" | "ar";
     plugins: {
         [plugin: string]: {
             enabled: boolean;
@@ -111,6 +113,9 @@ export interface Settings {
     };
 
     ignoreResetWarning: boolean;
+
+    themeActivationModes: Record<string, "light" | "dark" | "sync">;
+    windowsMaterial: boolean;
 
     userCssVars: {
         [themeId: string]: {
@@ -165,6 +170,9 @@ const DefaultSettings: Settings = {
     },
 
     userCssVars: {},
+    ignoreResetWarning: false,
+    themeActivationModes: {},
+    windowsMaterial: false,
 };
 
 const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;

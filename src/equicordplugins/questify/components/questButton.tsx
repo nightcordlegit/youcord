@@ -139,6 +139,7 @@ export function showQuestButton(displayMode: QuestButtonDisplayMode, badgeCount:
 }
 
 export function disguiseHomeButton(pathname: string): boolean {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const buttonSettings = useQuestifySettings(["questButtonDisplay", "questButtonBadgeCount", "isOnQuestsPage"]);
 
     if (!showQuestButton(buttonSettings.questButtonDisplay, buttonSettings.questButtonBadgeCount, buttonSettings.isOnQuestsPage)) {

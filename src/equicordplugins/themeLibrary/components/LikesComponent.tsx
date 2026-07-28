@@ -20,14 +20,9 @@ export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { t
     const debounce = useRef(false);
 
     useEffect(() => {
-        const likes = getThemeLikes(themeId);
-        setLikesCount(likes);
-    }, [likedThemes, themeId]);
-
-    function getThemeLikes(themeId: Theme["id"]): number {
         const themeLike = likedThemes?.likes.find(like => like.themeId === themeId as unknown as Number);
-        return themeLike ? themeLike.likes : 0;
-    }
+        setLikesCount(themeLike ? themeLike.likes : 0);
+    }, [likedThemes, themeId]);
 
     const handleLikeClick = async (themeId: Theme["id"]) => {
         if (!isAuthorized()) return;

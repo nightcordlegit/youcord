@@ -29,6 +29,7 @@ export default definePluginSettings({
         type: OptionType.COMPONENT,
         description: "Remove hidden servers",
         component: () => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const detail = useStateFromStores([HiddenServersStore], () => HiddenServersStore.hiddenGuildsDetail());
             return <HiddenServersMenu guilds={detail} />;
         }

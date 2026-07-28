@@ -195,7 +195,7 @@ function SettingsSections() {
     return <>{sections}</>;
 }
 
-export default ErrorBoundary.wrap(
+export default (ErrorBoundary as any).wrap(
     function SettingsUI() {
         return (
             <section>

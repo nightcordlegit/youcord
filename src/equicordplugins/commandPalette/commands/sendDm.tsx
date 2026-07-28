@@ -34,7 +34,7 @@ function friendOptions(query: string): FormFieldOption[] {
 }
 
 async function resolveDmChannel(userId: string): Promise<string | null> {
-    const result = await Promise.resolve(openPrivateChannel(userId, true));
+    const result = await Promise.resolve(openPrivateChannel(userId));
     if (typeof result === "string") return result;
 
     const existing = ChannelStore.getDMFromUserId(userId);

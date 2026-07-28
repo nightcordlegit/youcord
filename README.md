@@ -162,6 +162,19 @@ Build artifacts and releases are available in the [Releases](https://github.com/
 
 ---
 
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-0-orange.svg?style=flat-square)](#contributors)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+Contributions of any kind welcome!
+
 ## Contributing
 
 Contributions are welcome! Please check the [issue tracker](https://github.com/nightcordlegit/youcord/issues) for open bugs and feature requests.

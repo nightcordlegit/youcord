@@ -38,11 +38,12 @@ const filterOngoingRings = (currentUserId: string): CallUpdate["ongoingRings"] =
     args.ongoingRings.filter((id: string) => id !== currentUserId);
 
 const ContextMenuPatch: NavContextMenuPatchCallback = (children, { channel }: { channel: Channel; }) => {
-    if (!channel) return;
     const permanentlyIgnoredUsers = settings.store.permanentlyIgnoredUsers.split(",").map(s => s.trim()).filter(Boolean);
 
-    const [tempChecked, setTempChecked] = React.useState(ignoredChannelIds.has(channel.id));
-    const [permChecked, setPermChecked] = React.useState(permanentlyIgnoredUsers.includes(channel.id));
+    const [tempChecked, setTempChecked] = React.useState(channel ? ignoredChannelIds.has(channel.id) : false);
+    const [permChecked, setPermChecked] = React.useState(channel ? permanentlyIgnoredUsers.includes(channel.id) : false);
+
+    if (!channel) return;
 
     children.push(
         <>

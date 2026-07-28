@@ -23,7 +23,7 @@ export function Accessory({ message }: { message: Message; }) {
         setters.set(message.id, setTranslation);
 
         return () => void setters.delete(message.id);
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     if (!translation) return null;
 

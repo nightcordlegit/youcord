@@ -232,7 +232,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
         <>
             <Heading tag="h5">Custom Name</Heading>
             <CheckedTextInput
-                initialValue={name}
+                value={name}
                 onChange={v => {
                     data.name = v;
                     setName(v);

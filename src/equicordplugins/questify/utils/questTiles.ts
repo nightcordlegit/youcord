@@ -84,6 +84,7 @@ function getGradientClass(gradient: QuestTileGradient): string | null {
 }
 
 export function getQuestTileClasses(originalClasses: string, quest: Quest & { dummyColor?: QuestTileColorSetting; }, gradientOverride?: QuestTileGradient): string {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const questTiles = useQuestifySettings([
         "disableQuestsEverything",
         "ignoredQuestIDs",
@@ -127,6 +128,7 @@ export function getQuestTileClasses(originalClasses: string, quest: Quest & { du
 }
 
 export function getQuestTileStyle(quest: (Quest & { dummyColor?: QuestTileColorSetting; }) | null): Record<string, string> {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const questTiles = useQuestifySettings([
         "disableQuestsEverything",
         "ignoredQuestIDs",
@@ -243,6 +245,7 @@ export function hasInjectedDesktopVideoCompatibility(quest?: Quest | string | nu
 }
 
 export function sortQuests(quests: Quest[], skip?: boolean): Quest[] {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const questSorting = useQuestifySettings([
         "disableQuestsEverything",
         "ignoredQuestIDs",

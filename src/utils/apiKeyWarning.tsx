@@ -12,7 +12,7 @@ import Plugins from "~plugins";
 
 function ApiKeyWarningModal({ pluginName, onClose }: { pluginName: string; onClose: () => void; }) {
     return (
-        <ModalRoot transitionState={1 as any} size={ModalSize.SMALL}>
+        <ModalRoot transitionState={1 as any} size={ModalSize.SMALL as any} onClose={onClose}>
             <ModalContent style={{ padding: "24px 20px 8px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, textAlign: "center" }}>
                     <svg width={40} height={40} viewBox="0 0 24 24" fill="none">

@@ -22,6 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Heading } from "@components/Heading";
 import { EquicordDevs } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
+import { ModalSize } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, Modal, openModal } from "@webpack/common";
 
@@ -65,7 +66,7 @@ function openDecodedBase64Modal(decodedContent) {
         <ErrorBoundary>
             <Modal
                 {...props}
-                size="lg"
+                size={ModalSize.LARGE}
                 title="Decoded Base64 Content"
                 actions={decodedContent.map((content, index) => ({
                     text: `Copy Decoded Content ${index + 1}`,

@@ -47,7 +47,7 @@ export function TextField({ title, value, onChange, placeholder, disabled, multi
         <section>
             <Heading tag="h5">{title}</Heading>
             {multiline
-                ? <TextArea value={value} onChange={onChange} placeholder={placeholder} disabled={disabled} autosize />
+                ? <TextArea value={value} onChange={onChange} placeholder={placeholder} disabled={disabled} />
                 : <TextInput value={value} onChange={onChange} placeholder={placeholder} disabled={disabled} />}
         </section>
     );

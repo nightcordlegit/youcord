@@ -80,7 +80,7 @@ function CopyButton({ text }: { text: string; }) {
 
 const UserIDSection = ErrorBoundary.wrap(({ userId }: { userId: string; }) => (
     <div style={{ display: "flex", alignItems: "center" }}>
-        <BaseText size="sm" color="text-normal" style={{ userSelect: "text" }}>
+        <BaseText size="sm" color={"text-normal" as any} style={{ userSelect: "text" }}>
             {userId}
         </BaseText>
         <CopyButton text={userId} />

@@ -52,13 +52,25 @@ type RenderFunction = (props: ModalProps) => ReactNode | Promise<ReactNode>;
 interface Modals {
     ModalRoot: ComponentType<PropsWithChildren<{
         transitionState: ModalTransitionState;
-        size?: ModalSize;
+        size?: ModalSize | string;
         role?: "alertdialog" | "dialog";
         className?: string;
         fullscreenOnMobile?: boolean;
         "aria-label"?: string;
         "aria-labelledby"?: string;
         onAnimationEnd?(): string;
+        title?: ReactNode;
+        subtitle?: ReactNode;
+        input?: ReactNode;
+        preview?: ReactNode;
+        listProps?: any;
+        onClose(): void;
+        onScroll?(): void;
+        scrollerRef?: Ref<HTMLDivElement>;
+        actions?: Array<{ text: string; variant: string; onClick(): void; loading?: boolean; disabled?: boolean; }>;
+        actionBarInput?: ReactNode;
+        actionBarInputLayout?: "default" | "chat-input";
+        notice?: { message: string; type: string; };
     }>>;
     ModalHeader: ComponentType<PropsWithChildren<{
         /** Flex.Justify.START */

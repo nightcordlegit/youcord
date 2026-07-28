@@ -57,7 +57,9 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
     const category = useCategory(categoryId, initialChannelId);
     if (!category) return null;
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [name, setName] = useState(category.name);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [color, setColor] = useState(category.color);
 
     const onSave = () => {

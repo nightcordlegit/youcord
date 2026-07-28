@@ -61,7 +61,7 @@ export function useLyrics({ scroll = true }: { scroll?: boolean; } = {}) {
             setCurrLrcIndex(currentIndex);
             setNextLyric(nextLyric);
         }
-    }, [currentLyrics, position]);
+    }, [currentLyrics, position, lyricDelay]);
 
     useEffect(() => {
         if (scroll && currLrcIndex !== null) {
@@ -72,11 +72,12 @@ export function useLyrics({ scroll = true }: { scroll?: boolean; } = {}) {
                 lyricRefs[nextLyric]?.current?.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currLrcIndex, nextLyric, scroll]);
 
     useEffect(() => {
         if (isPlaying) {
-            setPosition(TidalStore.position);
+            setPosition(storePosition);
             const interval = setInterval(() => {
                 setPosition(p => p + 1000);
             }, 1000);

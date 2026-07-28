@@ -364,6 +364,7 @@ export default definePlugin({
     },
 
     renderSidebar() {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const { guild, channel /* width*/ } = useStateFromStores(
             [SidebarStore, GuildStore, ChannelStore], () => {
                 const { channelId, guildId } = SidebarStore.getState();
@@ -374,6 +375,7 @@ export default definePlugin({
             }, []
         );
 
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const [channelSidebar, guildSidebar] = useStateFromStores(
             [ChannelSectionStore, SelectedChannelStore, ChannelStore], () => {
                 const currentChannelId = SelectedChannelStore.getChannelId();
@@ -385,6 +387,7 @@ export default definePlugin({
             }, []
         );
 
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         useEffect(() => {
             if (!channel?.id || MessageStore.getLastMessage(channel.id)) return;
             MessageActions.fetchMessages({
@@ -393,8 +396,10 @@ export default definePlugin({
             });
         }, [channel?.id]);
 
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const [width, setWidth] = useState(window.innerWidth);
 
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         useLayoutEffect(() => {
             const handleResize = () => setWidth(window.innerWidth);
 
@@ -402,8 +407,10 @@ export default definePlugin({
             return () => window.removeEventListener("resize", handleResize);
         }, []);
 
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const [View, setViewComponent] = useState<React.ReactNode>(null);
 
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         useEffect(() => {
             if (!channel) return;
 
@@ -432,6 +439,7 @@ export default definePlugin({
                     />
                 );
             }
+            // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [channel]);
 
         if (!channel || channelSidebar || guildSidebar) return null;

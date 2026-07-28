@@ -232,7 +232,7 @@ function OtherThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton, 
                         id="open-website"
                         label="Open Website"
                         icon={HomeIcon}
-                        action={() => VencordNative.native.openExternal(theme.website)}
+                        action={() => VencordNative.native.openExternal(theme.website ?? "")}
                     />
                 )}
                 {theme.invite && (
@@ -523,6 +523,7 @@ function ThemesTab() {
             console.error("Theme initialization failed:", e);
             setInitError(String(e));
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [themeLinksStr]);
 
     function onThemeLinkEnabledChange(link: string, enabled: boolean) {

@@ -6,7 +6,7 @@
 
 import { IS_MAC } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
-import { React, SVGProps } from "@webpack/common";
+import { React } from "@webpack/common";
 
 const cl = classNameFactory("vc-command-palette-");
 
@@ -15,7 +15,7 @@ interface CommandPaletteActionBarProps {
     onOpenActions?(): void;
 }
 
-const EquicordIcon = (props: React.PropsWithChildren<SVGProps<SVGSVGElement>>) => (
+const EquicordIcon = (props: React.PropsWithChildren<React.SVGProps<SVGSVGElement>>) => (
     <svg
         {...props}
         fill="currentColor"

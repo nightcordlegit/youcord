@@ -208,7 +208,7 @@ function Visualizer({ playerRef, src }: { playerRef: React.RefObject<HTMLAudioEl
                 blobUrlRef.current = null;
             }
         };
-    }, [playerRef]);
+    }, [playerRef, src]);
 
     React.useEffect(() => {
         const canvas = canvasRef.current;

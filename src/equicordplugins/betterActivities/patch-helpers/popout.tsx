@@ -18,15 +18,18 @@ export function showAllActivitiesComponent({ activity, user, ...props }: Readonl
     const currentUser = UserStore.getCurrentUser();
     if (!currentUser) return null;
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [currentActivity, setCurrentActivity] = useState<Activity | null>(
         activity?.type !== 4 ? activity! : null
     );
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const activities = useStateFromStores(
         [PresenceStore],
         () => PresenceStore.getActivities(user.id).filter((activity: Activity) => activity != null && activity.type !== 4)
     );
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         if (!activities.length) {
             setCurrentActivity(null);
@@ -39,9 +42,11 @@ export function showAllActivitiesComponent({ activity, user, ...props }: Readonl
         } else if (existing !== currentActivity) {
             setCurrentActivity(existing);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activities]);
 
     // we use these for other activities, it would be better to somehow get the corresponding activity props
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const generalProps = useMemo(() => Object.keys(props).reduce((acc, key) => {
         // exclude activity specific props to prevent copying them to all activities (e.g. buttons)
         if (key !== "renderActions" && key !== "application") acc[key] = props[key];

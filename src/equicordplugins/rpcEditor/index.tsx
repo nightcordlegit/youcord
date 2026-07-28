@@ -56,6 +56,7 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "",
         component: () => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const update = useForceUpdater();
             return (
                 <>

@@ -77,7 +77,7 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader>
-                <Heading tag="h1" variant="heading-lg/semibold">{`${categoryId ? "Edit" : "New"} Category`}</Heading>
+                <Heading tag="h1">{`${categoryId ? "Edit" : "New"} Category`}</Heading>
             </ModalHeader>
             <ModalContent>
             <form

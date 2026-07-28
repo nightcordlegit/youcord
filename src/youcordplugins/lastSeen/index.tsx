@@ -171,7 +171,7 @@ function LastSeenText({ userId }: { userId: string; }) {
     }
 
     return (
-        <BaseText size="sm" color="text-normal" style={{ userSelect: "text" }}>
+        <BaseText size="sm" color={"text-normal" as any} style={{ userSelect: "text" }}>
             {content}
         </BaseText>
     );

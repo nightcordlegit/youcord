@@ -186,14 +186,16 @@ export function _getSurfaceProps(surfaceId: SurfaceId) {
 
 /** @internal Injected by SurfaceClassesAPI patch (do NOT call directly) */
 export function _useSurfaceProps(surfaceId: SurfaceId) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const forceUpdate = useForceUpdater();
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         const listener = () => forceUpdate();
 
         getListenerSet(surfaceId).add(listener);
         return () => { listeners.get(surfaceId)?.delete(listener); };
-    }, [surfaceId]);
+    }, [surfaceId, forceUpdate]);
 
     return getSurfaceProps(surfaceId);
 }

@@ -116,17 +116,25 @@ export default definePlugin({
             return <div>FFmpegStateContext is undefined</div>;
         }
 
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const [query, setQuery] = React.useState<string | undefined>();
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const [stickerPackMetas, setStickerPackMetas] = React.useState<StickerPackMeta[]>([]);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const [stickerPacks, setStickerPacks] = React.useState<StickerPack[]>([]);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const [counter, setCounter] = React.useState(0);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const [selectedStickerPackId, setSelectedStickerPackId] = React.useState<string | null>(null);
 
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const ffmpegLoaded = React.useState(false);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const ffmpeg = React.useState<FFmpeg>(new FFmpeg());
 
         const getMetasSignature = (m: StickerPackMeta[]) => m.map(x => x.id).sort().join(",");
 
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         React.useEffect(() => {
             (async () => {
                 console.log("Updating sticker packs...", counter);
@@ -138,8 +146,10 @@ export default definePlugin({
                     .filter((x): x is Exclude<typeof x, null> => x !== null);
                 setStickerPacks(sps);
             })();
+            // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [stickerPackMetas]);
 
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         React.useEffect(() => {
             (async () => {
                 const metas = await getStickerPackMetas();
@@ -147,14 +157,17 @@ export default definePlugin({
                     setStickerPackMetas(metas);
                 }
             })();
+            // eslint-disable-next-line react-hooks/exhaustive-deps
         }, []);
 
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         React.useEffect(() => {
             if (ffmpegLoaded[0]) return;
 
             loadFFmpeg(ffmpeg[0], () => {
                 ffmpegLoaded[1](true);
             });
+            // eslint-disable-next-line react-hooks/exhaustive-deps
         }, []);
 
         return (

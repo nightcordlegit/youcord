@@ -237,7 +237,7 @@ export async function searchChannelVideos(_: any, handleOrId: string): Promise<s
         return JSON.stringify({ videos: [], channels: [], channelInfo: null });
     }
     try {
-        let channelInfo = null;
+        let channelInfo: any = null;
         if (json.header?.pageHeaderRenderer) {
             const h = json.header.pageHeaderRenderer.content?.pageHeaderViewModel;
             const banner = h?.banner?.imageBannerViewModel?.image?.sources;

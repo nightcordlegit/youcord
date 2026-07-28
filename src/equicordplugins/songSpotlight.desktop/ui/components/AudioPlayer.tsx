@@ -77,6 +77,7 @@ export default function AudioPlayer({ audioRef, list, playing, setPlaying, setLo
             nodeEvents.current.get(index)?.();
             nodeEvents.current.delete(index);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [audios]);
 
     const handleLoaded = useCallback((index: number, state: boolean) => {
@@ -124,7 +125,7 @@ export default function AudioPlayer({ audioRef, list, playing, setPlaying, setLo
                 audioRef.current = node;
             }
         }
-    }, [playing, audios]);
+    }, [playing, audios, audioRef, setPlaying]);
 
     return (
         <div style={{ display: "none" }} aria-hidden="true">

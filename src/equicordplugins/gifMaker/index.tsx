@@ -12,6 +12,7 @@ import { classNameFactory } from "@utils/css";
 import { getCurrentChannel } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
+import { ModalSize } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
 import type { RenderModalProps } from "@vencord/discord-types";
@@ -248,8 +249,9 @@ function GifMakerModal({ url, isVideo, sourceWidth, sourceHeight, ...props }: Re
             setOptions(prev => ({ ...prev, width: w, height: h }));
             cleanupBlobUrl(img);
         }).catch(err => logger.error("auto-detect image failed", err));
-    }, [sourceWidth, sourceHeight]);
+    }, [sourceWidth, sourceHeight, url, isVideo]);
 
+    const captionModeKey = JSON.stringify(options.captionMode);
     useEffect(() => {
         const timer = setTimeout(() => {
             const gen = ++generationRef.current;
@@ -277,7 +279,7 @@ function GifMakerModal({ url, isVideo, sourceWidth, sourceHeight, ...props }: Re
         }, 300);
 
         return () => clearTimeout(timer);
-    }, [JSON.stringify(options.captionMode), options.captionText, options.captionSize, options.fontFamily, options.bubbleTipX, options.bubbleTipY, options.bubbleTipBase, options.width, options.height]);
+    }, [captionModeKey, options.captionText, options.captionSize, options.fontFamily, options.bubbleTipX, options.bubbleTipY, options.bubbleTipBase, options.width, options.height, url, isVideo]);
 
     const handlePreviewClick = (e: React.MouseEvent<HTMLImageElement>) => {
         if (options.captionMode !== "speechbubble") return;
@@ -309,7 +311,7 @@ function GifMakerModal({ url, isVideo, sourceWidth, sourceHeight, ...props }: Re
     return (
         <Modal
             {...props}
-            size="lg"
+            size={ModalSize.LARGE}
             title="Make GIF"
             actions={[
                 {

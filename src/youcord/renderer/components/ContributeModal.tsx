@@ -33,9 +33,9 @@ function CryptoAddress({ label, address, symbol }: { label: string, address: str
             }}
             onClick={() => copyWithToast(address, `Successfully copied ${label} address!`)}
         >
-            <Flex direction={Flex.Direction.VERTICAL}>
-                <Flex justify={Flex.Justify.BETWEEN} align={Flex.Align.CENTER} style={{ marginBottom: "8px" }}>
-                    <Heading level={3} variant="heading-sm/bold" style={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                <Flex direction={(Flex as any).Direction.VERTICAL}>
+                <Flex justify={(Flex as any).Justify.BETWEEN} align={(Flex as any).Align.CENTER} style={{ marginBottom: "8px" }}>
+                    <Heading {...{ level: 3, variant: "heading-sm/bold" } as any} style={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>
                         {label} ({symbol})
                     </Heading>
                     <Paragraph size="xs" color="text-brand" style={{ fontSize: "11px", textTransform: "uppercase", fontWeight: "bold" }}>
@@ -48,7 +48,7 @@ function CryptoAddress({ label, address, symbol }: { label: string, address: str
                     borderRadius: "6px",
                     fontSize: "12px",
                     wordBreak: "break-all",
-                    fontFfriendly: "var(--font-code)",
+                    ...{ fontFfriendly: "var(--font-code)" } as any,
                     display: "block",
                     border: "1px solid rgba(0,0,0,0.1)",
                     color: "var(--text-normal)"
@@ -63,10 +63,10 @@ function CryptoAddress({ label, address, symbol }: { label: string, address: str
 export function ContributeModal(props: ModalProps) {
     const { onClose } = props;
     return (
-        <ModalRoot {...props} size="small" style={{ overflow: "hidden", borderRadius: "12px" }}>
-            <ModalHeader separator={false} style={{ paddingTop: "24px", paddingBottom: "8px" }}>
-                <Flex direction={Flex.Direction.VERTICAL} align={Flex.Align.CENTER} style={{ width: "100%" }}>
-                    <Heading level={2} variant="heading-xl/bold" style={{ color: "#fff", textShadow: "0 0 10px rgba(88, 101, 242, 0.5)" }}>
+        <ModalRoot {...props as any} size="small" style={{ overflow: "hidden", borderRadius: "12px" }}>
+            <ModalHeader {...{ separator: false, style: { paddingTop: "24px", paddingBottom: "8px" } } as any}>
+                <Flex direction={(Flex as any).Direction.VERTICAL} align={(Flex as any).Align.CENTER} style={{ width: "100%" }}>
+                    <Heading {...{ level: 2, variant: "heading-xl/bold" } as any} style={{ color: "#fff", textShadow: "0 0 10px rgba(88, 101, 242, 0.5)" }}>
                         Support YouCord ❤ï¸
                     </Heading>
                 </Flex>
@@ -98,12 +98,12 @@ export function ContributeModal(props: ModalProps) {
                     Thank you for your support! Every donation helps keep the project alive.
                 </Paragraph>
             </ModalContent>
-            <ModalFooter style={{ backgroundColor: "rgba(0,0,0,0.1)", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                <Flex direction={Flex.Direction.HORIZONTAL} justify={Flex.Justify.END} style={{ width: "100%" }}>
+            <ModalFooter {...{ style: { backgroundColor: "rgba(0,0,0,0.1)", borderTop: "1px solid rgba(255,255,255,0.05)" } } as any}>
+                <Flex direction={(Flex as any).Direction.HORIZONTAL} justify={(Flex as any).Justify.END} style={{ width: "100%" }}>
                     <Button
-                        color={Button.Colors.BRAND}
+                        color={(Button as any).Colors.BRAND}
                         onClick={onClose}
-                        look={Button.Looks.FILLED}
+                        look={(Button as any).Looks.FILLED}
                         style={{ padding: "0 32px" }}
                     >
                         Close

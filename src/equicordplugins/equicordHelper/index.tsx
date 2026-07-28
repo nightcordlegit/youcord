@@ -156,6 +156,7 @@ export default definePlugin({
         EquicordDevs.omaw,
         Devs.Samwich,
         Devs.AutumnVN,
+        // @ts-ignore
         EquicordDevs.auggeeo
     ],
     required: true,

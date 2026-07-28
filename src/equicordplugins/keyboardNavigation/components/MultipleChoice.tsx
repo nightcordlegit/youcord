@@ -8,6 +8,7 @@ import "./style.css";
 
 import { ButtonAction } from "@equicordplugins/keyboardNavigation/commands";
 import { classNameFactory } from "@utils/css";
+import { ModalSize } from "@utils/modal";
 import { RenderModalProps } from "@vencord/discord-types";
 import { closeAllModals, Modal,openModal, React, TextInput, useEffect, useState } from "@webpack/common";
 
@@ -99,7 +100,7 @@ export function MultipleChoice({ modalProps, onSelect, choices }: MultipleChoice
     }, [queryEh]);
 
     return (
-        <Modal {...modalProps} size="md" title="Multiple Choice">
+        <Modal {...modalProps} size={ModalSize.MEDIUM} title="Multiple Choice">
             <div className={cl("root")} onKeyDown={handleKeyDown} onWheel={handleWheel}>
                 <TextInput
                     value={queryEh}

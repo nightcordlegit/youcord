@@ -31,7 +31,7 @@ export function waitForComponent<T extends ComponentType<any> = ComponentType<an
     const lazyComponent = LazyComponent(() => {
         try {
             if (myValue) {
-                if (typeof myValue === "function" || myValue?.$$typeof)
+                if (typeof myValue === "function" || (myValue as any)?.$$typeof)
                     return myValue;
                 logger.warn(`waitForComponent("${name}"): stored myValue is not a valid component type. Using fallback.`);
             }
@@ -48,7 +48,7 @@ export function waitForComponent<T extends ComponentType<any> = ComponentType<an
     }) as LazyComponentWrapper<T>;
 
     waitFor(filter, (v: any) => {
-        if (typeof v !== "function" && !v?.$$typeof) {
+        if (typeof v !== "function" && !(v as any)?.$$typeof) {
             logger.warn(`waitForComponent("${name}"): matched value is not a valid component type (got ${typeof v}). Using fallback.`);
             return;
         }

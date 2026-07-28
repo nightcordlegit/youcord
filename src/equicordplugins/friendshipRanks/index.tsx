@@ -13,6 +13,7 @@ import { Flex } from "@components/Flex";
 import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
+import { ModalSize } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
 import { Forms, Modal,openModal, RelationshipStore } from "@webpack/common";
@@ -88,7 +89,7 @@ function openRankModal(rank: rankInfo) {
         <ErrorBoundary>
             <Modal
                 {...props}
-                size="sm"
+                size={ModalSize.SMALL}
                 title={
                     <Flex className={cl("flex")}>
                         <Forms.FormTitle

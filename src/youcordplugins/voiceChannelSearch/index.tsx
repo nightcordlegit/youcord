@@ -59,8 +59,8 @@ async function scan(): Promise<VoiceChannel[]> {
                     const guild = guilds[guildId];
                     if (!guild) continue;
                     const gName: string = guild.name ?? "";
-                    const gIcon: string | null = guild.icon
-                        ? IconUtils.getGuildIconURL({ id: guildId, icon: guild.icon, size: 32 })
+                    const gIcon: string | null = (guild as any).icon
+                        ? IconUtils.getGuildIconURL({ id: guildId, icon: (guild as any).icon, size: 32 }) ?? null
                         : null;
 
                     const allChannels = GuildChannelStore.getChannels?.(guildId) ?? {};
@@ -297,6 +297,7 @@ export default definePlugin({
 
     headerBarButton: {
         icon: SearchIcon,
+        render: () => null,
     },
 
     start() {

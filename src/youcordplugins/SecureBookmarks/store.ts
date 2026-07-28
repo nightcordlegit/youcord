@@ -211,7 +211,7 @@ function getBookmarkImages(message: Message): BookmarkImage[] {
         .map(attachment => ({
             url: attachment.url,
             proxyUrl: attachment.proxy_url || attachment.url,
-            filename: attachment.title || attachment.filename,
+            filename: (attachment as any).title || attachment.filename,
             width: attachment.width,
             height: attachment.height,
             spoiler: attachment.spoiler

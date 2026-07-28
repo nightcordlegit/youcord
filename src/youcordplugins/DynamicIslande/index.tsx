@@ -428,7 +428,7 @@ function ParticipantRow({ p, channel, currentUser }: { p: { user: any; member: a
                             else IslandVoiceActions.toggleLocalMute(p.user.id);
                         }}
                     >
-                        <VoiceIcon slashed={isMuted}><Microphone size="14" /></VoiceIcon>
+                        <VoiceIcon slashed={isMuted}><Microphone width={14} height={14} /></VoiceIcon>
                     </ControlButton>
 
                     {!isSelf && (

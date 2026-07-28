@@ -73,7 +73,7 @@ function defineItems<T extends Record<CustomItemFormat, CustomItemDef>>(def: Ite
 // Stringify returns a simple string representation used for thumbnail text and expression picker search.
 export const defs = defineItems({
     [CustomItemFormat.ATTACHMENT]: defineItem({
-        encode: ({ id, filename, size, url, content_type = "", title, description }: MessageAttachment) => [
+        encode: ({ id, filename, size, url, content_type = "", title, description }: any) => [
             id,
             filename,
             size,
@@ -93,7 +93,7 @@ export const defs = defineItems({
             title: title ?? undefined,
             description: description ?? undefined
         }),
-        stringify: ({ title, filename }) => title?.trim() || filename
+        stringify: ({ title, filename }: any) => title?.trim() || filename
     })
     // This could be expanded in the future with other item types (e.g. voice messages)
 });
@@ -156,14 +156,14 @@ async function fetchAttachment(attachment: MessageAttachment): Promise<File> {
 }
 
 export async function sendAttachment(attachment: MessageAttachment, channel: Channel) {
-    const { filename, title, description } = attachment;
+    const { filename, title, description } = attachment as any;
     const file = await fetchAttachment(attachment).catch(() =>
         Toasts.show({ message: `Couldn't fetch ${filename}`, id: Toasts.genId(), type: Toasts.Type.FAILURE })
     );
     if (!file) return;
 
     // Using promptToUpload instead of addFiles directly since it has file size checks with error popups
-    await UploadHandler.promptToUpload([file], channel, DraftType.ChannelMessage).catch(() =>
+    await Promise.resolve(UploadHandler.promptToUpload([file], channel, DraftType.ChannelMessage)).catch(() =>
         Toasts.show({ message: `Couldn't upload ${filename}`, id: Toasts.genId(), type: Toasts.Type.FAILURE })
     );
 
@@ -278,6 +278,7 @@ export function useListScroller() {
 
         rowHeights.current.set(key, height);
         update();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return [rowHeights.current, handleResize] as const;

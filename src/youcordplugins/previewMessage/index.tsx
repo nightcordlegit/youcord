@@ -71,7 +71,7 @@ function Tooltip({ channelId, rect }: { channelId: string; rect: DOMRect; }) {
             }
 
             if (isMounted) {
-                let localMsgs = [];
+                let localMsgs: any[] = [];
                 if (msgs && msgs._array && msgs._array.length > 0) {
                     localMsgs = [...msgs._array].reverse();
                 }

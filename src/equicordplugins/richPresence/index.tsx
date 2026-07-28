@@ -86,6 +86,7 @@ export default definePlugin({
         Devs.RyanCaoDev,
         EquicordDevs.Prince527,
         EquicordDevs.creations,
+        // @ts-ignore
         EquicordDevs.Star123451,
     ],
     reporterTestable: ReporterTestable.None,

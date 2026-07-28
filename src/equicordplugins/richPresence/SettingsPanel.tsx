@@ -18,7 +18,7 @@ type SettingsKey = keyof SettingsStore;
 function SwitchSetting({ name, description, settingsKey }: { name: string; description: string; settingsKey: SettingsKey; }) {
     const [value, setValue] = useState(settings.store[settingsKey] ?? false);
     return (
-        <SettingsSection tag="label" inlineSetting id={name} name={name} description={description}>
+        <SettingsSection tag="label" inlineSetting name={name} description={description}>
             <Switch
                 checked={Boolean(value)}
                 onChange={v => { setValue(v); (settings.store[settingsKey] as boolean) = v; }}
@@ -30,7 +30,7 @@ function SwitchSetting({ name, description, settingsKey }: { name: string; descr
 function TextSetting({ name, description, settingsKey, placeholder }: { name: string; description: string; settingsKey: SettingsKey; placeholder?: string; }) {
     const [value, setValue] = useState(settings.store[settingsKey] ?? "");
     return (
-        <SettingsSection id={name} name={name} description={description}>
+        <SettingsSection name={name} description={description}>
             <TextInput
                 type="text"
                 value={String(value)}
@@ -44,7 +44,7 @@ function TextSetting({ name, description, settingsKey, placeholder }: { name: st
 function SelectSetting({ name, description, settingsKey, options }: { name: string; description: string; settingsKey: SettingsKey; options: { label: string; value: string | number; }[]; }) {
     const [value, setValue] = useState(settings.store[settingsKey] ?? options[0]?.value);
     return (
-        <SettingsSection id={name} name={name} description={description}>
+        <SettingsSection name={name} description={description}>
             <Select
                 options={options}
                 isSelected={v => v === value}
@@ -60,7 +60,7 @@ function SelectSetting({ name, description, settingsKey, options }: { name: stri
 function AudioBookShelfSettings() {
     return (
         <>
-            <SettingsSection id="audiobookshelf-settings" name="" description="Display your currently playing audiobooks as Discord Rich Presence. Requires your AudioBookShelf server URL, username, and password." />
+            <SettingsSection name="" description="Display your currently playing audiobooks as Discord Rich Presence. Requires your AudioBookShelf server URL, username, and password." />
             <TextSetting name="Server URL" description="AudioBookShelf server URL." settingsKey="abs_serverUrl" placeholder="https://abs.example.com" />
             <TextSetting name="Username" description="AudioBookShelf username." settingsKey="abs_username" />
             <TextSetting name="Password" description="AudioBookShelf password." settingsKey="abs_password" />
@@ -70,7 +70,7 @@ function AudioBookShelfSettings() {
 
 function TosuSettings() {
     return (
-        <SettingsSection id="tosu-settings" name="" description="Connects to tosu via WebSocket on port 24050. No configuration needed, just make sure tosu is running alongside osu!." />
+        <SettingsSection name="" description="Connects to tosu via WebSocket on port 24050. No configuration needed, just make sure tosu is running alongside osu!." />
     );
 }
 
@@ -86,7 +86,7 @@ const nameFormatOptions = [
 function StatsFmSettings() {
     return (
         <>
-            <SettingsSection id="statsfm-settings" name="" description="Show what you're currently listening to via stats.fm. Requires your listening history to be public." />
+            <SettingsSection name="" description="Show what you're currently listening to via stats.fm. Requires your listening history to be public." />
             <TextSetting name="Username" description="Stats.fm username." settingsKey="sfm_username" placeholder="stats.fm username" />
             <TextSetting name="Custom Status Text" description="Custom status text." settingsKey="sfm_statusName" placeholder="Stats.fm" />
             <SelectSetting name="Name Format" description="Name format." settingsKey="sfm_nameFormat" options={nameFormatOptions} />
@@ -108,7 +108,7 @@ function StatsFmSettings() {
 function JellyfinSettings() {
     return (
         <>
-            <SettingsSection id="jellyfin-settings" name="" description="Show what you're playing on Jellyfin. To get your API key: open your Jellyfin web UI, press F12 to open Developer Tools, go to the Network tab, look for requests to your server, find the Authorization header (Ctrl+F to search), and You need the part from Token='this'. Your user ID can be found in your profile page URL." />
+            <SettingsSection name="" description="Show what you're playing on Jellyfin. To get your API key: open your Jellyfin web UI, press F12 to open Developer Tools, go to the Network tab, look for requests to your server, find the Authorization header (Ctrl+F to search), and You need the part from Token='this'. Your user ID can be found in your profile page URL." />
             <TextSetting name="Server URL" description="Jellyfin server URL." settingsKey="jf_serverUrl" placeholder="https://jellyfin.example.com" />
             <TextSetting name="API Key" description="Jellyfin API key." settingsKey="jf_apiKey" placeholder="Authorization" />
             <TextSetting name="User ID" description="Jellyfin user ID." settingsKey="jf_userId" placeholder="User ID from profile URL" />
@@ -145,8 +145,8 @@ function GensokyoRadioSettings() {
     const [value, setValue] = useState(settings.store.gr_refreshInterval ?? 15);
     return (
         <>
-            <SettingsSection id="gensokyoradio-settings" name="" description="Discord rich presence for Gensokyo Radio. Just enable it and listen!" />
-            <SettingsSection id="refresh-interval" name="Refresh Interval" description="Refresh interval in seconds.">
+            <SettingsSection name="" description="Discord rich presence for Gensokyo Radio. Just enable it and listen!" />
+            <SettingsSection name="Refresh Interval" description="Refresh interval in seconds.">
                 <Slider
                     markers={[1, 2, 2.5, 3, 5, 10, 15]}
                     initialValue={value}
@@ -166,7 +166,7 @@ function NavidromeSettings() {
     const { nd_activityType, nd_albumArtMode } = settings.use(ND_DYNAMIC_KEYS);
     return (
         <>
-            <SettingsSection id="navidrome-settings" name="" description="Show what you're currently listening to via Navidrome." />
+            <SettingsSection name="" description="Show what you're currently listening to via Navidrome." />
             <TextSetting name="Server URL" description="Navidrome Server URL (must be a public domain, e.g. https://navidrome.example.com)." settingsKey="nd_serverUrl" placeholder="https://navidrome.example.com" />
             <TextSetting name="Username" description="Navidrome username." settingsKey="nd_username" />
             <TextSetting name="Password" description="Navidrome password." settingsKey="nd_password" />
@@ -198,7 +198,7 @@ function NavidromeSettings() {
             <TextSetting name="Details Format" description="The main line showing what song is playing (e.g. {song})" settingsKey="nd_detailsString" placeholder="{song}" />
             <TextSetting name="State Format" description="The line below the song name (e.g. {artist})" settingsKey="nd_stateString" placeholder="{artist}" />
             <TextSetting name="Large Text Format" description="The album line (e.g. {album})" settingsKey="nd_largeTextString" placeholder="{album}" />
-            <SettingsSection id="nd-refresh-interval" name="Refresh Interval" description="Refresh interval in seconds.">
+            <SettingsSection name="Refresh Interval" description="Refresh interval in seconds.">
                 <Slider
                     markers={[1, 2, 5, 10, 15]}
                     initialValue={refreshInterval}

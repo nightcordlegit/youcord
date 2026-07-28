@@ -183,9 +183,10 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const logRef = useRef<HTMLDivElement>(null);
 
+    const logLength = s.log.length;
     useEffect(() => {
         if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
-    }, [s.log.length]);
+    }, [logLength]);
 
     const saveTokens = (newTokens: string[]) => {
         setTokens(newTokens);
@@ -251,6 +252,7 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
     useEffect(() => {
         if (selectedToken) fetchGuilds();
         else setGuilds([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedToken]);
 
     const toggleGuild = (id: string) => {

@@ -46,6 +46,7 @@ const settings = definePluginSettings({
 const UserContextMenuPatch: NavContextMenuPatchCallback = (children, { channel, user }: UserContextProps) => {
     if (UserStore.getCurrentUser().id === user.id || !RelationshipStore.getFriendIDs().includes(user.id)) return;
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [checked, setChecked] = React.useState(followedUserInfo?.userId === user.id);
 
     children.push(
