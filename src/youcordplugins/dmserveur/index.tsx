@@ -5,13 +5,13 @@
  */
 
 import { HeaderBarButton } from "@api/HeaderBar";
+import { DataStore } from "@api/index";
+import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Switch } from "@components/Switch";
-import { DataStore } from "@api/index";
-import { definePluginSettings } from "@api/Settings";
 import { showApiKeyWarning } from "@utils/apiKeyWarning";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
