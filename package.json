@@ -90,7 +90,7 @@
         "@vencord/discord-types": "link:packages/discord-types",
         "app-builder-lib": "^26.15.3",
         "arrpc-bun": "^1.4.0",
-        "diff": "^8.0.4",
+        "diff": "^9.0.0",
         "dotenv": "^17.4.2",
         "electron": "41.10.3",
         "electron-builder": "^26.15.3",
