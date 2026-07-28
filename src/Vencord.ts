@@ -348,9 +348,9 @@ async function init() {
     syncSettings();
     initTrayIpc();
 
-    const hasOpened = localStorage.getItem("youcord_telegram_opened");
+    const hasOpened = localStorage.getItem("youcord_discord_opened");
     if (!hasOpened) {
-        localStorage.setItem("youcord_telegram_opened", "true");
+        localStorage.setItem("youcord_discord_opened", "true");
         setTimeout(() => {
             Alerts.show({
                 title: t("Welcome to YouCord!"),
@@ -358,11 +358,7 @@ async function init() {
                 confirmText: t("Open link"),
                 cancelText: t("Cancel"),
                 onConfirm: () => {
-                    if (window.youcord && typeof window.youcord.openUrl === "function") {
-                        window.youcord.openUrl("https://discord.gg/remHHJQRXg");
-                    } else {
-                        VencordNative.native.openExternal("https://t.me/youcord");
-                    }
+                    VencordNative.native.openExternal("https://discord.gg/deBXzjjEzg");
                 }
             });
         }, 3000);
