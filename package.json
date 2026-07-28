@@ -107,7 +107,7 @@
         "html-minifier-terser": "^7.2.0",
         "minimatch": "^10.2.5",
         "moment": "^2.30.1",
-        "puppeteer-core": "^24.43.1",
+        "puppeteer-core": "^25.4.0",
         "rcedit": "^5.0.2",
         "source-map": "^0.8.0",
         "source-map-support": "^0.5.21",
