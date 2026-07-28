@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { HeaderBarButton } from "@api/HeaderBar";
-import { DataStore } from "@api/index";
-import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
