@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -134,7 +134,7 @@ async function _groqChat(opts: GroqCallOptions, attempt = 0): Promise<string> {
 
     const apiKey = await getGroqKey();
     if (!apiKey) {
-        throw new Error("Groq API key missing â€” configure it in Settings â†’ YouCordAI");
+        throw new Error("Groq API key missing — configure it in Settings → YouCordAI");
     }
 
     const model = forceModel ?? getAvailableModel();
@@ -159,7 +159,7 @@ async function _groqChat(opts: GroqCallOptions, attempt = 0): Promise<string> {
 
         if (res.status === 429) {
             if (attempt >= maxRetries) {
-                throw new Error("Groq rate limit â€” try again in a moment");
+                throw new Error("Groq rate limit — try again in a moment");
             }
 
             const retryAfterHeader = res.headers.get("retry-after");
