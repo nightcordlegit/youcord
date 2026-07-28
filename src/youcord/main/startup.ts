@@ -9,8 +9,8 @@ import "./ipc";
 import "./userAssets";
 import "./vesktopProtocol";
 
-import { app, BrowserWindow, nativeTheme } from "electron";
 import { execSync } from "child_process";
+import { app, BrowserWindow, nativeTheme } from "electron";
 
 import { DATA_DIR } from "./constants";
 import { createFirstLaunchTour } from "./firstLaunch";

@@ -47,7 +47,7 @@ async function checkForUpdates() {
                 xhr.onerror = () => { clearTimeout(timeout); reject(new Error("network error")); };
                 xhr.send();
             }),
-            new Promise<any>((resolve) => {
+            new Promise<any>(resolve => {
                 const xhr = new XMLHttpRequest();
                 xhr.open("GET", GITHUB_API + "/releases/tags/v" + localVersion, true);
                 xhr.onload = () => {
