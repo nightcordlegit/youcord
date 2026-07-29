@@ -16,7 +16,7 @@ import { showApiKeyWarning } from "@utils/apiKeyWarning";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, GuildStore, LocaleStore, React, ReactDOM, RestAPI, Select, Slider, TextArea, UserStore } from "@webpack/common";
+import { ChannelStore, GuildStore, LocaleStore, Popout, React, RestAPI, Select, Slider, TextArea, UserStore } from "@webpack/common";
 
 import { getGroqKey, groqChat } from "../youcordAI/groqManager";
 
@@ -640,12 +640,9 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
     const [selectedGuildIds, setSelectedGuildIds] = React.useState<string[]>([]);
     const [guildChannelsMap, setGuildChannelsMap] = React.useState<Record<string, string[]>>({});
     const [selectedChannelIds, setSelectedChannelIds] = React.useState<string[]>([]);
-    const [showGuildList, setShowGuildList] = React.useState(false);
-    const [guildListPos, setGuildListPos] = React.useState<{ top: number; left: number; width: number; } | null>(null);
     const [guilds, setGuilds] = React.useState<any[]>([]);
     const [ready, setReady] = React.useState(false);
     const guildTriggerRef = React.useRef<HTMLDivElement>(null);
-    const guildDropdownPortalRef = React.useRef<HTMLDivElement>(null);
 
     // Live-mirrored settings state so the panel re-renders when values change
     const [isActive, setIsActive] = React.useState(!!settings.store.isActive);
@@ -707,34 +704,13 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
         loadChannelsForGuilds();
     }, [selectedGuildIds]);
 
-    // Close the guild dropdown on any click outside of it (was staying open
-    // and floating over the rest of the panel forever otherwise).
-    React.useEffect(() => {
-        if (!showGuildList) return;
-        function handleClickOutside(e: MouseEvent) {
-            const target = e.target as Node;
-            const insideTrigger = guildTriggerRef.current?.contains(target);
-            const insideDropdown = guildDropdownPortalRef.current?.contains(target);
-            if (!insideTrigger && !insideDropdown) {
-                setShowGuildList(false);
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside, true);
-        return () => document.removeEventListener("mousedown", handleClickOutside, true);
-    }, [showGuildList]);
-
-    function openGuildList() {
+    function ensureGuildsLoaded() {
         if (guilds.length === 0) {
             try {
                 const all = Object.values(GuildStore.getGuilds()) as any[];
                 setGuilds(all.sort((a, b) => a.name?.localeCompare?.(b.name) ?? 0));
             } catch { }
         }
-        const rect = guildTriggerRef.current?.getBoundingClientRect();
-        if (rect) {
-            setGuildListPos({ top: rect.bottom + 2, left: rect.left, width: rect.width });
-        }
-        setShowGuildList(v => !v);
     }
 
     if (!ready) {
@@ -818,64 +794,70 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
             )}
 
             <SectionCard title={t("1. Select a Server")}>
-                <div
-                    ref={guildTriggerRef}
-                    onClick={openGuildList}
-                    style={{
-                        padding: "10px 12px", borderRadius: "var(--radius-xs)",
-                        border: "1px solid var(--border-subtle)",
-                        background: "var(--input-background)",
-                        cursor: "pointer", userSelect: "none",
-                    }}
+                <Popout
+                    targetElementRef={guildTriggerRef}
+                    align="left"
+                    position="bottom"
+                    animation={Popout.Animation.NONE}
+                    renderPopout={({ closePopout }) => (
+                        <div
+                            style={{
+                                width: Math.max(guildTriggerRef.current?.offsetWidth ?? 260, 220),
+                                maxHeight: 280, overflowY: "auto",
+                                background: "var(--background-floating)", borderRadius: "var(--radius-sm)",
+                                boxShadow: "0 4px 16px rgba(0,0,0,0.5)", padding: 6,
+                            }}
+                        >
+                            {guilds.map(g => {
+                                const isSel = selectedGuildIds.includes(g.id);
+                                return (
+                                    <div key={g.id}
+                                        onClick={() => toggleGuild(g.id)}
+                                        style={{
+                                            padding: "8px 10px", cursor: "pointer", borderRadius: "var(--radius-xs)",
+                                            background: isSel ? "var(--brand-experiment-30a)" : "transparent",
+                                            marginBottom: 2,
+                                            display: "flex", alignItems: "center", gap: 8,
+                                        }}
+                                        onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = "var(--background-modifier-hover)"; }}
+                                        onMouseLeave={e => { if (!isSel) e.currentTarget.style.background = "transparent"; }}
+                                    >
+                                        <span style={{
+                                            width: 16, height: 16, borderRadius: 3, flexShrink: 0,
+                                            border: isSel ? "1px solid var(--brand-experiment)" : "1px solid var(--text-muted)",
+                                            background: isSel ? "var(--brand-experiment)" : "transparent",
+                                            display: "flex", alignItems: "center", justifyContent: "center",
+                                            fontSize: 10, fontWeight: "bold", color: "white",
+                                        }}>
+                                            {isSel ? "✓" : ""}
+                                        </span>
+                                        <Paragraph size="sm" style={{ flex: 1 }}>{g.name}</Paragraph>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 >
-                    <Paragraph size="sm" color={selectedGuilds.length > 0 ? undefined : "text-muted"}>
-                        {selectedGuilds.length > 0
-                            ? t("{0} server(s) selected", selectedGuilds.length)
-                            : t("Click to choose a server...")}
-                    </Paragraph>
-                </div>
-                {showGuildList && guildListPos && ReactDOM.createPortal(
-                    <div
-                        ref={guildDropdownPortalRef}
-                        style={{
-                            position: "fixed",
-                            top: guildListPos.top, left: guildListPos.left, width: guildListPos.width,
-                            zIndex: 99999,
-                            maxHeight: 280, overflowY: "auto",
-                            background: "var(--background-floating)", borderRadius: "var(--radius-sm)",
-                            boxShadow: "0 4px 16px rgba(0,0,0,0.5)", padding: 6,
-                        }}
-                    >
-                        {guilds.map(g => {
-                            const isSel = selectedGuildIds.includes(g.id);
-                            return (
-                                <div key={g.id}
-                                    onClick={() => toggleGuild(g.id)}
-                                    style={{
-                                        padding: "8px 10px", cursor: "pointer", borderRadius: "var(--radius-xs)",
-                                        background: isSel ? "var(--brand-experiment-30a)" : "transparent",
-                                        marginBottom: 2,
-                                        display: "flex", alignItems: "center", gap: 8,
-                                    }}
-                                    onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = "var(--background-modifier-hover)"; }}
-                                    onMouseLeave={e => { if (!isSel) e.currentTarget.style.background = "transparent"; }}
-                                >
-                                    <span style={{
-                                        width: 16, height: 16, borderRadius: 3, flexShrink: 0,
-                                        border: isSel ? "1px solid var(--brand-experiment)" : "1px solid var(--text-muted)",
-                                        background: isSel ? "var(--brand-experiment)" : "transparent",
-                                        display: "flex", alignItems: "center", justifyContent: "center",
-                                        fontSize: 10, fontWeight: "bold", color: "white",
-                                    }}>
-                                        {isSel ? "✓" : ""}
-                                    </span>
-                                    <Paragraph size="sm" style={{ flex: 1 }}>{g.name}</Paragraph>
-                                </div>
-                            );
-                        })}
-                    </div>,
-                    document.body
-                )}
+                    {(triggerProps, { isShown }) => (
+                        <div
+                            ref={guildTriggerRef}
+                            {...triggerProps}
+                            onClick={e => { ensureGuildsLoaded(); triggerProps.onClick(e); }}
+                            style={{
+                                padding: "10px 12px", borderRadius: "var(--radius-xs)",
+                                border: "1px solid var(--border-subtle)",
+                                background: "var(--input-background)",
+                                cursor: "pointer", userSelect: "none",
+                            }}
+                        >
+                            <Paragraph size="sm" color={selectedGuilds.length > 0 ? undefined : "text-muted"}>
+                                {selectedGuilds.length > 0
+                                    ? t("{0} server(s) selected", selectedGuilds.length)
+                                    : t("Click to choose a server...")}
+                            </Paragraph>
+                        </div>
+                    )}
+                </Popout>
             </SectionCard>
 
             {selectedGuilds.length > 0 && (

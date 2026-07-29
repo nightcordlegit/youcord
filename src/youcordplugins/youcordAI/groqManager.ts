@@ -10,6 +10,7 @@ import { Logger } from "@utils/Logger";
 const logger = new Logger("GroqManager");
 
 const DS_API_KEY = "groq-shared-api-key";
+const DS_GEMINI_API_KEY = "gemini-shared-api-key";
 
 const GROQ_MODELS = [
     "llama-3.3-70b-versatile",
@@ -18,8 +19,23 @@ const GROQ_MODELS = [
     "gemma2-9b-it",
 ] as const;
 
-let currentModelIdx = 0;
-const modelCooldown: Record<string, number> = {};
+// Free-tier Gemini models (gemini-2.0-flash was retired March 2026).
+const GEMINI_MODELS = [
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+] as const;
+
+type Provider = "groq" | "gemini";
+
+let currentGroqModelIdx = 0;
+let currentGeminiModelIdx = 0;
+const groqModelCooldown: Record<string, number> = {};
+const geminiModelCooldown: Record<string, number> = {};
+
+// Per-provider cooldown — set when every model of that provider is rate-limited.
+const providerCooldown: Record<Provider, number> = { groq: 0, gemini: 0 };
+// Sticky preference so we don't ping-pong between providers on every call.
+let preferredProvider: Provider = "groq";
 
 let _settingsFallback: (() => string) | null = null;
 
@@ -52,48 +68,125 @@ export async function setGroqKey(key: string): Promise<void> {
     await DataStore.set(DS_API_KEY, key.trim());
 }
 
-function getAvailableModel(): string {
+export async function getGeminiKey(): Promise<string> {
+    const key = await DataStore.get(DS_GEMINI_API_KEY);
+    if (typeof key === "string" && key.trim()) {
+        return key.trim();
+    }
+    return "";
+}
+
+export async function setGeminiKey(key: string): Promise<void> {
+    if (typeof key !== "string") {
+        throw new Error("API key must be a string");
+    }
+    await DataStore.set(DS_GEMINI_API_KEY, key.trim());
+}
+
+export async function hasAnyAIKey(): Promise<boolean> {
+    const [groq, gemini] = await Promise.all([getGroqKey(), getGeminiKey()]);
+    return !!(groq || gemini);
+}
+
+export function getCurrentProvider(): Provider {
+    return preferredProvider;
+}
+
+// ── Model rotation within a single provider (unchanged logic, per-provider) ──────────
+
+function getAvailableGroqModel(): string {
     const now = Date.now();
     for (let i = 0; i < GROQ_MODELS.length; i++) {
-        const idx = (currentModelIdx + i) % GROQ_MODELS.length;
+        const idx = (currentGroqModelIdx + i) % GROQ_MODELS.length;
         const model = GROQ_MODELS[idx];
-        const cooldownUntil = modelCooldown[model] ?? 0;
-        if (now >= cooldownUntil) {
-            currentModelIdx = idx;
+        if (now >= (groqModelCooldown[model] ?? 0)) {
+            currentGroqModelIdx = idx;
             return model;
         }
     }
-
     let minCooldown = Infinity;
     let bestIdx = 0;
     for (let i = 0; i < GROQ_MODELS.length; i++) {
-        const cd = modelCooldown[GROQ_MODELS[i]] ?? 0;
-        if (cd < minCooldown) {
-            minCooldown = cd;
-            bestIdx = i;
-        }
+        const cd = groqModelCooldown[GROQ_MODELS[i]] ?? 0;
+        if (cd < minCooldown) { minCooldown = cd; bestIdx = i; }
     }
-    currentModelIdx = bestIdx;
+    currentGroqModelIdx = bestIdx;
     return GROQ_MODELS[bestIdx];
 }
 
-function markModelRateLimited(model: string, retryAfterMs = 60_000): void {
-    modelCooldown[model] = Date.now() + retryAfterMs;
-    logger.warn(`Model ${model} in cooldown for ${retryAfterMs / 1000}s`);
-    currentModelIdx = (currentModelIdx + 1) % GROQ_MODELS.length;
+function getAvailableGeminiModel(): string {
+    const now = Date.now();
+    for (let i = 0; i < GEMINI_MODELS.length; i++) {
+        const idx = (currentGeminiModelIdx + i) % GEMINI_MODELS.length;
+        const model = GEMINI_MODELS[idx];
+        if (now >= (geminiModelCooldown[model] ?? 0)) {
+            currentGeminiModelIdx = idx;
+            return model;
+        }
+    }
+    let minCooldown = Infinity;
+    let bestIdx = 0;
+    for (let i = 0; i < GEMINI_MODELS.length; i++) {
+        const cd = geminiModelCooldown[GEMINI_MODELS[i]] ?? 0;
+        if (cd < minCooldown) { minCooldown = cd; bestIdx = i; }
+    }
+    currentGeminiModelIdx = bestIdx;
+    return GEMINI_MODELS[bestIdx];
 }
 
-let queue = Promise.resolve();
-const MIN_DELAY_MS = 200;
-
-function enqueue<T>(fn: () => Promise<T>): Promise<T> {
-    const result = queue.then(() => fn());
-    queue = result.then(
-        () => new Promise(r => setTimeout(r, MIN_DELAY_MS)),
-        () => new Promise(r => setTimeout(r, MIN_DELAY_MS)),
-    );
-    return result;
+function markGroqModelRateLimited(model: string, retryAfterMs = 60_000): void {
+    groqModelCooldown[model] = Date.now() + retryAfterMs;
+    currentGroqModelIdx = (currentGroqModelIdx + 1) % GROQ_MODELS.length;
+    // If every Groq model is now cooling down, put the whole provider on cooldown
+    // so pickProvider() skips straight to Gemini instead of retrying uselessly.
+    const now = Date.now();
+    if (GROQ_MODELS.every(m => (groqModelCooldown[m] ?? 0) > now)) {
+        const soonest = Math.min(...GROQ_MODELS.map(m => groqModelCooldown[m] ?? 0));
+        providerCooldown.groq = soonest;
+        logger.warn("All Groq models rate-limited — provider on cooldown");
+    }
 }
+
+function markGeminiModelRateLimited(model: string, retryAfterMs = 60_000): void {
+    geminiModelCooldown[model] = Date.now() + retryAfterMs;
+    currentGeminiModelIdx = (currentGeminiModelIdx + 1) % GEMINI_MODELS.length;
+    const now = Date.now();
+    if (GEMINI_MODELS.every(m => (geminiModelCooldown[m] ?? 0) > now)) {
+        const soonest = Math.min(...GEMINI_MODELS.map(m => geminiModelCooldown[m] ?? 0));
+        providerCooldown.gemini = soonest;
+        logger.warn("All Gemini models rate-limited — provider on cooldown");
+    }
+}
+
+// ── Provider selection ──────────────────────────────────────────────────────────
+
+async function pickProvider(exclude?: Provider): Promise<Provider | null> {
+    const [groqKey, geminiKey] = await Promise.all([getGroqKey(), getGeminiKey()]);
+    const now = Date.now();
+
+    const candidates: Provider[] = [];
+    if (groqKey && provider_not_excluded("groq", exclude) && now >= providerCooldown.groq) candidates.push("groq");
+    if (geminiKey && provider_not_excluded("gemini", exclude) && now >= providerCooldown.gemini) candidates.push("gemini");
+
+    if (candidates.length > 0) {
+        if (candidates.includes(preferredProvider)) return preferredProvider;
+        preferredProvider = candidates[0];
+        return preferredProvider;
+    }
+
+    // Nothing available right now (both cooling down, or excluded) — fall back to
+    // whichever configured key isn't the excluded one, even mid-cooldown, so the
+    // user still gets *an* attempt instead of a hard failure.
+    if (groqKey && exclude !== "groq") return "groq";
+    if (geminiKey && exclude !== "gemini") return "gemini";
+    return null;
+}
+
+function provider_not_excluded(p: Provider, exclude?: Provider) {
+    return exclude !== p;
+}
+
+// ── Shared message format ──────────────────────────────────────────────────────
 
 export interface GroqChatMessage {
     role: "system" | "user" | "assistant";
@@ -108,6 +201,21 @@ export interface GroqCallOptions {
     maxRetries?: number;
 }
 
+let queue = Promise.resolve();
+const MIN_DELAY_MS = 200;
+
+function enqueue<T>(fn: () => Promise<T>): Promise<T> {
+    const result = queue.then(() => fn());
+    queue = result.then(
+        () => new Promise(r => setTimeout(r, MIN_DELAY_MS)),
+        () => new Promise(r => setTimeout(r, MIN_DELAY_MS)),
+    );
+    return result;
+}
+
+// ── Public entry point — kept as "groqChat" for backward compatibility: every
+// plugin (Dmserveur, AutoCorrect, VoiceDictation, YouCordAI) already imports this
+// name, so switching providers under the hood needs zero changes on their side.
 export async function groqChat(opts: GroqCallOptions): Promise<string> {
     if (!opts || typeof opts !== "object") {
         throw new Error("Invalid options object");
@@ -126,18 +234,46 @@ export async function groqChat(opts: GroqCallOptions): Promise<string> {
             throw new Error("Message content must be a string or array");
         }
     }
-    return enqueue(() => _groqChat(opts));
+    return enqueue(() => _dispatch(opts));
 }
+
+async function _dispatch(opts: GroqCallOptions, attempt = 0, excludeProvider?: Provider): Promise<string> {
+    const maxProviderSwitches = 2; // groq -> gemini -> (give up)
+
+    const provider = await pickProvider(excludeProvider);
+    if (!provider) {
+        throw new Error("No AI API key configured — add a Groq and/or Gemini key in Settings → YouCordAI");
+    }
+
+    try {
+        if (provider === "groq") {
+            return await _groqChat(opts);
+        } else {
+            return await _geminiChat(opts);
+        }
+    } catch (err: any) {
+        const isRateLimit = err?.__rateLimited === true;
+        if (isRateLimit && attempt < maxProviderSwitches) {
+            logger.warn(`${provider} rate-limited, switching provider`);
+            return _dispatch(opts, attempt + 1, provider);
+        }
+        throw err;
+    }
+}
+
+// ── Groq ─────────────────────────────────────────────────────────────────────
 
 async function _groqChat(opts: GroqCallOptions, attempt = 0): Promise<string> {
     const { messages, temperature = 0.7, maxTokens = 1000, forceModel, maxRetries = 3 } = opts;
 
     const apiKey = await getGroqKey();
     if (!apiKey) {
-        throw new Error("Groq API key missing — configure it in Settings → YouCordAI");
+        const err: any = new Error("Groq API key missing");
+        err.__rateLimited = true; // treat "no key" like "unavailable" so we try Gemini instead
+        throw err;
     }
 
-    const model = forceModel ?? getAvailableModel();
+    const model = forceModel ?? getAvailableGroqModel();
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30_000);
 
@@ -158,21 +294,20 @@ async function _groqChat(opts: GroqCallOptions, attempt = 0): Promise<string> {
         });
 
         if (res.status === 429) {
-            if (attempt >= maxRetries) {
-                throw new Error("Groq rate limit — try again in a moment");
-            }
-
             const retryAfterHeader = res.headers.get("retry-after");
             let retryAfterMs = 60_000;
             if (retryAfterHeader) {
                 const parsed = parseInt(retryAfterHeader, 10);
-                if (!isNaN(parsed) && parsed > 0) {
-                    retryAfterMs = Math.min(300_000, parsed * 1000);
-                }
+                if (!isNaN(parsed) && parsed > 0) retryAfterMs = Math.min(300_000, parsed * 1000);
             }
+            markGroqModelRateLimited(model, retryAfterMs);
 
-            markModelRateLimited(model, retryAfterMs);
-            return _groqChat({ ...opts, forceModel: undefined }, attempt + 1);
+            if (attempt < maxRetries) {
+                return _groqChat({ ...opts, forceModel: undefined }, attempt + 1);
+            }
+            const err: any = new Error("Groq rate limit — switching provider if possible");
+            err.__rateLimited = true;
+            throw err;
         }
 
         if (!res.ok) {
@@ -193,7 +328,130 @@ async function _groqChat(opts: GroqCallOptions, attempt = 0): Promise<string> {
         return content.trim();
     } catch (err: any) {
         if (err.name === "AbortError") {
-            throw new Error("Groq API request timed out after 30 seconds");
+            const timeoutErr: any = new Error("Groq API request timed out after 30 seconds");
+            timeoutErr.__rateLimited = true; // let it fail over to Gemini rather than dead-end
+            throw timeoutErr;
+        }
+        throw err;
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
+// ── Gemini ─────────────────────────────────────────────────────────────
+
+function toGeminiPayload(messages: GroqChatMessage[]) {
+    const systemParts: string[] = [];
+    const contents: any[] = [];
+
+    for (const msg of messages) {
+        if (msg.role === "system") {
+            systemParts.push(typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content));
+            continue;
+        }
+
+        const role = msg.role === "assistant" ? "model" : "user";
+
+        if (typeof msg.content === "string") {
+            contents.push({ role, parts: [{ text: msg.content }] });
+            continue;
+        }
+
+        // Multimodal content (text + images), same shape used for Groq vision calls.
+        const parts: any[] = [];
+        for (const part of msg.content) {
+            if (part?.type === "text" && typeof part.text === "string") {
+                parts.push({ text: part.text });
+            } else if (part?.type === "image_url" && typeof part.image_url?.url === "string") {
+                const match = /^data:([^;]+);base64,(.+)$/.exec(part.image_url.url);
+                if (match) {
+                    parts.push({ inlineData: { mimeType: match[1], data: match[2] } });
+                }
+            }
+        }
+        contents.push({ role, parts });
+    }
+
+    return {
+        contents,
+        systemInstruction: systemParts.length > 0 ? { parts: [{ text: systemParts.join("\n\n") }] } : undefined,
+    };
+}
+
+async function _geminiChat(opts: GroqCallOptions, attempt = 0): Promise<string> {
+    const { messages, temperature = 0.7, maxTokens = 1000, forceModel, maxRetries = 3 } = opts;
+
+    const apiKey = await getGeminiKey();
+    if (!apiKey) {
+        const err: any = new Error("Gemini API key missing");
+        err.__rateLimited = true;
+        throw err;
+    }
+
+    const model = forceModel ?? getAvailableGeminiModel();
+    const { contents, systemInstruction } = toGeminiPayload(messages);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30_000);
+
+    try {
+        const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": apiKey,
+                },
+                body: JSON.stringify({
+                    contents,
+                    systemInstruction,
+                    generationConfig: {
+                        temperature,
+                        maxOutputTokens: maxTokens,
+                    },
+                }),
+                signal: controller.signal,
+            },
+        );
+
+        if (res.status === 429) {
+            markGeminiModelRateLimited(model, 60_000);
+            if (attempt < maxRetries) {
+                return _geminiChat({ ...opts, forceModel: undefined }, attempt + 1);
+            }
+            const err: any = new Error("Gemini rate limit — switching provider if possible");
+            err.__rateLimited = true;
+            throw err;
+        }
+
+        if (!res.ok) {
+            const body = await res.text().catch(() => "");
+            throw new Error(`Gemini API ${res.status}: ${body.slice(0, 200)}`);
+        }
+
+        const data = await res.json().catch(() => null);
+        if (!data || typeof data !== "object") {
+            throw new Error("Invalid response JSON from Gemini");
+        }
+
+        const parts = data.candidates?.[0]?.content?.parts;
+        const text = Array.isArray(parts) ? parts.map((p: any) => p.text ?? "").join("") : "";
+        if (!text) {
+            // Gemini returns no candidates when its safety filters block a prompt —
+            // surface that distinctly instead of a blank/confusing error.
+            if (data.promptFeedback?.blockReason) {
+                throw new Error(`Gemini blocked the request: ${data.promptFeedback.blockReason}`);
+            }
+            throw new Error("Gemini response did not return any text");
+        }
+
+        return text.trim();
+    } catch (err: any) {
+        if (err.name === "AbortError") {
+            const timeoutErr: any = new Error("Gemini API request timed out after 30 seconds");
+            timeoutErr.__rateLimited = true;
+            throw timeoutErr;
         }
         throw err;
     } finally {
@@ -202,5 +460,7 @@ async function _groqChat(opts: GroqCallOptions, attempt = 0): Promise<string> {
 }
 
 export function getCurrentModel(): string {
-    return GROQ_MODELS[currentModelIdx] ?? GROQ_MODELS[0];
+    return preferredProvider === "gemini"
+        ? (GEMINI_MODELS[currentGeminiModelIdx] ?? GEMINI_MODELS[0])
+        : (GROQ_MODELS[currentGroqModelIdx] ?? GROQ_MODELS[0]);
 }

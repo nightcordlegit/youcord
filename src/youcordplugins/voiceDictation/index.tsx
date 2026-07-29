@@ -73,7 +73,7 @@ function insertText(text: string) {
 async function transcribe(blob: Blob): Promise<string> {
     const language = settings.store.language?.trim() || undefined;
     const apiKey = await getGroqKey();
-    if (!apiKey) throw new Error("API key missing â€” Configure your key in Settings â†’ YouCordAI");
+    if (!apiKey) throw new Error("API key missing — Configure your key in Settings → YouCordAI");
 
     const form = new FormData();
     form.append("file", blob, "audio.webm");
@@ -126,13 +126,13 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
             if (text) {
                 const t = text.trim();
                 const isHallucination =
-                    /^(merci|thanks?|thank you|music|â™ª|ðŸŽµ|\.\.\.|\.\s*)+$/i.test(t) ||
+                    /^(merci|thanks?|thank you|music|♪|🎵|\.\.\.|\.\s*)+$/i.test(t) ||
                     /sous[- ]?titr/i.test(t) ||
                     /radio[- ]?canada|société radio/i.test(t) ||
                     /merci .*(regard|écouter|suivi)|thanks? .*watch/i.test(t) ||
                     /transcri(ption|t)\s*(par|by)/i.test(t) ||
                     /^(.{1,15})\1{2,}$/i.test(t.replace(/\s+/g, "")) ||
-                    /^[\s.,!?â€¦\-â€“â€”]+$/.test(t);
+                    /^[\s.,!?…\-–—]+$/.test(t);
                 if (!isHallucination) insertText(text + " ");
             }
         } catch (e: any) {

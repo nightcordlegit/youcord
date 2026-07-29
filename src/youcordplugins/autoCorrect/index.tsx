@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -15,7 +15,7 @@ import plugins from "~plugins";
 
 import { getGroqKey,groqChat } from "../youcordAI/groqManager";
 
-// â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Settings ───────────────────────────────────────────────────────────────────
 
 const settings = definePluginSettings({
     isActive: {
@@ -39,20 +39,20 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: "Correction level",
         options: [
-            { label: "Soft â€” obvious mistakes only", value: "low", default: true },
-            { label: "Normal â€” mistakes + style", value: "medium" },
-            { label: "Aggressive â€” full rewrite", value: "high" },
+            { label: "Soft — obvious mistakes only", value: "low", default: true },
+            { label: "Normal — mistakes + style", value: "medium" },
+            { label: "Aggressive — full rewrite", value: "high" },
         ],
         default: "low",
     },
 });
 
-// â”€â”€ Correction via groqManager â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Correction via groqManager ────────────────────────────────────────────────
 
 const LANG_PROMPTS: Record<string, string> = {
     fr: "Tu es un correcteur orthographique. Corrige UNIQUEMENT les fautes d'orthographe et de grammaire. Retourne le texte corrigé sans explication ni guillemets. INTERDIT: ajouter des mots, changer le sens, reformuler. Si le texte est correct, retourne-le identique.",
     en: "You are a spell-checker. Fix ONLY spelling and grammar mistakes. Return the corrected text without explanation or quotes. FORBIDDEN: adding words, changing meaning, rephrasing. If already correct, return as-is.",
-    es: "Eres un corrector ortográfico. Corrige SOLO errores ortográficos y gramaticales. Devuelve el texte corrigé sans explication. PROHIBIDO: añadir palabras, cambiar el sentido.",
+    es: "Eres un corrector ortográfico. Corrige SOLO errores ortográficos y gramaticales. Devuelve el texto corregido sin explicación. PROHIBIDO: añadir palabras, cambiar el sentido.",
     de: "Du bist ein Rechtschreibprüfer. Korrigiere NUR Rechtschreib- und Grammatikfehler. Gib den korrigierten Text ohne Erklärung zurück. VERBOTEN: Wörter hinzufügen, Bedeutung ändern.",
     it: "Sei un correttore ortografico. Correggi SOLO errori ortografici e grammaticali. Restituisci il testo corretto senza spiegazioni. VIETATO: aggiungere parole, cambiare il significato.",
     pt: "Você é um corretor ortográfico. Corrija SOMENTE erros ortográficos e gramaticais. Retorne o texto corrigido sem explicação. PROIBIDO: adicionar palavras, mudar o sentido.",
@@ -79,7 +79,7 @@ async function correctText(text: string): Promise<string> {
             ],
             temperature: 0,
             maxTokens: 512,
-            // Forcer un modèle léger pour la correction â€” économise le quota du 70B pour l'IA
+            // Forcer un modèle léger pour la correction — économise le quota du 70B pour l'IA
             forceModel: "llama-3.1-8b-instant",
         });
 
@@ -88,7 +88,7 @@ async function correctText(text: string): Promise<string> {
         // Sécurité contre les répétitions infinies ou les hallucinations
         if (corrected.toLowerCase().includes("correction:") || corrected.toLowerCase().includes("text:")) return text;
 
-        // Sécurité : réponse trop différente â†’ on n'applique pas
+        // Sécurité : réponse trop différente → on n'applique pas
         if (corrected.length > text.length * 1.5 || corrected.length < text.length * 0.4) return text;
 
         // En mode low : vérification plus stricte du nombre de mots
@@ -108,7 +108,7 @@ async function correctText(text: string): Promise<string> {
     }
 }
 
-// â”€â”€ Chat Bar Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Chat Bar Button ────────────────────────────────────────────────────────────
 
 function AutoCorrectIcon({ enabled }: { enabled: boolean; }) {
     return (
@@ -148,8 +148,8 @@ const AutoCorrectChatBarButton: ChatBarButtonFactory = ({ type }) => {
     };
 
     const tooltip = enabled
-        ? "AutoCorrect: enabled â€” click to disable"
-        : "AutoCorrect: disabled â€” click to enable";
+        ? "AutoCorrect: enabled — click to disable"
+        : "AutoCorrect: disabled — click to enable";
 
     return (
         <ChatBarButton
@@ -165,7 +165,7 @@ const AutoCorrectChatBarButton: ChatBarButtonFactory = ({ type }) => {
     );
 };
 
-// â”€â”€ Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Plugin ─────────────────────────────────────────────────────────────────────
 
 export default definePlugin({
     name: "AutoCorrect",
