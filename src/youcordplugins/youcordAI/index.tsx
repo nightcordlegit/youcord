@@ -21,7 +21,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, IconUtils, Menu,React, ReactDOM, RelationshipStore, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
-import { getGeminiKey, getGroqKey, getProviderPreference, groqChat, setGeminiKey, setGroqKey, setProviderPreference } from "./groqManager";
+import { getGeminiKey, getGroqKey, groqChat, setGeminiKey, setGroqKey, setProviderPreference } from "./groqManager";
 
 // ── Settings ───────────────────────────────────────────────────────────────────
 
