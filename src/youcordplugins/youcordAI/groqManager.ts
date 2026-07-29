@@ -13,11 +13,12 @@ const DS_API_KEY = "groq-shared-api-key";
 const DS_GEMINI_API_KEY = "gemini-shared-api-key";
 const DS_PROVIDER_PREF = "ai-provider-preference"; // "auto" | "groq" | "gemini"
 
+// Groq deprecated its old Llama chat models (llama-3.3-70b-versatile,
+// llama-3.1-8b-instant, llama3-70b-8192...) on June 17, 2026. Current
+// recommended production models per console.groq.com/docs/deprecations.
 const GROQ_MODELS = [
-    "llama-3.3-70b-versatile",
-    "llama3-70b-8192",
-    "llama-3.1-8b-instant",
-    "gemma2-9b-it",
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
 ] as const;
 
 // Free-tier Gemini models (gemini-2.0-flash was retired March 2026).

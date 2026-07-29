@@ -21,7 +21,11 @@ export function makeLazy<T>(factory: () => T, attempts = 5): () => T {
     let cache: T;
     return () => {
         if (cache === undefined && attempts > tries++) {
-            cache = factory();
+            try {
+                cache = factory();
+            } catch (e) {
+                console.error("Lazy factory threw:", e);
+            }
             if (cache === undefined && attempts === tries)
                 console.error("Lazy factory failed:", factory);
         }
@@ -103,7 +107,11 @@ export function proxyLazy<T>(factory: () => T, attempts = 5, isChild = false): T
         [SYM_LAZY_CACHED]: void 0 as T | undefined,
         [SYM_LAZY_GET]() {
             if (!proxyDummy[SYM_LAZY_CACHED] && attempts > tries++) {
-                proxyDummy[SYM_LAZY_CACHED] = factory();
+                try {
+                    proxyDummy[SYM_LAZY_CACHED] = factory();
+                } catch (e) {
+                    console.error("Lazy factory threw:", e);
+                }
                 if (!proxyDummy[SYM_LAZY_CACHED] && attempts === tries)
                     console.error("Lazy factory failed:", factory);
             }

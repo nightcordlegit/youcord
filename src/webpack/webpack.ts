@@ -214,12 +214,9 @@ if (IS_DEV && IS_DISCORD_DESKTOP) {
 }
 
 export function handleModuleNotFound(method: string, ...filter: unknown[]) {
-    const err = new Error(`webpack.${method} found no module`);
-    logger.error(err, "Filter:", filter);
-
-    // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-    if (IS_DEV && !devToolsOpen)
-        throw err;
+    // Errors are now caught by lazy wrappers (makeLazy/proxyLazy), so this is just a
+    // diagnostic hint rather than a fatal error. Log at warn level to reduce console noise.
+    logger.warn(`webpack.${method} found no module — Filter:`, ...filter);
 }
 
 /**

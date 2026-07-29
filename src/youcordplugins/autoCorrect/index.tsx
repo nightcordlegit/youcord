@@ -79,8 +79,8 @@ async function correctText(text: string): Promise<string> {
             ],
             temperature: 0,
             maxTokens: 512,
-            // Forcer un modèle léger pour la correction — économise le quota du 70B pour l'IA
-            forceModel: "llama-3.1-8b-instant",
+            // Forcer un modèle léger pour la correction — économise le quota du 120B pour l'IA
+            forceModel: "openai/gpt-oss-20b",
         });
 
         if (!corrected || corrected.trim() === "" || corrected === text) return text;

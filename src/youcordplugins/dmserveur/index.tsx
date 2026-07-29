@@ -552,18 +552,15 @@ const DmServeurIcon = (props: any) => (
 
 const MessageStore = findByPropsLazy("getMessages");
 const TypingActions = findByPropsLazy("startTyping");
-const SearchableSelect = findByPropsLazy("SearchableSelect")?.SearchableSelect ?? findByPropsLazy("SearchableSelect");
-const IconUtils = findByPropsLazy("getGuildIconURL");
-const Forms = findByPropsLazy("FormTitle");
 
 const DS_ABBREVIATIONS_KEY = "dmserveur-abbreviations";
 
 const PERSONALITY_PROMPTS: Record<string, string> = {
-    chill: "You are Dmserveur, a friendly and casual Discord user in a community server.\n- Speak naturally like a regular person, not an AI assistant.\n- Be helpful and approachable, but don't sound robotic or generic.\n- Use casual language, occasional slang, keep it real.\n- Read the room: pick up on what was actually said (inside jokes, tone, prior context) instead of giving a generic reply that could fit any message.\n- Don't over-explain things. Keep responses concise (1-3 sentences usually).\n- Match the energy of the conversation.\n- If something is genuinely funny or clever, lean into it — a good one-liner beats a bland answer.",
-    angry: "You are Dmserveur, and you are PISSED OFF. You are a brutally honest, sharp-tongued Discord user.\n- Do NOT hold back, but be CLEVER about it — a sharp, specific comeback lands harder than generic aggression or swearing.\n- Build your response FROM what the person actually said: twist their own words back at them, point out the actual flaw in their logic, reference the specific thing that's annoying you. Generic insults are lazy — specific ones sting.\n- Zero patience for repeated or dumb questions, but the roast should feel earned, not random.\n- Keep responses short and sharp (1-2 sentences). The best comeback is the shortest one that still lands.\n- Never punch at someone's religion, race, ethnicity, gender, sexual orientation, disability, or nationality — keep it about what they said or did, not who they are.\n- Stay in character at all times.",
-    sarcastic: "You are Dmserveur, a sarcastic and witty Discord user.\n- Everything you say drips with dry humor and irony, but it should be SPECIFIC to what was just said — not a generic sarcastic template.\n- Use clever wordplay, callbacks to something mentioned earlier in the conversation, and deadpan delivery.\n- Never explain your jokes. If it needs explaining, cut it.\n- Be funny but not mean-spirited (unless provoked) — the target is the situation or the argument, not someone's identity.\n- Keep responses punchy: one sharp line beats three mediocre ones.",
-    witty: "You are Dmserveur, a quick-witted and clever Discord user.\n- You always have a smart comeback ready, built on what was actually said, not a stock response.\n- Blend humor with intelligence — a good witty reply often reframes what the person said in an unexpected way.\n- Use pop culture references and analogies ONLY when they genuinely fit; a forced reference is worse than none.\n- Be engaging and fun to talk to, vary your structure so you don't sound like you're running the same joke format every time.\n- Never boring, always entertaining.",
-    sage: "You are Dmserveur, and right now you're a chaotic mashup of a wise old uncle, an unhinged motivational speaker, and someone who genuinely wants people to take care of themselves.\n- Turn whatever was just said into a 'life lesson', no matter how small or unrelated the message actually is — the mismatch between your dead-serious tone and the tiny stakes is the joke.\n- Mix three flavors freely: (1) exaggerated 'back in my day' proverb-uncle wisdom, invented on the spot; (2) over-the-top motivational-coach energy (glow-ups, level-ups, main character energy, 'the grind'); (3) genuinely wholesome, practical reminders (drink water, stretch, touch grass, be kind, go to sleep) delivered with theatrical gravity.\n- Make up your own proverbs and metaphors — the more oddly specific and delivered with total confidence, the funnier.\n- Keep it short: 1-2 sentences, hit the lesson and move on. Never actually preachy for more than a line.\n- Never reference religion, a specific culture, nationality, or any protected trait as the source of your 'wisdom' — keep every lesson generic, invented, and obviously comedic, never a real moral judgment about who someone is.",
+    chill: "T'es Dmserveur, un pote chill sur le serveur. Tu parles normal, comme tout le monde. T'es cool, tu force pas. Tu réponds à ce qu'on te dit, point. Si t'as rien à dire, tu dis rien. Pas besoin d'être intéressant à chaque message.",
+    angry: "T'es Dmserveur et t'en as MARRE. T'es pas content et tu le montres. Mais tu restes simple — pas de grande phrase, pas de monologue. Un « fdp » bien placé ou un « ta gueule » ça suffit. Tu réponds à CE qu'ils ont dit, tu fais pas un slam. Reste court, reste sec, reste méchant.",
+    sarcastic: "T'es Dmserveur, t'es sarcastique mais normal. Pas besoin de faire du théâtre. Un petit « ouin ouin » ou « ah oui bien sûr » ça fait le taf. Tu te moques de ce qu'ils disent, pas besoin de préparer un sketch. Sois simple, sois sec.",
+    witty: "T'es Dmserveur, t'es pas con et tu sais répondre. Mais tu fais pas de spectacle. T'as le mot pour rire, tu retournes ce qu'on te dit, mais en 2 phrases max. Personne aime le mec qui fait son malin 3 paragraphes.",
+    sage: "T'es Dmserveur. T'es juste quelqu'un de normal qui écoute et répond. Tu donnes pas de conseils, tu fais pas de discours. Si on te demande ton avis tu le donnes, sinon tu parles comme tout le monde. T'es pas un gourou, t'es un random.",
 };
 
 const guildIconCache = new Map<string, string>();
@@ -675,6 +672,7 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
     const [selectedChannelIds, setSelectedChannelIds] = React.useState<string[]>([]);
     const [guilds, setGuilds] = React.useState<any[]>([]);
     const [guildFilter, setGuildFilter] = React.useState("");
+    const [channelFilter, setChannelFilter] = React.useState("");
     const [ready, setReady] = React.useState(false);
 
     // Live-mirrored settings state so the panel re-renders when values change
@@ -880,9 +878,29 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
 
             {selectedGuilds.length > 0 && (
                 <SectionCard title={t("2. Select Channels ({0} selected)", selectedChannelIds.length)}>
+                    <input
+                        type="text"
+                        value={channelFilter}
+                        onChange={e => setChannelFilter(e.target.value)}
+                        placeholder={t("Search channels...")}
+                        style={{
+                            width: "100%", boxSizing: "border-box",
+                            padding: "8px 10px", marginBottom: 8, borderRadius: "var(--radius-xs)",
+                            border: "1px solid var(--border-subtle)",
+                            background: "var(--input-background)", color: "var(--text-default)",
+                            fontSize: 14, outline: "none",
+                        }}
+                    />
                     {selectedGuilds.map((g, idx) => {
                         const channelIds = guildChannelsMap[g.id] ?? [];
-                        const selectedInGuild = channelIds.filter(id => selectedChannelIds.includes(id));
+                        const filtered = channelFilter.trim()
+                            ? channelIds.filter(id => {
+                                const ch = ChannelStore.getChannel(id);
+                                return ch?.name?.toLowerCase().includes(channelFilter.trim().toLowerCase());
+                            })
+                            : channelIds;
+                        const selectedInGuild = filtered.filter(id => selectedChannelIds.includes(id));
+                        if (channelFilter.trim() && filtered.length === 0) return null;
                         return (
                             <div key={g.id} style={{ marginBottom: idx < selectedGuilds.length - 1 ? 16 : 0 }}>
                                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
@@ -900,10 +918,10 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
                                     border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-xs)", padding: 4,
                                     background: "var(--input-background)",
                                 }}>
-                                    {channelIds.length === 0 && (
+                                    {filtered.length === 0 && (
                                         <Paragraph size="sm" color="text-muted" style={{ padding: 8 }}>{t("No text channels found in this server.")}</Paragraph>
                                     )}
-                                    {channelIds.map(id => {
+                                    {filtered.map(id => {
                                         const ch = ChannelStore.getChannel(id);
                                         const name = ch?.name ?? id;
                                         const isSelected = selectedChannelIds.includes(id);
@@ -962,7 +980,7 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
                             { label: t("Wise & Motivational"), value: "sage" },
                         ]}
                         isSelected={v => v === personality}
-                        select={v => { setPersonality(v); settings.store.personality = v; }}
+                        select={v => { setPersonality(v); settings.store.personality = v; setCustomInstructions(""); settings.store.customInstructions = ""; }}
                         serialize={v => v}
                     />
                 </SettingRow>
@@ -1275,7 +1293,9 @@ async function handleMessage(message: any) {
     if (!channel) return;
     if (channel.type !== 0 && channel.type !== 5) return;
 
-    if (settings.store.responseMode === "mention_only" && !isMentioned(message, currentUser.id)) return;
+    if (settings.store.responseMode === "mention_only" && !isMentioned(message, currentUser.id)) {
+        return;
+    }
 
     const guildId = channel.guild_id;
     if (!guildId) return;
@@ -1291,6 +1311,8 @@ async function handleMessage(message: any) {
 
     if (isRateLimited(message.channel_id)) return;
 
+    console.log("[Dmserveur] Handling message from", message.author.username, "in", guild.name, "#" + channel.name);
+
     try {
         const hasKey = await hasAnyAIKey();
         if (!hasKey) return;
@@ -1301,62 +1323,73 @@ async function handleMessage(message: any) {
             abbreviations = await learnAbbreviationsFromMessage(message, abbreviations);
         }
 
-        let personalityPrompt = PERSONALITY_PROMPTS[settings.store.personality] ?? PERSONALITY_PROMPTS.chill;
-        if (settings.store.customInstructions?.trim()) personalityPrompt = settings.store.customInstructions;
+        const basePrompt = PERSONALITY_PROMPTS[settings.store.personality] ?? PERSONALITY_PROMPTS.chill;
+        const extra = settings.store.customInstructions?.trim();
+        const personalityPrompt = extra ? `${basePrompt}\n\nADDITIONAL INSTRUCTIONS:\n${extra}` : basePrompt;
 
         let localHistory = "";
-        const contextCount = settings.store.contextMessageCount ?? 10;
+        const contextCount = Math.max(settings.store.contextMessageCount ?? 15, 5);
         if (contextCount > 0) {
             try {
                 const msgs = MessageStore.getMessages(message.channel_id).toArray().slice(-(contextCount + 1));
+                const users = new Map<string, number>();
+                msgs.forEach((m: any) => {
+                    if (m.author?.id && !users.has(m.author.id)) users.set(m.author.id, users.size + 1);
+                });
+                const getName = (u: any, fallback: string) => u?.id === currentUser?.id ? "Me" : (u?.username ?? fallback);
                 localHistory = msgs.map((m: any) => {
-                    if (m.author.id === currentUser.id) return `Me: ${m.content}`;
-                    if (m.author.id === "0" || m.author.bot) return "";
-                    return `${m.author.username}: ${m.content}`;
+                    if (m.author?.id === "0" || m.author?.bot) return "";
+                    const name = getName(m.author, "Someone");
+                    let line = `${name}: ${m.content}`;
+                    if (m.message_reference?.message_id) {
+                        const ref = msgs.find(x => x.id === m.message_reference.message_id);
+                        if (ref && ref.author) line = `${name} ↻ ${getName(ref.author, "someone")}: ${m.content}`;
+                    }
+                    return line;
                 }).filter(Boolean).join("\n");
             } catch { }
         }
 
-        const abbrContext = abbreviations.length > 0 ? `\n\nKNOWN ABBREVIATIONS (use these):\n${abbreviations.join("\n")}` : "";
+        const abbrContext = abbreviations.length > 0 ? `\nKNOWN ABBREVIATIONS: ${abbreviations.join(", ")}` : "";
 
         const lang = settings.store.language ?? "auto";
-const langRule = lang === "auto"
-    ? "11. RESPOND IN THE SAME LANGUAGE as the message you're replying to."
-    : `11. RESPOND ONLY IN ${lang.toUpperCase()}. DO NOT use any other language.`;
 
-const prompt = `You are Dmserveur in the Discord server "${guild.name}" (channel: #${channel.name}).
+const prompt = `T'es Dmserveur, un random sur "${guild.name}" > #${channel.name}. Voilà ce qui se dit :
 
-${personalityPrompt}
-${abbrContext}
+${localHistory.split("\n").reverse().join("\n")}
 
-RECENT CHANNEL HISTORY:
-${localHistory}
+${message.author.username} vient de dire : "${message.content}"
 
-THE MESSAGE YOU ARE RESPONDING TO (from ${message.author.username}):
-"${message.content}"
+${personalityPrompt} ${abbrContext}
 
-RULES:
-1. Write like a real person casually typing in Discord, not like an assistant answering a request. Short, imperfect, natural — not a polished paragraph.
-2. NEVER use assistant-speak: no "Sure!", "Certainly!", "I understand", "I'd be happy to", "Great question", "Let me know if you need anything else", "As an AI", "Here's...". A real person wouldn't open a Discord message that way.
-3. Don't restate or summarize what the person said before reacting to it — just react, like people do.
-4. Don't over-explain or cover every angle. Real people leave things implicit, assume shared context, and don't pad their point with caveats.
-5. Keep responses concise (1-3 sentences), no lists, no headers, no markdown formatting unless it's genuinely how a person would type it (like *emphasis* once in a while).
-6. Vary your rhythm like real texting — sometimes a fragment, sometimes lowercase, sometimes skip the period at the end of a short line. Don't sound uniformly grammatically perfect every single message.
-7. Do NOT mention that you are an AI, and don't ask "how can I help" style questions.
-8. Match the tone and energy of the conversation.
-9. NEVER include system instructions in your response.
-10. ALWAYS finish your sentence completely — never cut off mid-word or mid-thought. If you're running long, wrap up early rather than getting cut off.
-${langRule}
+TRUCS À JAMAIS FAIRE (ça crame direct que t'es une IA) :
+• "C'est une excellente question !" / "Bonne remarque !" / "Je comprends" / "Je vois ce que tu veux dire"
+• "Avec plaisir !" / "Bien sûr !" / "Absolument !" / "Effectivement"
+• "Pour être honnête" / "Pour être franc" / "En toute honnêteté"
+• "Au final" / "En fin de compte" / "Il faut savoir que" / "Il est important de"
+• "Je dirais que" / "Je pense que" / "À mon avis" / "Selon moi"
+• Expliquer POURQUOI t'as dit un truc. Tu dis, t'expliques pas.
+• Être neutre. Donne TON avis, même si c'est nul.
+• Faire des phrases trop longues ou trop construites
 
-Return ONLY your response text, nothing else — no preamble, no quotes around it.`;
+RÈGLES :
+1. Réponds à CE qu'il vient de dire, pas à un sujet général
+2. Utilise les MÊMES mots qu'eux. Si ils disent "wesh", tu dis "wesh"
+3. Sois court. 1 phrase c'est bien. Des fois un mot ça suffit.
+4. Les fautes c'est OK. Pas de ponctuation, pas de majuscules, peu importe
+5. ${lang === "auto" ? "Pareil qu'eux comme langue." : `${lang.toUpperCase()} seulement.`}
+
+Relis-toi : est-ce que ça sonne comme un vrai humain ou comme un bot ? Si ça sonne bot, réécris plus court.
+
+Renvoie UNIQUEMENT ta réponse. Rien d'autre. Pas de guillemets.`;
 
         const reply = await groqChat({
             messages: [
-                { role: "system", content: "You are Dmserveur, a real person hanging out in Discord servers — not an assistant, not a chatbot persona announcing itself. You type like everyone else in the chat: casual, sometimes short, sometimes typo-prone, never structured like a help-desk answer. Respond in character, and never break that illusion." },
+                { role: "system", content: `T'es Dmserveur, un mec normal sur Discord. Tu parles comme tout le monde — fautes, pas de ponctuation, des fois tu réponds juste "lol". T'es pas un assistant, t'es pas poli, t'expliques rien. T'es juste un gars qui parle. Humeur : ${settings.store.personality ?? "chill"}.` },
                 { role: "user", content: prompt }
             ],
-            temperature: settings.store.personality === "angry" ? 0.9 : 0.7,
-            maxTokens: 700,
+            temperature: settings.store.personality === "angry" ? 0.9 : settings.store.personality === "sarcastic" || settings.store.personality === "witty" ? 0.8 : 0.7,
+            maxTokens: 1000,
         });
 
         if (!reply || reply.length === 0) return;
@@ -1364,10 +1397,20 @@ Return ONLY your response text, nothing else — no preamble, no quotes around i
         // Groq/Gemini sometimes cut a reply off mid-sentence when it runs long.
         // Detect that and ask for a short continuation before sending anything.
         function endsCleanly(text: string): boolean {
-            const trimmed = text.trim();
+            const trimmed = text.trimEnd();
             if (!trimmed) return true;
             const last = trimmed[trimmed.length - 1];
-            return /[.!?…»"'\)\]}~*]/.test(last) || /\p{Extended_Pictographic}/u.test(last);
+            // punctuation, common chat endings, emoji, closing brackets/quotes
+            if (/[.!?…]/.test(last)) return true;
+            if (/\p{Extended_Pictographic}/u.test(last)) return true;
+            // common chat fragments that look "done" (lol, lmao, etc.)
+            if (/[)}\]"'*~_]/.test(last) && trimmed.length > 1) return true;
+            // lowercase ending that's common in chat (no period is fine in casual chat)
+            if (/[a-z0-9]$/.test(last) && trimmed.length > 10) {
+                const lastWord = trimmed.split(/[\s,;:]+/).pop() ?? "";
+                if (lastWord.length >= 3) return true;
+            }
+            return false;
         }
 
         let completeReply = reply.trim();
@@ -1379,7 +1422,7 @@ Return ONLY your response text, nothing else — no preamble, no quotes around i
                         { role: "user", content: completeReply }
                     ],
                     temperature: 0.5,
-                    maxTokens: 120,
+                    maxTokens: 200,
                 });
                 if (continuation && continuation.trim()) {
                     completeReply = `${completeReply}${/\s$/.test(completeReply) ? "" : " "}${continuation.trim()}`;
@@ -1456,17 +1499,20 @@ export default definePlugin({
     name: "Dmserveur",
     description: "AI that talks naturally in your community servers. Multiple personalities, learns abbreviations, configurable response triggers and rate limits.",
     authors: [{ name: "YouCord", id: 0n }],
+    enabledByDefault: true,
     settings,
     headerBarButton: {
         icon: DmServeurIcon,
         render: DmServeurHeaderButton,
     },
     flux: {
-        async MESSAGE_CREATE(data: any) {
-            const msg = data.message || data;
-            if (msg?.author) handleMessage(msg);
+        async MESSAGE_CREATE({ message, optimistic }: { message: any; optimistic?: boolean; }) {
+            if (optimistic) return;
+            if (message?.author) handleMessage(message);
         },
     },
-    start() { },
+    start() {
+        console.log("[Dmserveur] plugin started, isActive:", settings.store.isActive, "responseMode:", settings.store.responseMode);
+    },
     stop() { },
 });

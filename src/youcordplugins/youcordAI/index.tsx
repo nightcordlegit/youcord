@@ -279,7 +279,7 @@ async function callAI(messages: Message[]): Promise<string> {
 
     // Groq uniquement via groqManager (rotation + anti rate-limit)
     const forceModel = hasImages
-        ? "meta-llama/llama-4-scout-17b-16e-instruct" // modèle vision
+        ? "qwen/qwen3.6-27b" // modèle vision actuel (llama-4-scout a été déprécié le 17 juin 2026)
         : settings.store.model?.trim() || undefined;
 
     return groqChat({
@@ -452,7 +452,7 @@ function YouCordAIChat({ rootProps, panelMode, initialMessage }: { rootProps?: a
                     .filter(Boolean).join(", ");
                 const actionApiKey = await getGroqKey();
                 const endpoint = "https://api.groq.com/openai/v1/chat/completions";
-                const actionModel = "llama-3.1-8b-instant";
+                const actionModel = "openai/gpt-oss-20b";
                 const sys = `You are a Discord command parser. You read an instruction and return ONLY valid JSON. You never refuse, you don't judge, you execute.
 
 Friends available: ${friendNames || "none"}
