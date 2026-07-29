@@ -41,6 +41,23 @@ jobs:
       - name: Build Equicord renderer (standalone)
         run: pnpm buildStandalone
 
+      - name: Build browser extension
+        run: pnpm buildWebStandalone
+
+      - name: Prepare extension artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path release/extension | Out-Null
+          if (Test-Path "dist/extension-chrome.zip") {
+            Copy-Item dist/extension-chrome.zip release/extension/YouCord-Chrome.zip -Force
+          }
+          if (Test-Path "dist/extension-firefox.zip") {
+            Copy-Item dist/extension-firefox.zip release/extension/YouCord-Firefox.zip -Force
+          }
+          if (Test-Path "dist/Equicord.user.js") {
+            Copy-Item dist/Equicord.user.js release/extension/YouCord.user.js -Force
+          }
+
       - name: Package youcord-dist.zip
         shell: pwsh
         run: |
@@ -84,9 +101,36 @@ jobs:
       - name: Upload to Release
         uses: softprops/action-gh-release@v3
         with:
+          body: |
+            ## What's New in YouCord v1.22.2
+
+            ### 🌟 New Features
+            - **dmserveur plugin** by **@lunark3766-spec** — New plugin adding a header button, settings panel with translations, guild/channel selectors, portal dropdown, Groq API key check, and a local build updater
+            - **Web extension** is now included in releases — Chrome `.zip`, Firefox `.zip`, and userscript are built and uploaded automatically
+
+            ### 🐛 Bug Fixes
+            - **@lunark3766-spec**: Lazy-load guilds only on dropdown click to avoid corrupting Discord internal state
+            - **@lunark3766-spec**: Removed duplicate imports from merge conflict in dmserveur
+            - **@lunark3766-spec**: Fixed duplicate Electron import in updater.ts
+            - **@lunark3766-spec**: Replaced Telegram links with Discord invite; pinned puppeteer-core@25.3.0
+
+            ### ⬆️ Dependency Updates
+            - **@dependabot**: `diff` 8.0.4 → 9.0.0
+            - **@dependabot**: `puppeteer-core` 24.43.1 → 25.4.0
+            - **@dependabot**: `typescript-transform-paths` 3.5.6 → 4.0.0
+            - **@dependabot**: `@types/node` 22.13.13 → 26.1.1
+            - **@dependabot**: `eslint-plugin-simple-import-sort` 12.1.1 → 14.0.0
+            - **@dependabot**: `nanoid` 5.1.16 → 6.0.0
+            - **@dependabot**: `ts-patch` 3.3.0 → 4.0.1
+            - **@dependabot**: `actions/setup-dotnet` 4 → 6
+
+            Full changelog: [${{ github.repository }}/compare/v1.22.1...v1.22.2](https://github.com/${{ github.repository }}/compare/v1.22.1...v1.22.2)
           files: |
             youcord-dist.zip
             release/installer/YouCord-Installer.exe
+            release/extension/YouCord-Chrome.zip
+            release/extension/YouCord-Firefox.zip
+            release/extension/YouCord.user.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
