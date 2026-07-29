@@ -13,7 +13,7 @@ import { React } from "@webpack/common";
 
 import plugins from "~plugins";
 
-import { getGroqKey,groqChat } from "../youcordAI/groqManager";
+import { groqChat, hasAnyAIKey } from "../youcordAI/groqManager";
 
 // ── Settings ───────────────────────────────────────────────────────────────────
 
@@ -136,7 +136,7 @@ const AutoCorrectChatBarButton: ChatBarButtonFactory = ({ type }) => {
     const toggle = async () => {
         if (!enabled) {
             // Vérifie que la clé API est configurée avant d'activer
-            const key = await getGroqKey();
+            const key = await hasAnyAIKey();
             if (!key) {
                 showApiKeyWarning("AutoCorrect");
                 return;

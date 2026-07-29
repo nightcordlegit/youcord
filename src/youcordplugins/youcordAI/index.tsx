@@ -21,7 +21,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, IconUtils, Menu,React, ReactDOM, RelationshipStore, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
-import { getGeminiKey, getGroqKey, groqChat, setGeminiKey, setGroqKey } from "./groqManager";
+import { getGeminiKey, getGroqKey, getProviderPreference, groqChat, setGeminiKey, setGroqKey, setProviderPreference } from "./groqManager";
 
 // ── Settings ───────────────────────────────────────────────────────────────────
 
@@ -55,6 +55,17 @@ const settings = definePluginSettings({
         description: "Custom model (empty = default)",
         default: "",
         restartNeeded: false,
+    },
+    aiProvider: {
+        type: OptionType.SELECT,
+        description: "AI provider used by YouCordAI, Dmserveur, AutoCorrect and VoiceDictation",
+        options: [
+            { label: "Auto (switch automatically on rate-limit)", value: "auto", default: true },
+            { label: "Groq only (fallback to Gemini if rate-limited)", value: "groq" },
+            { label: "Gemini only (fallback to Groq if rate-limited)", value: "gemini" },
+        ],
+        restartNeeded: false,
+        onChange: (val: string) => { setProviderPreference(val as any); },
     },
     systemPrompt: {
         type: OptionType.STRING,
@@ -836,6 +847,10 @@ export default definePlugin({
                     console.log("[YouCordAI] Gemini API key migrated to shared DataStore");
                 }
             });
+        }
+        const providerFromSettings = settings.store.aiProvider;
+        if (providerFromSettings && providerFromSettings !== "auto") {
+            setProviderPreference(providerFromSettings as any);
         }
 
         // Système de secours DOM si le patch Webpack échoue sur cette version de Discord

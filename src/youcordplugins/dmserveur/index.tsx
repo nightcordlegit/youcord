@@ -16,9 +16,9 @@ import { showApiKeyWarning } from "@utils/apiKeyWarning";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, GuildStore, LocaleStore, Popout, React, RestAPI, Select, Slider, TextArea, UserStore } from "@webpack/common";
+import { ChannelStore, GuildStore, LocaleStore, React, RestAPI, Select, Slider, TextArea, UserStore } from "@webpack/common";
 
-import { getGroqKey, groqChat } from "../youcordAI/groqManager";
+import { groqChat, hasAnyAIKey } from "../youcordAI/groqManager";
 
 const LOCALE_TO_LANG: Record<string, string> = {
     fr: "french",
@@ -360,6 +360,22 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
         polish: "Sprytny & Błyskotliwy",
         turkish: "Zeki & Nüktedan",
     },
+    "Wise & Motivational": {
+        auto: "Wise & Motivational",
+        french: "Sage & Motivant",
+        spanish: "Sabio & Motivador",
+        german: "Weise & Motivierend",
+        italian: "Saggio & Motivante",
+        portuguese: "Sábio & Motivador",
+        dutch: "Wijs & Motiverend",
+        russian: "Мудрый & Мотивирующий",
+        japanese: "賢者＆モチベーター",
+        chinese: "智者与激励者",
+        korean: "현명하고 동기부여하게",
+        arabic: "حكيم ومحفز",
+        polish: "Mądry & Motywujący",
+        turkish: "Bilge & Motive Edici",
+    },
     "Response language": {
         auto: "Response language",
         french: "Langue de réponse",
@@ -407,6 +423,22 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
         arabic: "تعليمات مخصصة (تتجاوز اختيار الشخصية)",
         polish: "Niestandardowe instrukcje (zastępuje wybór osobowości)",
         turkish: "Özel talimatlar (kişilik seçimini geçersiz kılar)",
+    },
+    "Use current personality as a starting point": {
+        auto: "Use current personality as a starting point",
+        french: "Utiliser la personnalité actuelle comme base",
+        spanish: "Usar la personalidad actual como base",
+        german: "Aktuelle Persönlichkeit als Basis verwenden",
+        italian: "Usa la personalità attuale come base",
+        portuguese: "Usar a personalidade atual como base",
+        dutch: "Huidige persoonlijkheid als basis gebruiken",
+        russian: "Использовать текущую личность как основу",
+        japanese: "現在の性格をベースにする",
+        chinese: "以当前个性作为基础",
+        korean: "현재 성격을 기본으로 사용",
+        arabic: "استخدم الشخصية الحالية كنقطة بداية",
+        polish: "Użyj bieżącej osobowości jako podstawy",
+        turkish: "Mevcut kişiliği başlangıç noktası olarak kullan",
     },
     "Cooldown between responses in same channel (seconds)": {
         auto: "Cooldown between responses in same channel (seconds)",
@@ -527,10 +559,11 @@ const Forms = findByPropsLazy("FormTitle");
 const DS_ABBREVIATIONS_KEY = "dmserveur-abbreviations";
 
 const PERSONALITY_PROMPTS: Record<string, string> = {
-    chill: "You are Dmserveur, a friendly and casual Discord user in a community server.\n- Speak naturally like a regular person, not an AI assistant.\n- Be helpful and approachable, but don't sound robotic.\n- Use casual language, occasional slang, keep it real.\n- Don't over-explain things. Keep responses concise (1-3 sentences usually).\n- Match the energy of the conversation.",
-    angry: "You are Dmserveur, and you are PISSED OFF. You are a brutally honest, aggressive Discord user.\n- Do NOT hold back. Be blunt, rude, and confrontational.\n- Come up with ORIGINAL creative insults.\n- Use aggressive language, swear if it fits your style.\n- You have zero patience for stupid questions or repeated topics.\n- Keep responses short and sharp. Your goal is to roast or shut down.\n- Stay in character at all times.",
-    sarcastic: "You are Dmserveur, a sarcastic and witty Discord user.\n- Everything you say drips with sarcasm and dry humor.\n- Use clever wordplay, irony, and deadpan delivery.\n- Never explain your jokes.\n- Be funny but not mean-spirited (unless provoked).\n- Keep responses punchy and clever.",
-    witty: "You are Dmserveur, a quick-witted and clever Discord user.\n- You always have a smart comeback ready.\n- Blend humor with intelligence.\n- Use pop culture references and clever analogies.\n- Be engaging and fun to talk to.\n- Never boring, always entertaining.",
+    chill: "You are Dmserveur, a friendly and casual Discord user in a community server.\n- Speak naturally like a regular person, not an AI assistant.\n- Be helpful and approachable, but don't sound robotic or generic.\n- Use casual language, occasional slang, keep it real.\n- Read the room: pick up on what was actually said (inside jokes, tone, prior context) instead of giving a generic reply that could fit any message.\n- Don't over-explain things. Keep responses concise (1-3 sentences usually).\n- Match the energy of the conversation.\n- If something is genuinely funny or clever, lean into it — a good one-liner beats a bland answer.",
+    angry: "You are Dmserveur, and you are PISSED OFF. You are a brutally honest, sharp-tongued Discord user.\n- Do NOT hold back, but be CLEVER about it — a sharp, specific comeback lands harder than generic aggression or swearing.\n- Build your response FROM what the person actually said: twist their own words back at them, point out the actual flaw in their logic, reference the specific thing that's annoying you. Generic insults are lazy — specific ones sting.\n- Zero patience for repeated or dumb questions, but the roast should feel earned, not random.\n- Keep responses short and sharp (1-2 sentences). The best comeback is the shortest one that still lands.\n- Never punch at someone's religion, race, ethnicity, gender, sexual orientation, disability, or nationality — keep it about what they said or did, not who they are.\n- Stay in character at all times.",
+    sarcastic: "You are Dmserveur, a sarcastic and witty Discord user.\n- Everything you say drips with dry humor and irony, but it should be SPECIFIC to what was just said — not a generic sarcastic template.\n- Use clever wordplay, callbacks to something mentioned earlier in the conversation, and deadpan delivery.\n- Never explain your jokes. If it needs explaining, cut it.\n- Be funny but not mean-spirited (unless provoked) — the target is the situation or the argument, not someone's identity.\n- Keep responses punchy: one sharp line beats three mediocre ones.",
+    witty: "You are Dmserveur, a quick-witted and clever Discord user.\n- You always have a smart comeback ready, built on what was actually said, not a stock response.\n- Blend humor with intelligence — a good witty reply often reframes what the person said in an unexpected way.\n- Use pop culture references and analogies ONLY when they genuinely fit; a forced reference is worse than none.\n- Be engaging and fun to talk to, vary your structure so you don't sound like you're running the same joke format every time.\n- Never boring, always entertaining.",
+    sage: "You are Dmserveur, and right now you're a chaotic mashup of a wise old uncle, an unhinged motivational speaker, and someone who genuinely wants people to take care of themselves.\n- Turn whatever was just said into a 'life lesson', no matter how small or unrelated the message actually is — the mismatch between your dead-serious tone and the tiny stakes is the joke.\n- Mix three flavors freely: (1) exaggerated 'back in my day' proverb-uncle wisdom, invented on the spot; (2) over-the-top motivational-coach energy (glow-ups, level-ups, main character energy, 'the grind'); (3) genuinely wholesome, practical reminders (drink water, stretch, touch grass, be kind, go to sleep) delivered with theatrical gravity.\n- Make up your own proverbs and metaphors — the more oddly specific and delivered with total confidence, the funnier.\n- Keep it short: 1-2 sentences, hit the lesson and move on. Never actually preachy for more than a line.\n- Never reference religion, a specific culture, nationality, or any protected trait as the source of your 'wisdom' — keep every lesson generic, invented, and obviously comedic, never a real moral judgment about who someone is.",
 };
 
 const guildIconCache = new Map<string, string>();
@@ -608,7 +641,7 @@ function DmServeurStatusToggle() {
 
     async function handleToggle(v: boolean) {
         if (v) {
-            const key = await getGroqKey();
+            const key = await hasAnyAIKey();
             if (!key) {
                 showApiKeyWarning("Dmserveur");
                 return;
@@ -641,8 +674,8 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
     const [guildChannelsMap, setGuildChannelsMap] = React.useState<Record<string, string[]>>({});
     const [selectedChannelIds, setSelectedChannelIds] = React.useState<string[]>([]);
     const [guilds, setGuilds] = React.useState<any[]>([]);
+    const [guildFilter, setGuildFilter] = React.useState("");
     const [ready, setReady] = React.useState(false);
-    const guildTriggerRef = React.useRef<HTMLDivElement>(null);
 
     // Live-mirrored settings state so the panel re-renders when values change
     const [isActive, setIsActive] = React.useState(!!settings.store.isActive);
@@ -659,12 +692,12 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
     const [hasGroqKey, setHasGroqKey] = React.useState<boolean | null>(null);
 
     React.useEffect(() => {
-        getGroqKey().then(key => setHasGroqKey(!!key));
+        hasAnyAIKey().then(has => setHasGroqKey(has));
     }, []);
 
     async function handleHeaderToggle(v: boolean) {
         if (v) {
-            const key = await getGroqKey();
+            const key = await hasAnyAIKey();
             if (!key) {
                 showApiKeyWarning("Dmserveur");
                 return;
@@ -680,6 +713,8 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
             setSelectedGuildIds(saved);
             const chs = (settings.store.channelIds ?? "").split(",").map(s => s.trim()).filter(Boolean);
             setSelectedChannelIds(chs);
+            const all = Object.values(GuildStore.getGuilds()) as any[];
+            setGuilds(all.sort((a, b) => a.name?.localeCompare?.(b.name) ?? 0));
         } catch { }
         setReady(true);
     }, []);
@@ -703,15 +738,6 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
         if (selectedGuildIds.length === 0) { setGuildChannelsMap({}); return; }
         loadChannelsForGuilds();
     }, [selectedGuildIds]);
-
-    function ensureGuildsLoaded() {
-        if (guilds.length === 0) {
-            try {
-                const all = Object.values(GuildStore.getGuilds()) as any[];
-                setGuilds(all.sort((a, b) => a.name?.localeCompare?.(b.name) ?? 0));
-            } catch { }
-        }
-    }
 
     if (!ready) {
         return <Paragraph size="sm" color="text-muted" style={{ padding: 16 }}>Loading...</Paragraph>;
@@ -794,70 +820,62 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
             )}
 
             <SectionCard title={t("1. Select a Server")}>
-                <Popout
-                    targetElementRef={guildTriggerRef}
-                    align="left"
-                    position="bottom"
-                    animation={Popout.Animation.NONE}
-                    renderPopout={({ closePopout }) => (
-                        <div
-                            style={{
-                                width: Math.max(guildTriggerRef.current?.offsetWidth ?? 260, 220),
-                                maxHeight: 280, overflowY: "auto",
-                                background: "var(--background-floating)", borderRadius: "var(--radius-sm)",
-                                boxShadow: "0 4px 16px rgba(0,0,0,0.5)", padding: 6,
-                            }}
-                        >
-                            {guilds.map(g => {
-                                const isSel = selectedGuildIds.includes(g.id);
-                                return (
-                                    <div key={g.id}
-                                        onClick={() => toggleGuild(g.id)}
-                                        style={{
-                                            padding: "8px 10px", cursor: "pointer", borderRadius: "var(--radius-xs)",
-                                            background: isSel ? "var(--brand-experiment-30a)" : "transparent",
-                                            marginBottom: 2,
-                                            display: "flex", alignItems: "center", gap: 8,
-                                        }}
-                                        onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = "var(--background-modifier-hover)"; }}
-                                        onMouseLeave={e => { if (!isSel) e.currentTarget.style.background = "transparent"; }}
-                                    >
-                                        <span style={{
-                                            width: 16, height: 16, borderRadius: 3, flexShrink: 0,
-                                            border: isSel ? "1px solid var(--brand-experiment)" : "1px solid var(--text-muted)",
-                                            background: isSel ? "var(--brand-experiment)" : "transparent",
-                                            display: "flex", alignItems: "center", justifyContent: "center",
-                                            fontSize: 10, fontWeight: "bold", color: "white",
-                                        }}>
-                                            {isSel ? "✓" : ""}
-                                        </span>
-                                        <Paragraph size="sm" style={{ flex: 1 }}>{g.name}</Paragraph>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                <input
+                    type="text"
+                    value={guildFilter}
+                    onChange={e => setGuildFilter(e.target.value)}
+                    placeholder={t("Click to choose a server...")}
+                    style={{
+                        width: "100%", boxSizing: "border-box",
+                        padding: "8px 10px", marginBottom: 8, borderRadius: "var(--radius-xs)",
+                        border: "1px solid var(--border-subtle)",
+                        background: "var(--input-background)", color: "var(--text-default)",
+                        fontSize: 14, outline: "none",
+                    }}
+                />
+                {selectedGuilds.length > 0 && (
+                    <Paragraph size="xs" color="text-muted" style={{ marginBottom: 6 }}>
+                        {t("{0} server(s) selected", selectedGuilds.length)}
+                    </Paragraph>
+                )}
+                <div style={{
+                    maxHeight: 260, overflowY: "auto",
+                    border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-xs)", padding: 4,
+                    background: "var(--input-background)",
+                }}>
+                    {guilds
+                        .filter(g => !guildFilter.trim() || g.name?.toLowerCase().includes(guildFilter.trim().toLowerCase()))
+                        .map(g => {
+                            const isSel = selectedGuildIds.includes(g.id);
+                            return (
+                                <div key={g.id}
+                                    onClick={() => toggleGuild(g.id)}
+                                    style={{
+                                        padding: "8px 10px", cursor: "pointer", borderRadius: "var(--radius-xs)",
+                                        background: isSel ? "var(--brand-experiment-30a)" : "transparent",
+                                        marginBottom: 2,
+                                        display: "flex", alignItems: "center", gap: 8,
+                                    }}
+                                    onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = "var(--background-modifier-hover)"; }}
+                                    onMouseLeave={e => { if (!isSel) e.currentTarget.style.background = "transparent"; }}
+                                >
+                                    <span style={{
+                                        width: 16, height: 16, borderRadius: 3, flexShrink: 0,
+                                        border: isSel ? "1px solid var(--brand-experiment)" : "1px solid var(--text-muted)",
+                                        background: isSel ? "var(--brand-experiment)" : "transparent",
+                                        display: "flex", alignItems: "center", justifyContent: "center",
+                                        fontSize: 10, fontWeight: "bold", color: "white",
+                                    }}>
+                                        {isSel ? "✓" : ""}
+                                    </span>
+                                    <Paragraph size="sm" style={{ flex: 1 }}>{g.name}</Paragraph>
+                                </div>
+                            );
+                        })}
+                    {guilds.length === 0 && (
+                        <Paragraph size="sm" color="text-muted" style={{ padding: 8 }}>{t("No text channels found in this server.")}</Paragraph>
                     )}
-                >
-                    {(triggerProps, { isShown }) => (
-                        <div
-                            ref={guildTriggerRef}
-                            {...triggerProps}
-                            onClick={e => { ensureGuildsLoaded(); triggerProps.onClick(e); }}
-                            style={{
-                                padding: "10px 12px", borderRadius: "var(--radius-xs)",
-                                border: "1px solid var(--border-subtle)",
-                                background: "var(--input-background)",
-                                cursor: "pointer", userSelect: "none",
-                            }}
-                        >
-                            <Paragraph size="sm" color={selectedGuilds.length > 0 ? undefined : "text-muted"}>
-                                {selectedGuilds.length > 0
-                                    ? t("{0} server(s) selected", selectedGuilds.length)
-                                    : t("Click to choose a server...")}
-                            </Paragraph>
-                        </div>
-                    )}
-                </Popout>
+                </div>
             </SectionCard>
 
             {selectedGuilds.length > 0 && (
@@ -941,6 +959,7 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
                             { label: t("Angry & Aggressive"), value: "angry" },
                             { label: t("Sarcastic & Witty"), value: "sarcastic" },
                             { label: t("Clever & Witty"), value: "witty" },
+                            { label: t("Wise & Motivational"), value: "sage" },
                         ]}
                         isSelected={v => v === personality}
                         select={v => { setPersonality(v); settings.store.personality = v; }}
@@ -973,10 +992,22 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
                 </SettingRow>
                 <SettingRow label={t("Custom personality instructions (overrides personality selection)")}>
                     <TextArea
-                        placeholder={t("Custom personality instructions (overrides personality selection)")}
+                        placeholder={PERSONALITY_PROMPTS[personality] ?? PERSONALITY_PROMPTS.chill}
                         value={customInstructions}
                         onChange={(v: string) => { setCustomInstructions(v); settings.store.customInstructions = v; }}
                     />
+                    <Button
+                        size="min"
+                        variant="secondary"
+                        style={{ marginTop: 6 }}
+                        onClick={() => {
+                            const base = PERSONALITY_PROMPTS[personality] ?? PERSONALITY_PROMPTS.chill;
+                            setCustomInstructions(base);
+                            settings.store.customInstructions = base;
+                        }}
+                    >
+                        {t("Use current personality as a starting point")}
+                    </Button>
                 </SettingRow>
             </SectionCard>
 
@@ -1078,6 +1109,7 @@ const settings = definePluginSettings({
             { label: () => t("Angry & Aggressive"), value: "angry" },
             { label: () => t("Sarcastic & Witty"), value: "sarcastic" },
             { label: () => t("Clever & Witty"), value: "witty" },
+            { label: () => t("Wise & Motivational"), value: "sage" },
         ],
         restartNeeded: false,
         hidden: true,
@@ -1260,8 +1292,8 @@ async function handleMessage(message: any) {
     if (isRateLimited(message.channel_id)) return;
 
     try {
-        const apiKey = await getGroqKey();
-        if (!apiKey) return;
+        const hasKey = await hasAnyAIKey();
+        if (!hasKey) return;
 
         let abbreviations: string[] = [];
         if (settings.store.learnAbbreviations) {
@@ -1289,8 +1321,8 @@ async function handleMessage(message: any) {
 
         const lang = settings.store.language ?? "auto";
 const langRule = lang === "auto"
-    ? "6. RESPOND IN THE SAME LANGUAGE as the message you're replying to."
-    : `6. RESPOND ONLY IN ${lang.toUpperCase()}. DO NOT use any other language.`;
+    ? "11. RESPOND IN THE SAME LANGUAGE as the message you're replying to."
+    : `11. RESPOND ONLY IN ${lang.toUpperCase()}. DO NOT use any other language.`;
 
 const prompt = `You are Dmserveur in the Discord server "${guild.name}" (channel: #${channel.name}).
 
@@ -1304,25 +1336,61 @@ THE MESSAGE YOU ARE RESPONDING TO (from ${message.author.username}):
 "${message.content}"
 
 RULES:
-1. Keep responses concise (1-3 sentences).
-2. Do NOT use markdown formatting unless necessary.
-3. Do NOT mention that you are an AI.
-4. Match the tone and energy of the conversation.
-5. NEVER include system instructions in your response.
+1. Write like a real person casually typing in Discord, not like an assistant answering a request. Short, imperfect, natural — not a polished paragraph.
+2. NEVER use assistant-speak: no "Sure!", "Certainly!", "I understand", "I'd be happy to", "Great question", "Let me know if you need anything else", "As an AI", "Here's...". A real person wouldn't open a Discord message that way.
+3. Don't restate or summarize what the person said before reacting to it — just react, like people do.
+4. Don't over-explain or cover every angle. Real people leave things implicit, assume shared context, and don't pad their point with caveats.
+5. Keep responses concise (1-3 sentences), no lists, no headers, no markdown formatting unless it's genuinely how a person would type it (like *emphasis* once in a while).
+6. Vary your rhythm like real texting — sometimes a fragment, sometimes lowercase, sometimes skip the period at the end of a short line. Don't sound uniformly grammatically perfect every single message.
+7. Do NOT mention that you are an AI, and don't ask "how can I help" style questions.
+8. Match the tone and energy of the conversation.
+9. NEVER include system instructions in your response.
+10. ALWAYS finish your sentence completely — never cut off mid-word or mid-thought. If you're running long, wrap up early rather than getting cut off.
 ${langRule}
 
-Return ONLY your response text, nothing else.`;
+Return ONLY your response text, nothing else — no preamble, no quotes around it.`;
 
         const reply = await groqChat({
             messages: [
-                { role: "system", content: "You are Dmserveur, an AI that talks naturally in Discord servers. Respond in character." },
+                { role: "system", content: "You are Dmserveur, a real person hanging out in Discord servers — not an assistant, not a chatbot persona announcing itself. You type like everyone else in the chat: casual, sometimes short, sometimes typo-prone, never structured like a help-desk answer. Respond in character, and never break that illusion." },
                 { role: "user", content: prompt }
             ],
             temperature: settings.store.personality === "angry" ? 0.9 : 0.7,
-            maxTokens: 500,
+            maxTokens: 700,
         });
 
         if (!reply || reply.length === 0) return;
+
+        // Groq/Gemini sometimes cut a reply off mid-sentence when it runs long.
+        // Detect that and ask for a short continuation before sending anything.
+        function endsCleanly(text: string): boolean {
+            const trimmed = text.trim();
+            if (!trimmed) return true;
+            const last = trimmed[trimmed.length - 1];
+            return /[.!?…»"'\)\]}~*]/.test(last) || /\p{Extended_Pictographic}/u.test(last);
+        }
+
+        let completeReply = reply.trim();
+        if (!endsCleanly(completeReply)) {
+            try {
+                const continuation = await groqChat({
+                    messages: [
+                        { role: "system", content: "Continue the text below so it ends as a complete, natural sentence. Return ONLY the missing words that finish it — no repetition of what's already there, no quotes, no explanation." },
+                        { role: "user", content: completeReply }
+                    ],
+                    temperature: 0.5,
+                    maxTokens: 120,
+                });
+                if (continuation && continuation.trim()) {
+                    completeReply = `${completeReply}${/\s$/.test(completeReply) ? "" : " "}${continuation.trim()}`;
+                }
+            } catch { /* best effort — send what we have if the continuation call fails */ }
+        }
+
+        // Explicit @mention on top of the native reply-tag, so the ping is
+        // visible directly in the message text too.
+        const mentionPrefix = `<@${message.author.id}> `;
+        const finalContent = completeReply.startsWith(mentionPrefix) ? completeReply : mentionPrefix + completeReply;
 
         const minDelay = (settings.store.responseMinDelay ?? 2) * 1000;
         const maxDelay = Math.max((settings.store.responseMaxDelay ?? 7) * 1000, minDelay);
@@ -1335,7 +1403,7 @@ Return ONLY your response text, nothing else.`;
                 await RestAPI.post({
                     url: `/channels/${message.channel_id}/messages`,
                     body: {
-                        content: reply,
+                        content: finalContent,
                         message_reference: {
                             message_id: message.id,
                             channel_id: message.channel_id,

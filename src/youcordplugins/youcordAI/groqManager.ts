@@ -11,6 +11,7 @@ const logger = new Logger("GroqManager");
 
 const DS_API_KEY = "groq-shared-api-key";
 const DS_GEMINI_API_KEY = "gemini-shared-api-key";
+const DS_PROVIDER_PREF = "ai-provider-preference"; // "auto" | "groq" | "gemini"
 
 const GROQ_MODELS = [
     "llama-3.3-70b-versatile",
@@ -88,6 +89,19 @@ export async function hasAnyAIKey(): Promise<boolean> {
     return !!(groq || gemini);
 }
 
+export type ProviderPreference = "auto" | Provider;
+
+export async function getProviderPreference(): Promise<ProviderPreference> {
+    const pref = await DataStore.get(DS_PROVIDER_PREF);
+    if (pref === "groq" || pref === "gemini") return pref;
+    return "auto";
+}
+
+export async function setProviderPreference(pref: ProviderPreference): Promise<void> {
+    await DataStore.set(DS_PROVIDER_PREF, pref);
+    if (pref !== "auto") preferredProvider = pref; // apply immediately, don't wait for next pick
+}
+
 export function getCurrentProvider(): Provider {
     return preferredProvider;
 }
@@ -161,7 +175,7 @@ function markGeminiModelRateLimited(model: string, retryAfterMs = 60_000): void 
 // ── Provider selection ──────────────────────────────────────────────────────────
 
 async function pickProvider(exclude?: Provider): Promise<Provider | null> {
-    const [groqKey, geminiKey] = await Promise.all([getGroqKey(), getGeminiKey()]);
+    const [groqKey, geminiKey, pref] = await Promise.all([getGroqKey(), getGeminiKey(), getProviderPreference()]);
     const now = Date.now();
 
     const candidates: Provider[] = [];
@@ -169,6 +183,12 @@ async function pickProvider(exclude?: Provider): Promise<Provider | null> {
     if (geminiKey && provider_not_excluded("gemini", exclude) && now >= providerCooldown.gemini) candidates.push("gemini");
 
     if (candidates.length > 0) {
+        // A manually forced provider (not "auto") wins as long as it's actually
+        // available right now; otherwise fall back to the sticky auto-preference.
+        if (pref !== "auto" && candidates.includes(pref)) {
+            preferredProvider = pref;
+            return preferredProvider;
+        }
         if (candidates.includes(preferredProvider)) return preferredProvider;
         preferredProvider = candidates[0];
         return preferredProvider;
@@ -247,9 +267,19 @@ async function _dispatch(opts: GroqCallOptions, attempt = 0, excludeProvider?: P
 
     try {
         if (provider === "groq") {
-            return await _groqChat(opts);
+            // forceModel is provider-specific. Gemini model names always start with
+            // "gemini"; anything else is assumed to be a Groq model name. Don't
+            // forward a Gemini-shaped model into a Groq call (or vice versa) if we
+            // ever fail over between providers mid-request.
+            const groqOpts = opts.forceModel?.startsWith("gemini")
+                ? { ...opts, forceModel: undefined }
+                : opts;
+            return await _groqChat(groqOpts);
         } else {
-            return await _geminiChat(opts);
+            const geminiOpts = opts.forceModel && !opts.forceModel.startsWith("gemini")
+                ? { ...opts, forceModel: undefined }
+                : opts;
+            return await _geminiChat(geminiOpts);
         }
     } catch (err: any) {
         const isRateLimit = err?.__rateLimited === true;
