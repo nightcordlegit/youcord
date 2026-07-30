@@ -21,7 +21,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, IconUtils, Menu,React, ReactDOM, RelationshipStore, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
-import { getGeminiKey, getGroqKey, groqChat, setGeminiKey, setGroqKey, setProviderPreference } from "./groqManager";
+import { getGeminiKey, getGroqKey, groqChat, setGeminiKey, setGroqKey, setOllamaModel, setOllamaUrl, setProviderPreference } from "./groqManager";
 
 // ── Settings ───────────────────────────────────────────────────────────────────
 
@@ -63,9 +63,26 @@ const settings = definePluginSettings({
             { label: "Auto (switch automatically on rate-limit)", value: "auto", default: true },
             { label: "Groq only (fallback to Gemini if rate-limited)", value: "groq" },
             { label: "Gemini only (fallback to Groq if rate-limited)", value: "gemini" },
+            { label: "Ollama (local, no API key needed)", value: "ollama" },
         ],
         restartNeeded: false,
         onChange: (val: string) => { setProviderPreference(val as any); },
+    },
+    ollamaUrl: {
+        type: OptionType.STRING,
+        description: "Ollama server URL (used when provider is set to Ollama)",
+        default: "http://localhost:11434",
+        restartNeeded: false,
+        onChange: (val: string) => { setOllamaUrl(val); },
+        placeholder: "http://localhost:11434",
+    },
+    ollamaModel: {
+        type: OptionType.STRING,
+        description: "Ollama model name (empty = default model on server). Click 'Fetch models' below to see available models.",
+        default: "",
+        restartNeeded: false,
+        onChange: (val: string) => { setOllamaModel(val); },
+        placeholder: "llama3.2",
     },
     systemPrompt: {
         type: OptionType.STRING,

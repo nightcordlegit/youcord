@@ -229,7 +229,8 @@ const buildConfigs = ([
     }
 ]);
 
-await buildOrWatchAll(buildConfigs);
+const discordOnly = process.env.BUILD_DISCORD_ONLY === "true";
+await buildOrWatchAll(discordOnly ? buildConfigs.slice(0, 3) : buildConfigs);
 
 const buildInfo = JSON.stringify({
     version: VERSION,

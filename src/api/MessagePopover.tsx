@@ -69,11 +69,9 @@ function VencordPopoverButtons(props: { Component: React.ComponentType<MessagePo
 
     const { messagePopoverButtons } = useSettings(["uiElements.messagePopoverButtons.*"]).uiElements;
 
-    // ── Stealth Mode Bypass ──
-    try {
-        const { isStealthModeEnabled } = require("./HeaderBar");
-        if (isStealthModeEnabled()) return null;
-    } catch { }
+    // Note: Stealth Mode intentionally does NOT block message popover buttons.
+    // This toolbar only appears on hover over a message, it isn't persistently
+    // visible, so keeping it active doesn't break the "looks normal" illusion.
 
     const elements = Array.from(MessagePopoverButtonMap.entries())
         .filter(([key]) => messagePopoverButtons[key]?.enabled !== false)

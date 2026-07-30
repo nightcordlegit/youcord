@@ -14,6 +14,8 @@ import { ComponentDispatch, MediaEngineStore, React, useEffect, useRef, useState
 import plugins from "~plugins";
 
 import { getGroqKey } from "../youcordAI/groqManager";
+import { destroyLocalTranscriber, getLocalTranscriberStatus, initLocalTranscriber, isLocalTranscriberReady } from "./backends/local";
+import { type SttBackend,transcribe } from "./transcribe";
 
 const settings = definePluginSettings({
     language: {
@@ -35,6 +37,48 @@ const settings = definePluginSettings({
         description: "Audio segment duration (seconds). Shorter = more reactive but less precise.",
         markers: [1, 2, 3, 5, 8, 10],
         default: 2,
+        restartNeeded: false,
+    },
+    sttBackend: {
+        type: OptionType.SELECT,
+        description: "Transcription engine",
+        options: [
+            { label: "Groq Cloud (fast, requires API key)", value: "groq", default: true },
+            { label: "Local (Transformers.js, quasi-real-time)", value: "local" },
+            { label: "Custom API (OpenAI-compatible)", value: "custom" },
+        ],
+        restartNeeded: false,
+    },
+    localModel: {
+        type: OptionType.SELECT,
+        description: "Local model size (larger = slower but more accurate). Pre-loaded at startup.",
+        options: [
+            { label: "Tiny (fastest, performance mode)", value: "Xenova/whisper-tiny" },
+            { label: "Base (recommended, balanced)", value: "Xenova/whisper-base", default: true },
+            { label: "Small (best accuracy)", value: "Xenova/whisper-small" },
+        ],
+        restartNeeded: false,
+    },
+    customApiUrl: {
+        type: OptionType.STRING,
+        description: "Custom STT API URL (must accept OpenAI-compatible POST /v1/audio/transcriptions with FormData)",
+        default: "",
+        placeholder: "http://localhost:8080/v1/audio/transcriptions",
+        restartNeeded: false,
+    },
+    customApiKey: {
+        type: OptionType.STRING,
+        description: "Custom API key (optional, leave blank if not required)",
+        default: "",
+        placeholder: "sk-...",
+        componentProps: { type: "password", autoComplete: "off" },
+        restartNeeded: false,
+    },
+    customModel: {
+        type: OptionType.STRING,
+        description: "Custom API model name (default: whisper-1)",
+        default: "",
+        placeholder: "whisper-1",
         restartNeeded: false,
     },
 });
@@ -70,32 +114,6 @@ function insertText(text: string) {
     });
 }
 
-async function transcribe(blob: Blob): Promise<string> {
-    const language = settings.store.language?.trim() || undefined;
-    const apiKey = await getGroqKey();
-    if (!apiKey) throw new Error("API key missing — Configure your key in Settings → YouCordAI");
-
-    const form = new FormData();
-    form.append("file", blob, "audio.webm");
-    form.append("model", "whisper-large-v3-turbo");
-    form.append("response_format", "text");
-    form.append("prompt", "Ceci est une dictée vocale en français. Ne pas traduire en anglais. Ne pas générer de texte si il n'y a que du silence.");
-    if (language) form.append("language", language);
-
-    const res = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}` },
-        body: form,
-    });
-
-    if (!res.ok) {
-        const body = await res.text().catch(() => "");
-        throw new Error(`Groq API ${res.status}: ${body.slice(0, 120)}`);
-    }
-
-    return (await res.text()).trim();
-}
-
 function getDiscordVoice(): any | null {
     try {
         return (DiscordNative as any)?.nativeModules?.requireModule?.("discord_voice") ?? null;
@@ -108,6 +126,7 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
     const [recording, setRecording] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [localReady, setLocalReady] = useState(isLocalTranscriberReady());
 
     const nativeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const nativeRecordingRef = useRef(false);
@@ -122,18 +141,17 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
         if (blob.size < 100) return;
         setProcessing(true);
         try {
-            const text = await transcribe(blob);
+            const backend = settings.store.sttBackend as SttBackend;
+            const text = await transcribe({
+                backend,
+                blob,
+                language: settings.store.language?.trim() || undefined,
+                customApiUrl: settings.store.customApiUrl,
+                customApiKey: settings.store.customApiKey,
+                customModel: settings.store.customModel || undefined,
+            });
             if (text) {
-                const t = text.trim();
-                const isHallucination =
-                    /^(merci|thanks?|thank you|music|♪|🎵|\.\.\.|\.\s*)+$/i.test(t) ||
-                    /sous[- ]?titr/i.test(t) ||
-                    /radio[- ]?canada|société radio/i.test(t) ||
-                    /merci .*(regard|écouter|suivi)|thanks? .*watch/i.test(t) ||
-                    /transcri(ption|t)\s*(par|by)/i.test(t) ||
-                    /^(.{1,15})\1{2,}$/i.test(t.replace(/\s+/g, "")) ||
-                    /^[\s.,!?…\-–—]+$/.test(t);
-                if (!isHallucination) insertText(text + " ");
+                insertText(text + " ");
             }
         } catch (e: any) {
             console.error("[VoiceDictation] Transcription error:", e);
@@ -141,6 +159,13 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
         } finally {
             setProcessing(false);
         }
+    }, []);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setLocalReady(isLocalTranscriberReady());
+        }, 1000);
+        return () => clearInterval(interval);
     }, []);
 
     const stopNative = React.useCallback(function stopNative(discordVoice: any) {
@@ -314,17 +339,24 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
     async function startDictation() {
         setErrorMsg(null);
 
-        const apiKey = await getGroqKey();
-        if (!apiKey) {
-            showApiKeyWarning("VoiceDictation");
+        const backend = settings.store.sttBackend as SttBackend;
+
+        if (backend === "groq") {
+            const apiKey = await getGroqKey();
+            if (!apiKey) {
+                showApiKeyWarning("VoiceDictation");
+                return;
+            }
+        }
+
+        if (backend === "local" && !localReady) {
+            const status = getLocalTranscriberStatus();
+            setErrorMsg(status === "downloading" ? "Model loading... try again shortly" : "Local model not ready");
             return;
         }
 
         activeRef.current = true;
 
-        // Sur Discord Desktop, getUserMedia fonctionne mieux que startLocalAudioRecording
-        // car le module discord_voice peut refuser si Discord utilise déjà le micro.
-        // On tente getUserMedia en premier et on fall back sur native si ça échoue.
         console.log("[VoiceDictation] Using getUserMedia");
         try {
             await startFallback();
@@ -364,7 +396,18 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
 
     if (!isMainChat) return null;
 
-    const tooltip = errorMsg || (processing ? "Transcribing..." : recording ? "Stop dictation" : "Voice dictation");
+    const localStatus = settings.store.sttBackend === "local" ? getLocalTranscriberStatus() : null;
+    const tooltip = errorMsg || (localStatus === "downloading"
+            ? "Downloading model..."
+            : localStatus === "loading"
+                ? "Loading model..."
+                : localStatus === "error"
+                    ? "Model error — check settings"
+                    : processing
+                        ? "Transcribing..."
+                        : recording
+                            ? "Stop dictation"
+                            : "Voice dictation");
 
     return (
         <ChatBarButton
@@ -383,12 +426,22 @@ const VoiceDictationButton: ChatBarButtonFactory = ({ isMainChat }) => {
 export default definePlugin({
     name: "VoiceDictation",
     enabledByDefault: true,
-    description: "Real-time voice dictation via Groq Whisper (free). API key shared with YouCordAI.",
+    description: "Real-time voice dictation via Groq Whisper, local Transformers.js, or custom API.",
     authors: [{ name: "User", id: 0n }],
     dependencies: ["ChatInputButtonAPI"],
     settings,
     chatBarButton: {
         icon: DictationIcon as any,
         render: VoiceDictationButton,
+    },
+    start() {
+        if (settings.store.sttBackend === "local") {
+            initLocalTranscriber({
+                model: settings.store.localModel as any,
+            });
+        }
+    },
+    stop() {
+        destroyLocalTranscriber();
     },
 });

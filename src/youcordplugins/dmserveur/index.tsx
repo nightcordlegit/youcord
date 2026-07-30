@@ -408,6 +408,18 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
         polish: "Jak wiadomość (auto)",
         turkish: "Mesajla aynı (otomatik)",
     },
+    "Personal information (name, age, location, etc.)": {
+        auto: "Personal information (name, age, location, etc.)",
+        french: "Informations personnelles (prénom, âge, ville, etc.)",
+    },
+    "Your writing style (casual, no caps, use slang, etc.)": {
+        auto: "Your writing style (casual, no caps, use slang, etc.)",
+        french: "Ton style d'écriture (familier, pas de majuscules, argot, etc.)",
+    },
+    "Mention (ping) the user when replying": {
+        auto: "Mention (ping) the user when replying",
+        french: "Mentionner (ping) la personne en répondant",
+    },
     "Custom personality instructions (overrides personality selection)": {
         auto: "Custom personality instructions (overrides personality selection)",
         french: "Instructions personnalisées (remplace la sélection de personnalité)",
@@ -677,16 +689,19 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
 
     // Live-mirrored settings state so the panel re-renders when values change
     const [isActive, setIsActive] = React.useState(!!settings.store.isActive);
-    const [responseMode, setResponseMode] = React.useState(settings.store.responseMode ?? "mention_only");
+    const [responseMode, setResponseMode] = React.useState(settings.store.responseMode ?? "all_messages");
     const [personality, setPersonality] = React.useState(settings.store.personality ?? "chill");
     const [language, setLanguage] = React.useState(settings.store.language ?? "auto");
     const [cooldownSec, setCooldownSec] = React.useState(settings.store.cooldownSec ?? 30);
-    const [maxPerMinute, setMaxPerMinute] = React.useState(settings.store.maxPerMinute ?? 5);
-    const [responseMinDelay, setResponseMinDelay] = React.useState(settings.store.responseMinDelay ?? 2);
-    const [responseMaxDelay, setResponseMaxDelay] = React.useState(settings.store.responseMaxDelay ?? 7);
+    const [maxPerMinute, setMaxPerMinute] = React.useState(settings.store.maxPerMinute ?? 2);
+    const [responseMinDelay, setResponseMinDelay] = React.useState(settings.store.responseMinDelay ?? 3);
+    const [responseMaxDelay, setResponseMaxDelay] = React.useState(settings.store.responseMaxDelay ?? 9);
     const [learnAbbreviations, setLearnAbbreviations] = React.useState(!!settings.store.learnAbbreviations);
-    const [contextMessageCount, setContextMessageCount] = React.useState(settings.store.contextMessageCount ?? 10);
+    const [contextMessageCount, setContextMessageCount] = React.useState(settings.store.contextMessageCount ?? 12);
     const [customInstructions, setCustomInstructions] = React.useState(settings.store.customInstructions ?? "");
+    const [personalInfo, setPersonalInfo] = React.useState(settings.store.personalInfo ?? "");
+    const [writingStyle, setWritingStyle] = React.useState(settings.store.writingStyle ?? "");
+    const [mentionUser, setMentionUser] = React.useState(settings.store.mentionUser !== false);
     const [hasGroqKey, setHasGroqKey] = React.useState<boolean | null>(null);
 
     React.useEffect(() => {
@@ -958,15 +973,25 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
             )}
 
             <SectionCard title={t("When should Dmserveur respond?")}>
-                <Select
-                    options={[
-                        { label: t("Only when mentioned (@Dmserveur)"), value: "mention_only" },
-                        { label: t("All messages in selected channels"), value: "all_messages" },
-                    ]}
-                    isSelected={v => v === responseMode}
-                    select={v => { setResponseMode(v); settings.store.responseMode = v; }}
-                    serialize={v => v}
-                />
+                <SettingRow label={t("When should Dmserveur respond?")}>
+                    <Select
+                        options={[
+                            { label: t("Only when mentioned (@Dmserveur)"), value: "mention_only" },
+                            { label: t("All messages in selected channels"), value: "all_messages" },
+                        ]}
+                        isSelected={v => v === responseMode}
+                        select={v => { setResponseMode(v); settings.store.responseMode = v; }}
+                        serialize={v => v}
+                    />
+                </SettingRow>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <Paragraph size="sm">{t("Mention (ping) the user when replying")}</Paragraph>
+                    <Switch
+                        checked={mentionUser}
+                        onChange={v => { setMentionUser(v); settings.store.mentionUser = v; }}
+                        hasIcon
+                    />
+                </div>
             </SectionCard>
 
             <SectionCard title={t("Dmserveur personality / mood")}>
@@ -1026,6 +1051,23 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
                     >
                         {t("Use current personality as a starting point")}
                     </Button>
+                </SettingRow>
+            </SectionCard>
+
+            <SectionCard title={t("Your writing style (casual, no caps, use slang, etc.)")}>
+                <SettingRow label={t("Personal information (name, age, location, etc.)")}>
+                    <TextArea
+                        placeholder="Ex: 19 ans, vit à Paris, étudiant en info..."
+                        value={personalInfo}
+                        onChange={(v: string) => { setPersonalInfo(v); settings.store.personalInfo = v; }}
+                    />
+                </SettingRow>
+                <SettingRow label={t("Your writing style (casual, no caps, use slang, etc.)")}>
+                    <TextArea
+                        placeholder="Ex: jamais de majuscules, utilise 'ptn', 'jsp', abrège beaucoup..."
+                        value={writingStyle}
+                        onChange={(v: string) => { setWritingStyle(v); settings.store.writingStyle = v; }}
+                    />
                 </SettingRow>
             </SectionCard>
 
@@ -1113,9 +1155,16 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: () => t("When should Dmserveur respond?"),
         options: [
-            { label: () => t("Only when mentioned (@Dmserveur)"), value: "mention_only", default: true },
-            { label: () => t("All messages in selected channels"), value: "all_messages" },
+            { label: () => t("Only when mentioned (@Dmserveur)"), value: "mention_only" },
+            { label: () => t("All messages in selected channels"), value: "all_messages", default: true },
         ],
+        restartNeeded: false,
+        hidden: true,
+    },
+    mentionUser: {
+        type: OptionType.BOOLEAN,
+        description: () => t("Mention (ping) the user when replying"),
+        default: true,
         restartNeeded: false,
         hidden: true,
     },
@@ -1163,6 +1212,22 @@ const settings = definePluginSettings({
         restartNeeded: false,
         hidden: true,
     },
+    personalInfo: {
+        type: OptionType.STRING,
+        description: () => t("Personal information (name, age, location, etc.)"),
+        default: "",
+        multiline: true,
+        restartNeeded: false,
+        hidden: true,
+    },
+    writingStyle: {
+        type: OptionType.STRING,
+        description: () => t("Your writing style (casual, no caps, use slang, etc.)"),
+        default: "",
+        multiline: true,
+        restartNeeded: false,
+        hidden: true,
+    },
     guildIds: {
         type: OptionType.STRING,
         description: "",
@@ -1189,7 +1254,7 @@ const settings = definePluginSettings({
         type: OptionType.SLIDER,
         description: () => t("Max responses per minute (global rate limit safety)"),
         markers: [1, 3, 5, 10, 15, 20, 30],
-        default: 5,
+        default: 2,
         restartNeeded: false,
         hidden: true,
     },
@@ -1197,7 +1262,7 @@ const settings = definePluginSettings({
         type: OptionType.SLIDER,
         description: () => t("Minimum delay before responding (seconds)"),
         markers: [1, 2, 3, 5, 8, 10],
-        default: 2,
+        default: 3,
         restartNeeded: false,
         hidden: true,
     },
@@ -1205,7 +1270,7 @@ const settings = definePluginSettings({
         type: OptionType.SLIDER,
         description: () => t("Maximum delay before responding (seconds)"),
         markers: [3, 5, 7, 10, 15, 20],
-        default: 7,
+        default: 9,
         restartNeeded: false,
         hidden: true,
     },
@@ -1220,7 +1285,7 @@ const settings = definePluginSettings({
         type: OptionType.SLIDER,
         description: () => t("Number of recent messages to include as context (0 = none)"),
         markers: [0, 5, 10, 15, 20],
-        default: 10,
+        default: 12,
         restartNeeded: false,
         hidden: true,
     },
@@ -1304,18 +1369,30 @@ async function handleMessage(message: any) {
     if (!guild) return;
 
     const allowedGuilds = (settings.store.guildIds ?? "").split(",").map(s => s.trim()).filter(Boolean);
-    if (allowedGuilds.length > 0 && !allowedGuilds.includes(guildId)) return;
+    if (allowedGuilds.length > 0 && !allowedGuilds.includes(guildId)) {
+        console.log("[Dmserveur] Skipped: server", guild.name, "not in the allowed server list");
+        return;
+    }
 
     const allowedChannels = (settings.store.channelIds ?? "").split(",").map(s => s.trim()).filter(Boolean);
-    if (allowedChannels.length > 0 && !allowedChannels.includes(message.channel_id)) return;
+    if (allowedChannels.length > 0 && !allowedChannels.includes(message.channel_id)) {
+        console.log("[Dmserveur] Skipped: channel #" + channel.name, "not in the allowed channel list");
+        return;
+    }
 
-    if (isRateLimited(message.channel_id)) return;
+    if (isRateLimited(message.channel_id)) {
+        console.log("[Dmserveur] Skipped (rate limited / cooldown) for channel", message.channel_id);
+        return;
+    }
 
     console.log("[Dmserveur] Handling message from", message.author.username, "in", guild.name, "#" + channel.name);
 
     try {
         const hasKey = await hasAnyAIKey();
-        if (!hasKey) return;
+        if (!hasKey) {
+            console.warn("[Dmserveur] No Groq/AI API key configured — aborting. Set one in YouCordAI settings.");
+            return;
+        }
 
         let abbreviations: string[] = [];
         if (settings.store.learnAbbreviations) {
@@ -1325,74 +1402,81 @@ async function handleMessage(message: any) {
 
         const basePrompt = PERSONALITY_PROMPTS[settings.store.personality] ?? PERSONALITY_PROMPTS.chill;
         const extra = settings.store.customInstructions?.trim();
-        const personalityPrompt = extra ? `${basePrompt}\n\nADDITIONAL INSTRUCTIONS:\n${extra}` : basePrompt;
+        let personalityBlock = extra ? `${basePrompt}\n\nINSTRUCTIONS SUPPLÉMENTAIRES :\n${extra}` : basePrompt;
+
+        const personalInfo = settings.store.personalInfo?.trim();
+        const writingStyle = settings.store.writingStyle?.trim();
+        if (personalInfo) personalityBlock += `\n\nTES INFOS PERSONNELLES (à n'utiliser que si pertinent, ne ramène pas tout à ça) :\n${personalInfo}`;
+        if (writingStyle) personalityBlock += `\n\nTON STYLE D'ÉCRITURE (à imiter fidèlement dans TOUTES tes réponses) :\n${writingStyle}`;
 
         let localHistory = "";
-        const contextCount = Math.max(settings.store.contextMessageCount ?? 15, 5);
+        const contextCount = settings.store.contextMessageCount ?? 12;
         if (contextCount > 0) {
             try {
                 const msgs = MessageStore.getMessages(message.channel_id).toArray().slice(-(contextCount + 1));
-                const users = new Map<string, number>();
-                msgs.forEach((m: any) => {
-                    if (m.author?.id && !users.has(m.author.id)) users.set(m.author.id, users.size + 1);
-                });
-                const getName = (u: any, fallback: string) => u?.id === currentUser?.id ? "Me" : (u?.username ?? fallback);
+                const getName = (u: any, fallback: string) => u?.id === currentUser?.id ? "Toi (Dmserveur)" : (u?.username ?? fallback);
                 localHistory = msgs.map((m: any) => {
                     if (m.author?.id === "0" || m.author?.bot) return "";
-                    const name = getName(m.author, "Someone");
-                    let line = `${name}: ${m.content}`;
+                    const name = getName(m.author, "Quelqu'un");
+                    let line = `${name} : ${m.content}`;
                     if (m.message_reference?.message_id) {
                         const ref = msgs.find(x => x.id === m.message_reference.message_id);
-                        if (ref && ref.author) line = `${name} ↻ ${getName(ref.author, "someone")}: ${m.content}`;
+                        if (ref && ref.author) line = `${name} (en réponse à ${getName(ref.author, "quelqu'un")}) : ${m.content}`;
                     }
                     return line;
                 }).filter(Boolean).join("\n");
             } catch { }
         }
 
-        const abbrContext = abbreviations.length > 0 ? `\nKNOWN ABBREVIATIONS: ${abbreviations.join(", ")}` : "";
+        const abbrContext = abbreviations.length > 0 ? `\n\nABRÉVIATIONS CONNUES DANS CE SERVEUR (utilise-les si naturel) :\n${abbreviations.join(", ")}` : "";
 
         const lang = settings.store.language ?? "auto";
+        const langInstruction = lang === "auto" ? "Réponds dans la MÊME langue que le dernier message." : `Réponds UNIQUEMENT en ${lang}.`;
 
-const prompt = `T'es Dmserveur, un random sur "${guild.name}" > #${channel.name}. Voilà ce qui se dit :
+        // La personnalité, le style et les infos perso vivent dans le system prompt :
+        // c'est là qu'un LLM les respecte le mieux et de façon cohérente sur toute la conversation.
+        const systemPrompt = `T'es Dmserveur, une vraie personne sur Discord — pas un assistant, pas poli, pas structuré. Tu ne t'excuses jamais, tu n'expliques jamais pourquoi tu dis un truc, tu ne fais pas de disclaimer.
 
-${localHistory.split("\n").reverse().join("\n")}
+${personalityBlock}${abbrContext}
 
-${message.author.username} vient de dire : "${message.content}"
+COMMENT TU LIS UNE CONVERSATION :
+- Tu prends en compte TOUT l'historique fourni, pas juste le dernier message : les blagues en cours, ce qui a été dit avant, qui répond à qui.
+- Tu réponds au dernier message en particulier, mais avec la mémoire de ce qui précède si ça a un lien.
+- Si le dernier message est une suite logique d'un truc dit avant, tu le comprends comme tel.
 
-${personalityPrompt} ${abbrContext}
+COMMENT TU RÉPONDS :
+- Adapte-toi à LEUR style et niveau de langage, sans jamais recopier leurs mots tels quels — ce n'est pas un miroir, c'est une vraie réponse.
+- Sois court. 1 phrase c'est bien. Des fois un mot suffit ("mdr", "grave", "nan").
+- Les fautes c'est OK, pas besoin de ponctuation ni de majuscules.
+- ${langInstruction}
 
-TRUCS À JAMAIS FAIRE (ça crame direct que t'es une IA) :
-• "C'est une excellente question !" / "Bonne remarque !" / "Je comprends" / "Je vois ce que tu veux dire"
-• "Avec plaisir !" / "Bien sûr !" / "Absolument !" / "Effectivement"
-• "Pour être honnête" / "Pour être franc" / "En toute honnêteté"
-• "Au final" / "En fin de compte" / "Il faut savoir que" / "Il est important de"
-• "Je dirais que" / "Je pense que" / "À mon avis" / "Selon moi"
-• Expliquer POURQUOI t'as dit un truc. Tu dis, t'expliques pas.
-• Être neutre. Donne TON avis, même si c'est nul.
-• Faire des phrases trop longues ou trop construites
+CE QU'IL FAUT ÉVITER :
+- Les formules polies ou explicatives ("je comprends", "bonne question", "pour être honnête")
+- Justifier ou expliquer ta réponse
+- Les phrases longues ou trop construites
+- Recopier ou paraphraser mot pour mot le dernier message reçu`;
 
-RÈGLES :
-1. Réponds à CE qu'il vient de dire, pas à un sujet général
-2. Utilise les MÊMES mots qu'eux. Si ils disent "wesh", tu dis "wesh"
-3. Sois court. 1 phrase c'est bien. Des fois un mot ça suffit.
-4. Les fautes c'est OK. Pas de ponctuation, pas de majuscules, peu importe
-5. ${lang === "auto" ? "Pareil qu'eux comme langue." : `${lang.toUpperCase()} seulement.`}
+        const userPrompt = `Voici la conversation sur "${guild.name}" > #${channel.name}, du plus ancien au plus récent :
 
-Relis-toi : est-ce que ça sonne comme un vrai humain ou comme un bot ? Si ça sonne bot, réécris plus court.
+${localHistory || "(pas d'historique récent)"}
 
-Renvoie UNIQUEMENT ta réponse. Rien d'autre. Pas de guillemets.`;
+>>> Dernier message de ${message.author.username} : "${message.content}"
+
+Réponds à ce dernier message en tenant compte du contexte ci-dessus. Avant d'envoyer, vérifie que ta réponse ne répète pas les mots du dernier message. Renvoie UNIQUEMENT le texte de ta réponse — pas de guillemets, rien d'autre.`;
 
         const reply = await groqChat({
             messages: [
-                { role: "system", content: `T'es Dmserveur, un mec normal sur Discord. Tu parles comme tout le monde — fautes, pas de ponctuation, des fois tu réponds juste "lol". T'es pas un assistant, t'es pas poli, t'expliques rien. T'es juste un gars qui parle. Humeur : ${settings.store.personality ?? "chill"}.` },
-                { role: "user", content: prompt }
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userPrompt }
             ],
             temperature: settings.store.personality === "angry" ? 0.9 : settings.store.personality === "sarcastic" || settings.store.personality === "witty" ? 0.8 : 0.7,
             maxTokens: 1000,
         });
 
-        if (!reply || reply.length === 0) return;
+        if (!reply || reply.length === 0) {
+            console.warn("[Dmserveur] AI returned an empty reply — nothing sent. Raw result:", reply);
+            return;
+        }
 
         // Groq/Gemini sometimes cut a reply off mid-sentence when it runs long.
         // Detect that and ask for a short continuation before sending anything.
@@ -1431,12 +1515,15 @@ Renvoie UNIQUEMENT ta réponse. Rien d'autre. Pas de guillemets.`;
         }
 
         // Explicit @mention on top of the native reply-tag, so the ping is
-        // visible directly in the message text too.
+        // visible directly in the message text too (only if enabled in settings).
+        const shouldMention = settings.store.mentionUser !== false;
         const mentionPrefix = `<@${message.author.id}> `;
-        const finalContent = completeReply.startsWith(mentionPrefix) ? completeReply : mentionPrefix + completeReply;
+        const finalContent = !shouldMention
+            ? completeReply
+            : (completeReply.startsWith(mentionPrefix) ? completeReply : mentionPrefix + completeReply);
 
-        const minDelay = (settings.store.responseMinDelay ?? 2) * 1000;
-        const maxDelay = Math.max((settings.store.responseMaxDelay ?? 7) * 1000, minDelay);
+        const minDelay = (settings.store.responseMinDelay ?? 3) * 1000;
+        const maxDelay = Math.max((settings.store.responseMaxDelay ?? 9) * 1000, minDelay);
         const delay = minDelay + Math.random() * (maxDelay - minDelay);
 
         try { TypingActions.startTyping(message.channel_id); } catch { }
@@ -1452,10 +1539,15 @@ Renvoie UNIQUEMENT ta réponse. Rien d'autre. Pas de guillemets.`;
                             channel_id: message.channel_id,
                             guild_id: guildId,
                         },
-                        allowed_mentions: {
-                            parse: ["users", "roles", "everyone"],
-                            replied_user: true,
-                        },
+                        allowed_mentions: shouldMention
+                            ? {
+                                parse: ["users", "roles", "everyone"],
+                                replied_user: true,
+                            }
+                            : {
+                                parse: [],
+                                replied_user: false,
+                            },
                     },
                 });
                 markReplied(message.channel_id);

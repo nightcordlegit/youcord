@@ -25,8 +25,10 @@ if not errorlevel 1 (
 %PS% "Write-Host '     ' -NoNewline; Write-Host '✓' -NoNewline -ForegroundColor Green; Write-Host ' Discord closed' -ForegroundColor Gray"
 echo.
 
-%PS% "Write-Host '[' -NoNewline -ForegroundColor Gray; Write-Host '2/4' -NoNewline -ForegroundColor Yellow; Write-Host '] Building...' -ForegroundColor Gray"
+%PS% "Write-Host '[' -NoNewline -ForegroundColor Gray; Write-Host '2/4' -NoNewline -ForegroundColor Yellow; Write-Host '] Building (Discord only)...' -ForegroundColor Gray"
+set BUILD_DISCORD_ONLY=true
 call pnpm build
+set BUILD_DISCORD_ONLY=
 if %errorlevel% neq 0 (
     echo.
     %PS% "Write-Host '  [ERROR] pnpm build failed. Aborting.' -ForegroundColor Red"

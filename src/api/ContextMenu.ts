@@ -141,11 +141,10 @@ export function _usePatchContextMenu(props: ContextMenuProps) {
     props.contextMenuAPIArguments ??= [];
     const contextMenuPatches = navPatches.get(props.navId);
 
-    // ── Stealth Mode Bypass ──
-    try {
-        const { isStealthModeEnabled } = require("./HeaderBar");
-        if (isStealthModeEnabled()) return props;
-    } catch { }
+    // Note: Stealth Mode intentionally does NOT block context menu patches.
+    // Right-click menu items aren't persistently visible UI (unlike header bar
+    // icons, chat bar buttons, or nav items), so keeping them active doesn't
+    // break the "looks normal" illusion Stealth Mode is meant to provide.
 
     if (!Array.isArray(props.children)) props.children = [props.children];
 
