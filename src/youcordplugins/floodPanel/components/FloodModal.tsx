@@ -10,6 +10,7 @@ import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 import { RestAPI, SearchableSelect, TextArea, useEffect, useMemo, useRef, useState } from "@webpack/common";
+
 import { settings } from "../index";
 
 const DEFAULT_MESSAGES = [
