@@ -6,8 +6,8 @@
 
 import { Logger } from "@utils/Logger";
 
-import { decodeAudio } from "../../shared/stt/audioUtils";
-import { TranscriberCallbacks, WhisperModel, WhisperTranscriber } from "../../shared/stt/WhisperTranscriber";
+import { decodeAudio } from "../../../utils/stt/audioUtils";
+import { TranscriberCallbacks, WhisperModel, WhisperTranscriber } from "../../../utils/stt/WhisperTranscriber";
 
 const logger = new Logger("LocalSTT");
 
