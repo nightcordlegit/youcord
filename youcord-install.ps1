@@ -78,6 +78,12 @@ if (Test-Path $EquilotlExe) {
 }
 
 if ($needDownload) {
+    Write-Host ""
+    Write-Host "          [AVERTISSEMENT SECURITE] EquilotlCli.exe est un binaire tiers" -ForegroundColor Yellow
+    Write-Host "          non verifie provenant du projet Equicord. Son integrite" -ForegroundColor Yellow
+    Write-Host "          ne peut pas etre garantie par YouCord." -ForegroundColor Yellow
+    Write-Host "          Telechargez uniquement si vous faites confiance a Equicord." -ForegroundColor Yellow
+    Write-Host ""
     Write-Host "          Telechargement de EquilotlCli.exe..." -ForegroundColor DarkGray
     try {
         Invoke-WebRequest -Uri $EquilotlUrl -OutFile $EquilotlExe -UseBasicParsing `
@@ -111,6 +117,38 @@ try {
     $zipPath = Join-Path $InstallDir "youcord-dist.zip"
     Invoke-WebRequest -Uri $distAsset.browser_download_url -OutFile $zipPath -UseBasicParsing `
         -Headers @{ "User-Agent" = "YouCord-Installer/2.0" }
+
+    # Verification SHA-256 (si checksums.txt disponible)
+    $checksumUrls = @(
+        $distAsset.browser_download_url -replace "youcord-dist.zip", "checksums.txt",
+        $distAsset.browser_download_url -replace "youcord-dist.zip", "SHA256SUMS",
+        $distAsset.browser_download_url -replace "youcord-dist.zip", "youcord-dist.zip.sha256"
+    )
+    $hashVerified = $false
+    foreach ($csUrl in $checksumUrls) {
+        try {
+            $csContent = Invoke-WebRequest -Uri $csUrl -UseBasicParsing -TimeoutSec 10 `
+                -Headers @{ "User-Agent" = "YouCord-Installer/2.0" }
+            foreach ($line in ($csContent.Content -split "`n")) {
+                $line = $line.Trim()
+                if ($line -match '^([a-fA-F0-9]{64})\s+\*?youcord-dist\.zip') {
+                    $expectedHash = $Matches[1].ToLower()
+                    $actualHash = (Get-FileHash -Path $zipPath -Algorithm SHA256).Hash.ToLower()
+                    if ($actualHash -eq $expectedHash) {
+                        $hashVerified = $true
+                        Write-OK "SHA-256 verifie (${expectedHash})"
+                    } else {
+                        Write-Fail "SHA-256 mismatch !`n           Attendu: $expectedHash`n           Reel:   $actualHash`n           Le fichier est peut-etre corrompu ou compromis. Annulation."
+                    }
+                    break
+                }
+            }
+            if ($hashVerified) { break }
+        } catch { continue }
+    }
+    if (-not $hashVerified) {
+        Write-Host "          [AVERTISSEMENT] Aucun checksum trouve — integrite NON verifiee." -ForegroundColor Yellow
+    }
 
     # Extraire proprement (supprimer l'ancien dist d'abord)
     if (Test-Path $DistDir) { Remove-Item $DistDir -Recurse -Force }

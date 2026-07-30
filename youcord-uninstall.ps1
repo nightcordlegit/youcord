@@ -1,56 +1,93 @@
 ﻿# ==============================================================================
 #  YouCord -- Desinstalleur utilisateur (PowerShell)
-#  Supprime l'injection YouCord de Discord
+#  Supprime l'injection YouCord de Discord sans binaire externe.
 #
 #  Usage : Clic droit -> "Executer avec PowerShell"
 # ==============================================================================
 
-$ErrorActionPreference = "Stop"
-
-$InstallDir    = Join-Path $env:LOCALAPPDATA "YouCord-Client"
-$DistDir       = Join-Path $InstallDir "dist\desktop"
-$InstallerDir  = Join-Path $InstallDir "installer"
-$EquilotlExe   = Join-Path $InstallerDir "EquilotlCli.exe"
+$ErrorActionPreference = "Continue"
 
 Clear-Host
 Write-Host ""
 Write-Host "  +-----------------------------------------------+" -ForegroundColor Cyan
 Write-Host "  |      YOUCORD -- Desinstalleur                  |" -ForegroundColor Cyan
-Write-Host "  +-----------------------------------------------+" -ForegroundColor Cyan
+Write-Host "  +-----------------------------------------------+"
 Write-Host ""
 
-if (-not (Test-Path $EquilotlExe)) {
-    Write-Host "  [INFO] EquilotlCli.exe introuvable." -ForegroundColor Yellow
-    Write-Host "         Telechargement de l'outil de desinstallation..." -ForegroundColor Yellow
-    Write-Host ""
-    New-Item -ItemType Directory -Force -Path $InstallerDir | Out-Null
-    $EquilotlUrl = "https://github.com/Equicord/Equilotl/releases/latest/download/EquilotlCli.exe"
-    Invoke-WebRequest -Uri $EquilotlUrl `
-        -Headers @{ "User-Agent" = "YouCord-Installer/2.0" } `
-        -OutFile $EquilotlExe -UseBasicParsing
+# ---- Localiser Discord ------------------------------------------------------
+$localAppData = $env:LOCALAPPDATA
+$channels = @(
+    @{ Name = "Discord"; Dir = "Discord" },
+    @{ Name = "Discord PTB"; Dir = "DiscordPTB" },
+    @{ Name = "Discord Canary"; Dir = "DiscordCanary" },
+    @{ Name = "Discord Dev"; Dir = "DiscordDevelopment" }
+)
+
+$found = $false
+foreach ($ch in $channels) {
+    $base = Join-Path $localAppData $ch.Dir
+    if (-not (Test-Path $base)) { continue }
+
+    $versions = Get-ChildItem $base -Filter "app-*" | Sort-Object Name -Descending
+    foreach ($ver in $versions) {
+        $resPath = Join-Path $ver.FullName "resources"
+        $appDir = Join-Path $resPath "app"
+        $backup = Join-Path $resPath "_app.asar"
+        $appAsar = Join-Path $resPath "app.asar"
+
+        if (-not (Test-Path $appDir)) { continue }
+
+        # Verifier que c'est bien YouCord
+        $pkgFile = Join-Path $appDir "package.json"
+        $isYouCord = $false
+        if (Test-Path $pkgFile) {
+            $pkgContent = Get-Content $pkgFile -Raw
+            if ($pkgContent -match '"youcord"') { $isYouCord = $true }
+        }
+
+        if (-not $isYouCord) { continue }
+        $found = $true
+
+        Write-Host "  [$ch.Name] Desinstallation en cours..." -ForegroundColor Yellow
+
+        # Tuer Discord
+        try {
+            taskkill /F /IM "$($ch.Name).exe" /T 2>$null
+            taskkill /F /IM "Update.exe" /T 2>$null
+            Start-Sleep -Milliseconds 500
+        } catch { }
+
+        # Supprimer le dossier app/
+        Write-Host "    Suppression du dossier app/..." -ForegroundColor Gray
+        try { Remove-Item $appDir -Recurse -Force } catch { }
+
+        # Restaurer app.asar depuis _app.asar
+        if (Test-Path $backup) {
+            Write-Host "    Restauration de l'original app.asar..." -ForegroundColor Gray
+            if (Test-Path $appAsar) { try { Remove-Item $appAsar -Force } catch { } }
+            try { Move-Item $backup $appAsar -Force } catch { }
+        } else {
+            Write-Host "    [ATTENTION] Backup _app.asar introuvable." -ForegroundColor Yellow
+        }
+
+        Write-Host "  [$ch.Name] Desinjection reussie !" -ForegroundColor Green
+
+        # Relancer Discord
+        try {
+            $updateExe = Join-Path $base "Update.exe"
+            if (Test-Path $updateExe) {
+                Start-Process -FilePath $updateExe -ArgumentList "--processStart $($ch.Name).exe"
+                Write-Host "    Discord redemarre." -ForegroundColor Gray
+            }
+        } catch { }
+    }
 }
 
-Write-Host "  Lancement du desinstalleur graphique..." -ForegroundColor Yellow
-Write-Host "  Une fenetre va s'ouvrir pour choisir votre Discord cible." -ForegroundColor Yellow
-Write-Host ""
-
-$env:EQUICORD_USER_DATA_DIR = $InstallDir
-$env:EQUICORD_DIRECTORY     = $DistDir
-$env:EQUICORD_DEV_INSTALL   = "1"
-
-try {
-    & $EquilotlExe "--uninstall"
-} catch {
-    Write-Host "  [ERREUR] La desinstallation a echoue : $_" -ForegroundColor Red
-    Write-Host "  Appuyez sur une touche pour quitter..."
-    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    exit 1
+if (-not $found) {
+    Write-Host "  Aucune installation YouCord trouvee." -ForegroundColor Yellow
+    Write-Host "  Assurez-vous que YouCord a ete injecte via pnpm inject." -ForegroundColor Yellow
 }
 
 Write-Host ""
-Write-Host "  +-----------------------------------------------+" -ForegroundColor Green
-Write-Host "  |  YouCord desinstalle avec succes !             |" -ForegroundColor Green
-Write-Host "  |  Redemarrez Discord pour appliquer les chang.  |" -ForegroundColor Green
-Write-Host "  +-----------------------------------------------+" -ForegroundColor Green
-Write-Host ""
-Start-Sleep -Seconds 3
+Write-Host "  Appuyez sur une touche pour fermer..."
+$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")

@@ -4,11 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>YouCord Installer</title>
-  <!-- Async font load: doesn't block first paint -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"></noscript>
+  <!-- Local fonts only — no external font dependencies for security -->
   <style>
     :root {
       --bg:        #0b0b18;
@@ -22,8 +18,8 @@
       --success:   #4ade80;
       --error:     #f87171;
       --warn:      #fbbf24;
-      --font:      'Inter', system-ui, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --font:      system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -569,11 +565,13 @@
   </div>
 
   <script>
+    const DISCORD_SVG = '<svg viewBox="0 0 71 55" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><path d="M60.105 4.898A59.1 59.1 0 0046.47.277a23.935 23.935 0 00-1.083 2.25 54.777 54.777 0 00-16.796 0A22.867 22.867 0 0027.508.277 59.022 59.022 0 0013.87 4.898C2.194 22.13-.787 39.083.373 55.797a59.247 59.247 0 0018.03 9.248 45.21 45.21 0 003.915-6.466 37.835 37.835 0 01-6.166-3.014 2.503 2.503 0 01-.25-.125c.422-.312.84-.636 1.244-.96 9.882 4.534 20.626 4.534 30.466 0 .405.324.822.648 1.244.96-.082.055-.164.109-.25.126a37.967 37.967 0 01-6.167 3.014 45.21 45.21 0 003.915 6.465 59.313 59.313 0 0018.03-9.248c1.155-16.714-1.82-33.67-13.482-50.899zM23.636 45.764c-3.544 0-6.45-3.306-6.45-7.367s2.874-7.367 6.45-7.367c3.544 0 6.45 3.306 6.45 7.367s-2.874 7.367-6.45 7.367zm22.81 0c-3.545 0-6.45-3.306-6.45-7.367s2.874-7.367 6.45-7.367c3.545 0 6.45 3.306 6.45 7.367s-2.874 7.367-6.45 7.367z" fill="#5865F2"/></svg>';
+    const DISCORD_SVG_CANARY = '<svg viewBox="0 0 71 55" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><path d="M60.105 4.898A59.1 59.1 0 0046.47.277a23.935 23.935 0 00-1.083 2.25 54.777 54.777 0 00-16.796 0A22.867 22.867 0 0027.508.277 59.022 59.022 0 0013.87 4.898C2.194 22.13-.787 39.083.373 55.797a59.247 59.247 0 0018.03 9.248 45.21 45.21 0 003.915-6.466 37.835 37.835 0 01-6.166-3.014 2.503 2.503 0 01-.25-.125c.422-.312.84-.636 1.244-.96 9.882 4.534 20.626 4.534 30.466 0 .405.324.822.648 1.244.96-.082.055-.164.109-.25.126a37.967 37.967 0 01-6.167 3.014 45.21 45.21 0 003.915 6.465 59.313 59.313 0 0018.03-9.248c1.155-16.714-1.82-33.67-13.482-50.899zM23.636 45.764c-3.544 0-6.45-3.306-6.45-7.367s2.874-7.367 6.45-7.367c3.544 0 6.45 3.306 6.45 7.367s-2.874 7.367-6.45 7.367zm22.81 0c-3.545 0-6.45-3.306-6.45-7.367s2.874-7.367 6.45-7.367c3.545 0 6.45 3.306 6.45 7.367s-2.874 7.367-6.45 7.367z" fill="#f04747"/></svg>';
     const ICONS = {
-      'Discord':        { html: '<img src="https://i.imgur.com/IvXl3Iq.png" alt="Discord" />', cls: 'stable' },
-      'Discord PTB':    { html: '<img src="https://i.imgur.com/IvXl3Iq.png" alt="Discord PTB" />', cls: 'ptb' },
-      'Discord Canary': { html: '<img src="https://i.imgur.com/QpoxYST.png" alt="Discord Canary" />', cls: 'canary' },
-      'Discord Dev':    { html: '<img src="https://i.imgur.com/QpoxYST.png" alt="Discord Dev" />', cls: 'dev' },
+      'Discord':        { html: DISCORD_SVG, cls: 'stable' },
+      'Discord PTB':    { html: DISCORD_SVG, cls: 'ptb' },
+      'Discord Canary': { html: DISCORD_SVG_CANARY, cls: 'canary' },
+      'Discord Dev':    { html: DISCORD_SVG_CANARY, cls: 'dev' },
     };
 
     let discords = [];

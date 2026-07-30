@@ -13,6 +13,8 @@ using Microsoft.Web.WebView2.WinForms;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace YouCordInstaller
 {
@@ -427,7 +429,29 @@ namespace YouCordInstaller
                 }
             }
 
-            SetProgress(75, "Preparing extraction...");
+            // SHA-256 verification before extraction
+            SetProgress(76, "Verifying download integrity...");
+            var expectedHash = await DownloadChecksumAsync(zipUrl);
+            if (!string.IsNullOrEmpty(expectedHash))
+            {
+                var actualHash = ComputeSha256(tmpZip);
+                if (!string.Equals(actualHash, expectedHash, StringComparison.OrdinalIgnoreCase))
+                {
+                    try { File.Delete(tmpZip); } catch { }
+                    throw new Exception(
+                        $"SHA-256 mismatch! The downloaded file may be corrupted or tampered with.\n" +
+                        $"Expected: {expectedHash}\nActual:   {actualHash}\n\n" +
+                        $"Download aborted for your safety. Please try again or report this issue."
+                    );
+                }
+                SetProgress(77, "Checksum verified successfully.");
+            }
+            else
+            {
+                SetProgress(77, "No checksum file found — skipping verification (download not validated).");
+            }
+
+            SetProgress(78, "Preparing extraction...");
             await Task.Run(() =>
             {
                 if (Directory.Exists(_distDir)) Directory.Delete(_distDir, true);
@@ -471,7 +495,7 @@ namespace YouCordInstaller
                         if (percent - lastReportedPercent >= 1.0 || percent >= 100.0)
                         {
                             lastReportedPercent = percent;
-                            double overallPercent = 75.0 + (percent * 0.15);
+                            double overallPercent = 78.0 + (percent * 0.14);
                             SetProgress(overallPercent, $"Extracting files ({extractedEntries}/{totalEntries})...");
                         }
                     }
@@ -487,10 +511,42 @@ namespace YouCordInstaller
             var backup = Path.Combine(resPath, "_app.asar");
             var appAsar = Path.Combine(resPath, "app.asar");
 
+            // Check for third-party mod and ask user before proceeding
+            var hasOtherMod = false;
+            if (Directory.Exists(appDir))
+            {
+                var pkgFile = Path.Combine(appDir, "package.json");
+                if (File.Exists(pkgFile))
+                {
+                    var pkgContent = File.ReadAllText(pkgFile);
+                    hasOtherMod = !pkgContent.Contains("\"youcord\"") &&
+                        (pkgContent.Contains("vencord", StringComparison.OrdinalIgnoreCase) ||
+                         pkgContent.Contains("equicord", StringComparison.OrdinalIgnoreCase) ||
+                         pkgContent.Contains("openasar", StringComparison.OrdinalIgnoreCase));
+                }
+            }
+
+            if (hasOtherMod)
+            {
+                var result = MessageBox.Show(
+                    "A different client mod (Vencord/Equicord/OpenAsar) is already installed.\n\n" +
+                    "Click Yes to replace it with YouCord (the other mod will be removed).\n" +
+                    "Click No to cancel and keep the current mod.",
+                    "Third-Party Mod Detected",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning
+                );
+
+                if (result == DialogResult.No)
+                {
+                    throw new Exception("Installation cancelled by user — another mod was detected.");
+                }
+            }
+
             SetProgress(90, "Closing Discord...");
             KillDiscord(resPath);
 
-            SetProgress(91, "Removing previous mod injection (Vencord / Equicord / OpenAsar)...");
+            SetProgress(91, "Removing previous injection...");
             if (Directory.Exists(appDir))
             {
                 try { Directory.Delete(appDir, true); } catch { }
@@ -597,14 +653,10 @@ namespace YouCordInstaller
                             if (!File.Exists(pf)) continue;
                             var content = File.ReadAllText(pf);
 
-                            bool isPatched = content.Contains("vencord", StringComparison.OrdinalIgnoreCase)
-                                         || content.Contains("equicord", StringComparison.OrdinalIgnoreCase)
-                                         || content.Contains("require(\"vencord")
-                                         || content.Contains("require('vencord")
-                                         || content.Contains("VencordNative")
-                                         || content.Contains("equilotl");
+                            // Only remove YouCord/Equilotl patches — leave other mods alone
+                            bool isYouCordPatch = content.Contains("equilotl", StringComparison.OrdinalIgnoreCase);
 
-                            if (!isPatched) continue;
+                            if (!isYouCordPatch) continue;
 
                             string[] backupExts = { ".orig", ".bak", ".vanilla" };
                             bool restored = false;
@@ -622,10 +674,12 @@ namespace YouCordInstaller
 
                             if (!restored)
                             {
-                                try { File.Delete(pf); } catch { }
+                                // Cannot restore from backup — skip instead of deleting
+                                Console.WriteLine($"[YouCord] Warning: Cannot restore {pf} (no backup found). Skipping to avoid data loss.");
                             }
                         }
 
+                        // Only remove YouCord's own app/ injection — not other mods
                         var innerAppDir = Path.Combine(corePath, "app");
                         if (Directory.Exists(innerAppDir))
                         {
@@ -633,10 +687,8 @@ namespace YouCordInstaller
                             if (File.Exists(innerPkg))
                             {
                                 var pkgContent = File.ReadAllText(innerPkg);
-                                bool isModInjection = pkgContent.Contains("vencord", StringComparison.OrdinalIgnoreCase)
-                                                   || pkgContent.Contains("equicord", StringComparison.OrdinalIgnoreCase)
-                                                   || pkgContent.Contains("openasar", StringComparison.OrdinalIgnoreCase);
-                                if (isModInjection)
+                                bool isYouCordInjection = pkgContent.Contains("\"youcord\"");
+                                if (isYouCordInjection)
                                 {
                                     try { Directory.Delete(innerAppDir, true); } catch { }
                                 }
@@ -816,6 +868,82 @@ namespace YouCordInstaller
                 if (matchPattern == null || val.EndsWith(matchPattern)) return val;
             }
             return null;
+        }
+
+        // ── SHA-256 verification helpers ────────────────────────────────────
+
+        /// <summary>
+        /// Attempts to download a SHA256SUMS or checksums.txt file from the same
+        /// release and extract the expected hash for the given zip filename.
+        /// Returns null if no checksums file is found.
+        /// </summary>
+        private async Task<string> DownloadChecksumAsync(string zipDownloadUrl)
+        {
+            // Derive checksum URL: replace the zip filename with "checksums.txt" or "SHA256SUMS"
+            var zipUrl = zipDownloadUrl;
+            var checksumCandidates = new[] {
+                zipUrl.Replace("youcord-dist.zip", "checksums.txt"),
+                zipUrl.Replace("youcord-dist.zip", "SHA256SUMS"),
+                zipUrl.Replace("youcord-dist.zip", "youcord-dist.zip.sha256"),
+            };
+
+            foreach (var checksumUrl in checksumCandidates)
+            {
+                try
+                {
+                    using (var req = new HttpRequestMessage(HttpMethod.Head, checksumUrl))
+                    {
+                        req.Headers.Add("User-Agent", "YouCord-Installer/2.0");
+                        var headResp = await _http.SendAsync(req);
+                        if (!headResp.IsSuccessStatusCode) continue;
+                    }
+
+                    using (var req = new HttpRequestMessage(HttpMethod.Get, checksumUrl))
+                    {
+                        req.Headers.Add("User-Agent", "YouCord-Installer/2.0");
+                        var resp = await _http.SendAsync(req);
+                        if (!resp.IsSuccessStatusCode) continue;
+
+                        var content = await resp.Content.ReadAsStringAsync();
+                        var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+                        foreach (var line in lines)
+                        {
+                            // Format: "sha256hash  filename.zip"
+                            // Also match "sha256hash *filename.zip" (bsd style) and "sha256hash  youcord-dist.zip"
+                            var parts = line.Trim().Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                            if (parts.Length >= 2)
+                            {
+                                var hash = parts[0].Trim();
+                                var fn = parts[1].TrimStart('*', ' ');
+
+                                if (fn.Equals("youcord-dist.zip", StringComparison.OrdinalIgnoreCase) && hash.Length == 64)
+                                {
+                                    return hash.ToLowerInvariant();
+                                }
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // Try next URL format
+                }
+            }
+
+            return null;
+        }
+
+        private static string ComputeSha256(string filePath)
+        {
+            using (var sha256 = SHA256.Create())
+            using (var stream = File.OpenRead(filePath))
+            {
+                var hash = sha256.ComputeHash(stream);
+                var sb = new StringBuilder(64);
+                foreach (var b in hash) sb.Append(b.ToString("x2"));
+                return sb.ToString();
+            }
         }
     }
 }

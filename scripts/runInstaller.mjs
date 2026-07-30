@@ -1,94 +1,28 @@
 ﻿/*
- * YouCord Ã¢â‚¬â€ Installer via EquilotlCli
- * TÃƒÂ©lÃƒÂ©charge EquilotlCli.exe depuis les releases Equicord et le lance
- * avec les variables d'environnement pointant vers les fichiers YouCord.
- *
- * L'exe affiche une interface graphique permettant de choisir le Discord cible.
+ * YouCord — Installer via injection directe
+ * Injection directe sans dépendance à EquilotlCli.exe.
  *
  * Usage:
- *   pnpm inject    Ã¢â€ â€™ installe YouCord dans le Discord choisi
- *   pnpm uninject  Ã¢â€ â€™ dÃƒÂ©sinstalle YouCord du Discord choisi
- *   pnpm repair    Ã¢â€ â€™ rÃƒÂ©pare l'installation
+ *   pnpm inject    → installe YouCord dans Discord
+ *   pnpm uninject  → désinstalle YouCord de Discord
+ *   pnpm repair    → répare l'installation
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import "./checkNodeVersion.js";
 
-import { execFileSync, execSync, exec } from "child_process";
-import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, renameSync, rmSync, statSync } from "fs";
-import { chmodSync } from "fs";
+import { execSync, exec } from "child_process";
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
-import { Readable } from "stream";
-import { finished } from "stream/promises";
 import { fileURLToPath } from "url";
 
-const BASE_URL = "https://github.com/Equicord/Equilotl/releases/latest/download/";
-const INSTALLER_PATH_DARWIN = "Equilotl.app/Contents/MacOS/Equilotl";
-const INSTALLER_APP_DARWIN = "Equilotl.app";
-
 const BASE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
-const FILE_DIR = join(BASE_DIR, "dist", "Installer");
-const ETAG_FILE = join(FILE_DIR, "etag.txt");
+const DIST_DIR = join(BASE_DIR, "dist", "desktop");
 
-function getFilename() {
-    switch (process.platform) {
-        case "win32":  return "EquilotlCli.exe";
-        case "darwin": return "Equilotl.MacOS.zip";
-        case "linux":  return "EquilotlCli-linux";
-        default: throw new Error("Unsupported platform: " + process.platform);
-    }
-}
-
-async function ensureBinary() {
-    const filename = getFilename();
-    mkdirSync(FILE_DIR, { recursive: true });
-
-    const downloadName = join(FILE_DIR, filename);
-    const outputFile = process.platform === "darwin"
-        ? join(FILE_DIR, INSTALLER_PATH_DARWIN)
-        : downloadName;
-    const outputApp = process.platform === "darwin"
-        ? join(FILE_DIR, INSTALLER_APP_DARWIN)
-        : null;
-
-    if (existsSync(outputFile)) {
-        console.log("[YouCord] Installer already present, using local copy.");
-        return outputFile;
-    }
-
-    console.log("[YouCord] Downloading installer (" + filename + ")...");
-
-    const res = await fetch(BASE_URL + filename, {
-        headers: { "User-Agent": "YouCord (https://github.com/youcordfr/youcord)" }
-    });
-
-    if (!res.ok)
-        throw new Error(`Failed to download installer: ${res.status} ${res.statusText}`);
-
-    writeFileSync(ETAG_FILE, res.headers.get("etag") ?? "");
-
-    if (process.platform === "darwin") {
-        const zip = new Uint8Array(await res.arrayBuffer());
-        writeFileSync(downloadName, zip);
-        execSync(`ditto -x -k '${downloadName}' '${FILE_DIR}'`);
-        try { execSync(`sudo xattr -dr com.apple.quarantine '${outputApp}'`); } catch { }
-    } else {
-        const body = Readable.fromWeb(res.body);
-        await finished(body.pipe(createWriteStream(outputFile, { mode: 0o755, autoClose: true })));
-    }
-
-    if (process.platform !== "win32") {
-        try { chmodSync(outputFile, 0o755); } catch { }
-    }
-
-    console.log("[YouCord] Installer downloaded successfully!");
-    return outputFile;
-}
-
-// Ã¢â€â‚¬Ã¢â€â‚¬ VÃƒÂ©rifier que le build existe Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ── Vérifier que le build existe ─────────────────────────────────────────────
 function checkBuild() {
-    const patcherPath = join(BASE_DIR, "dist", "desktop", "patcher.js");
+    const patcherPath = join(DIST_DIR, "patcher.js");
     if (!existsSync(patcherPath)) {
         console.error("\x1b[31m[YouCord] dist/desktop/patcher.js not found!\x1b[0m");
         console.error("\x1b[33m           Run 'pnpm build' first, then try again.\x1b[0m");
@@ -96,9 +30,7 @@ function checkBuild() {
     }
 }
 
-// â”€â”€ Suppression des mises Ã  jour Discord incomplÃ¨tes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Quand Discord tÃ©lÃ©charge une mise Ã  jour mais qu'elle est incomplÃ¨te (pas d'app.asar),
-// l'installeur essaie d'y injecter et Ã©choue. On supprime ces dossiers cassÃ©s.
+// ── Suppression des mises à jour Discord incomplètes ─────────────────────────
 function cleanIncompleteDiscordUpdates() {
     if (process.platform !== "win32") return;
     const localAppData = process.env.LOCALAPPDATA || "";
@@ -112,20 +44,19 @@ function cleanIncompleteDiscordUpdates() {
             const resourcesDir = join(base, ver, "resources");
             const appAsarPath  = join(resourcesDir, "app.asar");
             const backupPath   = join(resourcesDir, "_app.asar");
-            // Dossier incomplet : resources existe mais ni app.asar ni _app.asar
             if (existsSync(join(base, ver)) && !existsSync(appAsarPath) && !existsSync(backupPath)) {
                 try {
                     rmSync(join(base, ver), { recursive: true, force: true });
-                    console.log(`[YouCord] SupprimÃ© le dossier de mise Ã  jour Discord incomplet : ${join(base, ver)}`);
+                    console.log(`[YouCord] Removed incomplete Discord update: ${join(base, ver)}`);
                 } catch (e) {
-                    console.warn(`[YouCord] Impossible de supprimer ${join(base, ver)}: ${e.message}`);
+                    console.warn(`[YouCord] Cannot remove ${join(base, ver)}: ${e.message}`);
                 }
             }
         }
     }
 }
 
-// â”€â”€ Nettoyage des injections prÃ©cÃ©dentes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Nettoyage des injections précédentes ────────────────────────────────────
 function cleanOldYouCord(isUninstall) {
     console.log("[YouCord] Cleaning previous installations...");
     const platform = process.platform;
@@ -169,20 +100,28 @@ function cleanOldYouCord(isUninstall) {
 
         try {
             if (existsSync(appDirPath)) {
-                let shouldDelete = false;
+                let isYouCord = false;
                 try {
                     const pkgFile = join(appDirPath, "package.json");
-                    if (existsSync(pkgFile)) {
-                        const pkg = JSON.parse(readFileSync(pkgFile, "utf-8"));
-                        if (pkg.name === "youcord") shouldDelete = true;
-                    } else if (existsSync(backupPath)) {
-                        shouldDelete = true;
+                    const indexFile = join(appDirPath, "index.js");
+                    if (existsSync(indexFile)) {
+                        const indexContent = readFileSync(indexFile, "utf-8");
+                        if (indexContent.includes("YouCord")) isYouCord = true;
                     }
-                } catch { shouldDelete = true; }
+                    if (!isYouCord && existsSync(pkgFile)) {
+                        const pkg = JSON.parse(readFileSync(pkgFile, "utf-8"));
+                        if (pkg.name === "youcord") isYouCord = true;
+                    }
+                } catch { }
 
-                if (shouldDelete) {
+                if (isYouCord) {
                     rmSync(appDirPath, { recursive: true, force: true });
-                    console.log(`[YouCord] Removed legacy app/ folder in ${resourcesDir}`);
+                    console.log(`[YouCord] Removed previous YouCord injection in ${resourcesDir}`);
+                    cleanedAny = true;
+                } else if (existsSync(backupPath)) {
+                    // If there's a backup but no YouCord app dir, still safe to cleanup
+                    rmSync(appDirPath, { recursive: true, force: true });
+                    console.log(`[YouCord] Removed unknown app/ folder in ${resourcesDir}`);
                     cleanedAny = true;
                 }
             }
@@ -192,7 +131,7 @@ function cleanOldYouCord(isUninstall) {
                     rmSync(appAsarPath, { recursive: true, force: true });
                 }
                 renameSync(backupPath, appAsarPath);
-                console.log(`[YouCord] Restored _app.asar Ã¢â€ â€™ app.asar in ${resourcesDir}`);
+                console.log(`[YouCord] Restored _app.asar → app.asar in ${resourcesDir}`);
                 cleanedAny = true;
             }
 
@@ -208,9 +147,135 @@ function cleanOldYouCord(isUninstall) {
     }
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬ Lancer Discord aprÃƒÂ¨s injection Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
-// Cherche quel Discord vient d'ÃƒÂªtre injectÃƒÂ© (_app.asar prÃƒÂ©sent = injectÃƒÂ©)
-// et le lance via Update.exe --processStart Discord.exe
+// ── Injection directe (sans Equilotl) ──────────────────────────────────────
+function findDiscordResources() {
+    const platform = process.platform;
+    const candidates = [];
+
+    if (platform === "win32") {
+        const localAppData = process.env.LOCALAPPDATA || "";
+        for (const channel of ["Discord", "DiscordPTB", "DiscordCanary", "DiscordDevelopment"]) {
+            const base = join(localAppData, channel);
+            if (!existsSync(base)) continue;
+            try {
+                const versions = readdirSync(base)
+                    .filter(d => /^app-\d+\.\d+\.\d+$/.test(d))
+                    .sort()
+                    .reverse();
+                for (const ver of versions) {
+                    candidates.push(join(base, ver, "resources"));
+                }
+            } catch { }
+        }
+    } else if (platform === "darwin") {
+        candidates.push(
+            "/Applications/Discord.app/Contents/Resources",
+            "/Applications/Discord PTB.app/Contents/Resources",
+            "/Applications/Discord Canary.app/Contents/Resources"
+        );
+    } else if (platform === "linux") {
+        candidates.push(
+            "/usr/share/discord/resources",
+            "/usr/lib/discord/resources",
+            "/opt/discord/resources",
+            "/opt/Discord/resources",
+            join(process.env.HOME || "", ".local/share/flatpak/app/com.discordapp.Discord/current/active/files/discord/resources"),
+            "/snap/discord/current/usr/share/discord/resources"
+        );
+    }
+
+    return candidates.filter(p => {
+        if (!existsSync(p)) return false;
+        return existsSync(join(p, "app.asar")) || existsSync(join(p, "app")) || existsSync(join(p, "_app.asar"));
+    });
+}
+
+function hasThirdPartyMod(resourcesDir) {
+    const appDirPath = join(resourcesDir, "app");
+    if (!existsSync(appDirPath)) return false;
+    try {
+        const pkgFile = join(appDirPath, "package.json");
+        if (!existsSync(pkgFile)) return false;
+        const pkgContent = readFileSync(pkgFile, "utf-8");
+        return pkgContent.includes("vencord") || pkgContent.includes("equicord") || pkgContent.includes("openasar");
+    } catch {
+        return false;
+    }
+}
+
+function killDiscord(resourcesDir) {
+    if (process.platform !== "win32") return;
+    const procName = resourcesDir.includes("DiscordPTB") ? "DiscordPTB" :
+                     resourcesDir.includes("DiscordCanary") ? "DiscordCanary" :
+                     resourcesDir.includes("DiscordDevelopment") ? "DiscordDevelopment" : "Discord";
+    try {
+        execSync(`taskkill /F /IM ${procName}.exe /T 2>nul`, { stdio: "ignore" });
+        execSync(`taskkill /F /IM Update.exe /T 2>nul`, { stdio: "ignore" });
+    } catch { }
+    console.log(`[YouCord] Killed ${procName} process.`);
+}
+
+function injectDirect(resourcesDir) {
+    const appAsarPath = join(resourcesDir, "app.asar");
+    const backupPath = join(resourcesDir, "_app.asar");
+    const appDirPath = join(resourcesDir, "app");
+
+    // Check if already injected by YouCord
+    if (existsSync(appDirPath) && existsSync(join(appDirPath, "index.js"))) {
+        try {
+            const indexContent = readFileSync(join(appDirPath, "index.js"), "utf-8");
+            if (indexContent.includes("YouCord Injector") || indexContent.includes("YouCord")) {
+                console.log(`\x1b[33m[YouCord] Already injected in ${resourcesDir}.\x1b[0m`);
+                return false;
+            }
+        } catch { }
+    }
+
+    // Check for third-party mod and ask user
+    if (hasThirdPartyMod(resourcesDir)) {
+        console.log(`\x1b[33m[YouCord] WARNING: Another mod (Vencord/Equicord/OpenAsar) detected in:\x1b[0m`);
+        console.log(`\x1b[33m           ${resourcesDir}\x1b[0m`);
+        console.log(`\x1b[33m           This mod will be replaced by YouCord.\x1b[0m`);
+    }
+
+    // Backup app.asar → _app.asar
+    if (existsSync(appAsarPath) && !existsSync(backupPath)) {
+        let isDir = false;
+        try { isDir = statSync(appAsarPath).isDirectory(); } catch { }
+        if (isDir) {
+            console.warn(`\x1b[33m[YouCord] app.asar is a directory — another mod may be installed.\x1b[0m`);
+            rmSync(appAsarPath, { recursive: true, force: true });
+        }
+        console.log("[YouCord] Backing up app.asar → _app.asar...");
+        renameSync(appAsarPath, backupPath);
+    } else if (!existsSync(backupPath)) {
+        console.error(`\x1b[31m[YouCord] No app.asar or _app.asar found in resources!\x1b[0m`);
+        return false;
+    }
+
+    // Remove old app.asar if it exists
+    if (existsSync(appAsarPath)) {
+        try {
+            rmSync(appAsarPath, { recursive: true, force: true });
+        } catch (e) {
+            console.error(`\x1b[31m[YouCord] Cannot remove old app.asar: ${e.message}\x1b[0m`);
+            return false;
+        }
+    }
+
+    // Create app/ directory with loader
+    mkdirSync(appDirPath, { recursive: true });
+
+    const patcherPath = join(DIST_DIR, "patcher.js").replace(/\\/g, "\\\\");
+    writeFileSync(join(appDirPath, "package.json"), JSON.stringify({ name: "youcord", main: "index.js" }, null, 2));
+    writeFileSync(join(appDirPath, "index.js"),
+        `// YouCord Injector — auto-generated, do not edit\n"use strict";\nrequire("${patcherPath}");\n`
+    );
+
+    console.log(`\x1b[32m[YouCord] Successfully injected into: ${resourcesDir}\x1b[0m`);
+    return true;
+}
+
 function launchInjectedDiscord() {
     if (process.platform !== "win32") return;
 
@@ -227,10 +292,9 @@ function launchInjectedDiscord() {
 
         for (const ver of versions) {
             const resourcesDir = join(base, ver, "resources");
-            const backupPath   = join(resourcesDir, "_app.asar");
+            const appDirPath = join(resourcesDir, "app");
 
-            // _app.asar prÃƒÂ©sent = EquilotlCli vient d'injecter ici
-            if (existsSync(backupPath)) {
+            if (existsSync(appDirPath)) {
                 const exeName   = channel + ".exe";
                 const updateExe = join(base, "Update.exe");
 
@@ -238,60 +302,59 @@ function launchInjectedDiscord() {
                     console.log(`[YouCord] Launching ${channel}...`);
                     exec(`"${updateExe}" --processStart ${exeName}`);
                 } else {
-                    // Fallback : lancer l'exe directement
                     const directExe = join(base, ver, channel + ".exe");
                     if (existsSync(directExe)) {
                         console.log(`[YouCord] Launching ${channel} (direct)...`);
                         exec(`"${directExe}"`);
                     }
                 }
-                return; // On lance le premier Discord injectÃƒÂ© trouvÃƒÂ©
+                return;
             }
         }
     }
 }
 
-// Ã¢â€â‚¬Ã¢â€â‚¬ Main Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// ── Main ──────────────────────────────────────────────────────────────────
 const argStart = process.argv.indexOf("--");
 const args = argStart === -1 ? process.argv.slice(2) : process.argv.slice(argStart + 1);
 
 const isUninstall = args.includes("--uninstall");
+const isRepair = args.includes("--repair");
+
 cleanIncompleteDiscordUpdates();
 cleanOldYouCord(isUninstall);
-if (!isUninstall) checkBuild();
 
-const installerBin = await ensureBinary();
-
-console.log("[YouCord] Injecting...");
-
-const mappedArgs = args.map(a => {
-    if (a === "--install") return "-install";
-    if (a === "--uninstall") return "-uninstall";
-    if (a === "--repair") return "-repair";
-    return a;
-});
-
-if (!mappedArgs.includes("-branch") && !mappedArgs.includes("--branch")) {
-    mappedArgs.push("-branch", "auto");
+if (isUninstall) {
+    process.exit(0);
 }
 
-try {
-    execFileSync(installerBin, mappedArgs, {
-        stdio: "inherit",
-        env: {
-            ...process.env,
-            EQUICORD_USER_DATA_DIR: BASE_DIR,
-            EQUICORD_DIRECTORY: join(BASE_DIR, "dist", "desktop"),
-            EQUICORD_DEV_INSTALL: "1",
-            YOUCORD_DIRECTORY: join(BASE_DIR, "dist", "desktop")
-        }
-    });
-} catch {
-    console.error("[YouCord] Injection failed.");
+if (isRepair) {
+    console.log("[YouCord] Repair mode: re-injecting...");
+}
+
+checkBuild();
+
+// Try direct injection first (no Equilotl dependency)
+console.log("[YouCord] Using direct injection (no external binaries)...");
+
+const allResources = findDiscordResources();
+if (allResources.length === 0) {
+    console.error("\x1b[31m[YouCord] No Discord installation found!\x1b[0m");
+    console.error("\x1b[33m[YouCord] Make sure Discord is installed.\x1b[0m");
     process.exit(1);
 }
 
-// Lancer Discord uniquement aprÃƒÂ¨s une injection rÃƒÂ©ussie (pas aprÃƒÂ¨s uninject)
-if (!isUninstall) {
+let injectedCount = 0;
+for (const resPath of allResources) {
+    console.log(`\n[YouCord] → ${resPath}`);
+    killDiscord(resPath);
+    if (injectDirect(resPath)) injectedCount++;
+}
+
+if (injectedCount > 0) {
+    console.log(`\n\x1b[32m[YouCord] ${injectedCount}/${allResources.length} injection(s) successful.\x1b[0m`);
+    console.log("[YouCord] Launching Discord...");
     launchInjectedDiscord();
+} else {
+    console.log("\n\x1b[33m[YouCord] No new injections performed. Discord may already be injected.\x1b[0m");
 }
