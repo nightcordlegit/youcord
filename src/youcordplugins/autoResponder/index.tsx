@@ -19,6 +19,250 @@ import { getGroqKey, groqChat } from "../youcordAI/groqManager";
 
 const MessageStore = findByPropsLazy("getMessages");
 
+const LANGUAGES: Record<string, {
+    label: string;
+    system: string;
+    selfLabel: string;
+    otherLabel: string;
+    sections: {
+        myInfo: string;
+        myInstructions: string;
+        blacklist: string;
+        history: string;
+        latestMessage: string;
+        rules: string;
+        mission: string;
+    };
+    rules: string[];
+    mission: string;
+}> = {
+    fr: {
+        label: "FranÃ§ais",
+        system: "Tu es un AutoResponder ultra-personnalisable pour Discord.",
+        selfLabel: "MOI",
+        otherLabel: "L'AMI",
+        sections: {
+            myInfo: "MES INFOS PERSONNELLES",
+            myInstructions: "MES INSTRUCTIONS",
+            blacklist: "LISTE NOIRE",
+            history: "HISTORIQUE",
+            latestMessage: "DERNIER MESSAGE",
+            rules: "RÃˆGLES DE COMPORTEMENT (CRUCIAL)",
+            mission: "MISSION",
+        },
+        rules: [
+            "RÃ‰PONSES COURTES : Fais des rÃ©ponses concises (1 ou 2 phrases max). Ne fais pas de longs paragraphes.",
+            "DISCRÃ‰TION DES INFOS : N'utilise mes infos personnelles que si c'est pertinent.",
+            "STYLE Ã‰CRIT NATUREL : Supprime toute trace d'hÃ©sitation orale.",
+            "HUMAIN : Parle comme un pote sur Discord.",
+        ],
+        mission: "RÃ©ponds de maniÃ¨re naturelle. NE RENVOIE QUE LE TEXTE DE TA RÃ‰PONSE.",
+    },
+    en: {
+        label: "English",
+        system: "You are a highly customizable AutoResponder for Discord.",
+        selfLabel: "ME",
+        otherLabel: "THEM",
+        sections: {
+            myInfo: "MY PERSONAL INFO",
+            myInstructions: "MY INSTRUCTIONS",
+            blacklist: "BLACKLIST",
+            history: "HISTORY",
+            latestMessage: "LATEST MESSAGE",
+            rules: "BEHAVIOR RULES (CRITICAL)",
+            mission: "MISSION",
+        },
+        rules: [
+            "SHORT REPLIES: Keep responses concise (1-2 sentences max). No long paragraphs.",
+            "INFO DISCRETION: Only use my personal info when relevant.",
+            "NATURAL WRITING: Remove all traces of oral hesitation.",
+            "HUMAN: Talk like a friend on Discord.",
+        ],
+        mission: "Reply naturally. ONLY RETURN THE TEXT OF YOUR REPLY.",
+    },
+    es: {
+        label: "EspaÃ±ol",
+        system: "Eres un AutoResponder altamente personalizable para Discord.",
+        selfLabel: "YO",
+        otherLabel: "ELLOS",
+        sections: {
+            myInfo: "MI INFORMACIÃ“N PERSONAL",
+            myInstructions: "MIS INSTRUCCIONES",
+            blacklist: "LISTA NEGRA",
+            history: "HISTORIAL",
+            latestMessage: "ÃšLTIMO MENSAJE",
+            rules: "REGLAS DE COMPORTAMIENTO (CRUCIAL)",
+            mission: "MISIÃ“N",
+        },
+        rules: [
+            "RESPUESTAS CORTAS: Responde de forma concisa (1-2 frases mÃ¡x.). Sin pÃ¡rrafos largos.",
+            "DISCRECIÃ“N: Solo usa mi informaciÃ³n personal si es relevante.",
+            "ESTILO NATURAL: Elimina cualquier rastro de duda o hesitaciÃ³n oral.",
+            "HUMANO: Habla como un amigo en Discord.",
+        ],
+        mission: "Responde de forma natural. SOLO DEVUELVE EL TEXTO DE TU RESPUESTA.",
+    },
+    de: {
+        label: "Deutsch",
+        system: "Du bist ein hochgradig anpassbarer AutoResponder fÃ¼r Discord.",
+        selfLabel: "ICH",
+        otherLabel: "SIE",
+        sections: {
+            myInfo: "MEINE PERSÃ–NLICHEN DATEN",
+            myInstructions: "MEINE ANWEISUNGEN",
+            blacklist: "SPERRLISTE",
+            history: "VERLAUF",
+            latestMessage: "LETZTE NACHRICHT",
+            rules: "VERHALTENSREGELN (KRITISCH)",
+            mission: "AUFGABE",
+        },
+        rules: [
+            "KURZE ANTWORTEN: Halte Antworten kurz (max. 1-2 SÃ¤tze). Keine langen AbsÃ¤tze.",
+            "DISKRETION: Verwende persÃ¶nliche Infos nur, wenn relevant.",
+            "NATÃœRLICHER STIL: Keine zÃ¶gernden AusdrÃ¼cke.",
+            "MENSCHLICH: Rede wie ein Freund auf Discord.",
+        ],
+        mission: "Antworte natÃ¼rlich. GIB NUR DEN TEXT DEINER ANTWORT ZURÃœCK.",
+    },
+    it: {
+        label: "Italiano",
+        system: "Sei un AutoResponder altamente personalizzabile per Discord.",
+        selfLabel: "IO",
+        otherLabel: "LORO",
+        sections: {
+            myInfo: "MIE INFORMAZIONI PERSONALI",
+            myInstructions: "MIE ISTRUZIONI",
+            blacklist: "LISTA NERA",
+            history: "CRONOLOGIA",
+            latestMessage: "ULTIMO MESSAGGIO",
+            rules: "REGOLE DI COMPORTAMENTO (CRITICHE)",
+            mission: "MISSIONE",
+        },
+        rules: [
+            "RISPOSTE BREVI: Risposte concise (max 1-2 frasi). Niente paragrafi lunghi.",
+            "DISCREZIONE: Usa le mie informazioni personali solo se pertinente.",
+            "STILE NATURALE: Elimina ogni traccia di esitazione orale.",
+            "UMANO: Parla come un amico su Discord.",
+        ],
+        mission: "Rispondi in modo naturale. RESTITUISCI SOLO IL TESTO DELLA TUA RISPOSTA.",
+    },
+    pt: {
+        label: "PortuguÃªs",
+        system: "VocÃª Ã© um AutoResponder altamente personalizÃ¡vel para o Discord.",
+        selfLabel: "EU",
+        otherLabel: "ELES",
+        sections: {
+            myInfo: "MINHAS INFORMAÃ‡Ã•ES PESSOAIS",
+            myInstructions: "MINHAS INSTRUÃ‡Ã•ES",
+            blacklist: "LISTA NEGRA",
+            history: "HISTÃ“RICO",
+            latestMessage: "ÃšLTIMA MENSAGEM",
+            rules: "REGRAS DE COMPORTAMENTO (CRUCIAIS)",
+            mission: "MISSÃƒO",
+        },
+        rules: [
+            "RESPOSTAS CURTAS: Respostas concisas (mÃ¡x. 1-2 frases). Sem parÃ¡grafos longos.",
+            "DISCRIÃ‡ÃƒO: Use minhas informaÃ§Ãµes pessoais sÃ³ quando relevante.",
+            "ESTILO NATURAL: Elimine qualquer traÃ§o de hesitaÃ§Ã£o oral.",
+            "HUMANO: Fale como um amigo no Discord.",
+        ],
+        mission: "Responda naturalmente. SÃ“ RETORNE O TEXTO DA SUA RESPOSTA.",
+    },
+    nl: {
+        label: "Nederlands",
+        system: "Je bent een zeer aanpasbare AutoResponder voor Discord.",
+        selfLabel: "IK",
+        otherLabel: "ZIJ",
+        sections: {
+            myInfo: "MIJN PERSOONLIJKE GEGEVENS",
+            myInstructions: "MIJN INSTRUCTIES",
+            blacklist: "ZWARTE LIJST",
+            history: "GESCHIEDENIS",
+            latestMessage: "LAATSTE BERICHT",
+            rules: "GEDRAGSREGELS (CRITICAAL)",
+            mission: "MISSIE",
+        },
+        rules: [
+            "KORTE ANTWOORDEN: Houd antwoorden kort (max 1-2 zinnen). Geen lange paragrafen.",
+            "DISCRETIE: Gebruik mijn persoonlijke gegevens alleen wanneer relevant.",
+            "NATUURLIJKE STIJL: Verwijder alle sporen van mondelinge aarzeling.",
+            "MENSELIJK: Praat als een vriend op Discord.",
+        ],
+        mission: "Reageer natuurlijk. GEGEN ALLEEN DE TEKST VAN JE ANTWOORD TERUG.",
+    },
+    pl: {
+        label: "Polski",
+        system: "JesteÅ› wysoce konfigurowalnym AutoResponderem dla Discorda.",
+        selfLabel: "JA",
+        otherLabel: "ONI",
+        sections: {
+            myInfo: "MOJE DANE OSOBOWE",
+            myInstructions: "MOJE INSTRUKCJE",
+            blacklist: "CZARNA LISTA",
+            history: "HISTORIA",
+            latestMessage: "OSTATNIA WIADOMOÅšÄ†",
+            rules: "ZASADY ZACHOWANIA (KRYTYCZNE)",
+            mission: "MISJA",
+        },
+        rules: [
+            "KRÃ“TKIE ODPOWIEDZI: Odpowiadaj zwiÄ™Åºle (maks. 1-2 zdania). Bez dÅ‚ugich akapitÃ³w.",
+            "DYSKRECJA: UÅ¼ywaj moich danych osobowych tylko gdy to istotne.",
+            "NATURALNY STYL: UsuÅ„ wszelkie Å›lady ustnego wahania.",
+            "LUDZKI: MÃ³w jak znajomy na Discordzie.",
+        ],
+        mission: "Odpowiedz naturalnie. ZWRÃ“Ä† TYLKO TEKST SWOJEJ ODPOWIEDZI.",
+    },
+    ja: {
+        label: "æ—¥æœ¬èªž",
+        system: "ã‚ãªãŸã¯Discordã®ãŸã‚ã®é«˜åº¦ã«ã‚«ã‚¹ã‚¿ãƒžã‚¤ã‚ºå¯èƒ½ãªAutoResponderã§ã™ã€‚",
+        selfLabel: "ç§",
+        otherLabel: "å‘ã",
+        sections: {
+            myInfo: "å€‹äººæƒ…å ±",
+            myInstructions: "ã‚¤ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚·ãƒ§ãƒ³",
+            blacklist: "ãƒ–ãƒ©ãƒƒã‚¯ãƒªã‚¹ãƒˆ",
+            history: "éŽåŽ»ã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸",
+            latestMessage: "æœ€æ–°ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸",
+            rules: "è¡Œå‹•ãƒ«ãƒ¼ãƒ«（é‡è¦）",
+            mission: "ä»»å‹™",
+        },
+        rules: [
+            "çŸ­ãå›žç­”ï¼š1-2æ–‡ã§ç°¡æ½”ã«。é•·æ–‡ã¯ä¸è¦。",
+            "æƒ…å ±ã®é©åˆ‡ãªä½¿ç”¨ï¼šå€‹äººæƒ…å ±ã¯å¿…è¦ãªã¨ãã®ã¿ä½¿ç”¨。",
+            "è‡ªç„¶ãªè¡¨ç¾ï¼šå£èªžã®æŠœçµ¶ãƒ»é”™ã„ã‚’æ¶ˆã™。",
+            "äººé–“ã‚‰ã—ãï¼šDiscordã§ã®å‹é”ã¨ã—ã¦è©±ã™。",
+        ],
+        mission: "è‡ªç„¶ã«å¿œç­”ã—ã¦ãã ã•ã„。å¿œç­”æ–‡ã®ã¿ã‚’è¿”ã—ã¦ãã ã•ã„ã€‚",
+    },
+    zh: {
+        label: "ä¸­æ–‡",
+        system: "ä½ æ˜¯ä¸€ä¸ªé«˜åº¦å¯è‡ªå®šä¹‰çš„Discordè‡ªåŠ¨å›žå¤å™¨ã€‚",
+        selfLabel: "æˆ‘",
+        otherLabel: "ä»–ä»¬",
+        sections: {
+            myInfo: "æˆ‘çš„ä¸ªäººä¿¡æ¯",
+            myInstructions: "æˆ‘çš„æŒ‡ä»¤",
+            blacklist: "é»‘åå•",
+            history: "åŽ†å²è®°å½•",
+            latestMessage: "æœ€æ–°æ¶ˆæ¯",
+            rules: "è¡Œä¸ºè§„åˆ™（å…³é”®）",
+            mission: "ä»»åŠ¡",
+        },
+        rules: [
+            "çŸ­ç­”å¤ï¼šå›žå¤ç®€æ´（æœ€å¤š1-2å¥）。ä¸è¦é•¿æ®µè½ã€‚",
+            "ä¿¡æ¯é…Œå®¡ï¼šåªåœ¨ç›¸å…³æ—¶ä½¿ç”¨æˆ‘çš„ä¸ªäººä¿¡æ¯ã€‚",
+            "è‡ªç„¶é£Žæ ¼ï¼šåŽ»é™¤ä¸€åˆ‡å£å¤´çŠ¹è±«çš„ç—•è¿¹ã€‚",
+            "äººæ€§åŒ–ï¼šåƒDiscordä¸Šçš„æœ‹å‹ä¸€æ ·è¯´è¯ã€‚",
+        ],
+        mission: "è‡ªç„¶åœ°å›žå¤。åªè¿”å›žä½ çš„å›žå¤æ–‡æœ¬ã€‚",
+    },
+};
+
+const LANG_OPTIONS = Object.entries(LANGUAGES).map(([value, lang]) => ({
+    label: lang.label,
+    value
+}));
+
 const settings = definePluginSettings({
     warning: {
         type: OptionType.COMPONENT,
@@ -51,6 +295,13 @@ const settings = definePluginSettings({
         default: false,
         restartNeeded: false
     },
+    responseLanguage: {
+        type: OptionType.SELECT,
+        description: "Language for AI responses",
+        options: LANG_OPTIONS,
+        default: "fr",
+        restartNeeded: false,
+    },
     personalInfo: {
         type: OptionType.STRING,
         description: "Personal Information (Name, Age, Location, etc.)",
@@ -77,7 +328,7 @@ const settings = definePluginSettings({
     },
     blacklistedUsers: {
         type: OptionType.STRING,
-        description: "Blacklisted User IDs (comma separated) â€” AutoResponder will not reply to these users.",
+        description: "Blacklisted User IDs (comma separated) — AutoResponder will not reply to these users.",
         default: "",
         restartNeeded: false,
     },
@@ -142,44 +393,44 @@ async function handleMessage(message: any) {
             return;
         }
 
-        // Récupération de l'historique récent pour la cohérence
+        const lang = LANGUAGES[settings.store.responseLanguage] ?? LANGUAGES.fr;
+
         let localHistory = "";
         try {
             const msgs = MessageStore.getMessages(message.channel_id).toArray().slice(-15);
             localHistory = msgs.map((m: any) => {
-                const author = m.author.id === currentUser.id ? "MOI" : "L'AMI";
+                const author = m.author.id === currentUser.id ? lang.selfLabel : lang.otherLabel;
                 return `${author}: ${m.content}`;
             }).join("\n");
         } catch { }
 
-        const prompt = `Tu es l'utilisateur (MOI). Réponds au dernier message de L'AMI.
+        const rulesText = lang.rules.map((r, i) => `${i + 1}. ${r}`).join("\n");
+
+        const prompt = `Tu es l'utilisateur (${lang.selfLabel}). RÃ©ponds au dernier message de ${lang.otherLabel}.
         
-MES INFOS PERSONNELLES :
+${lang.sections.myInfo} :
 ${settings.store.personalInfo}
 
-MES INSTRUCTIONS :
+${lang.sections.myInstructions} :
 ${settings.store.customInstructions}
 
-LISTE NOIRE :
+${lang.sections.blacklist} :
 ${settings.store.blacklistedWords}
 
-HISTORIQUE :
+${lang.sections.history} :
 ${localHistory}
 
-LATEST MESSAGE : "${message.content}"
+${lang.sections.latestMessage} : "${message.content}"
 
-RÈGLES DE COMPORTEMENT (CRUCIAL) :
-1. RÉPONSES COURTES : Fais des réponses concises (1 ou 2 phrases max). Ne fais pas de longs paragraphes.
-2. DISCRÉTION DES INFOS : N'utilise mes infos personnelles (ex: Paris) que si c'est pertinent. Ne ramène pas tout à Paris à chaque message.
-3. STYLE ÉCRIT NATUREL : À l'écrit, on ne dit pas "heu..." ou "attends" quand on calcule. On donne juste le résultat ou on continue la phrase. Supprime toute trace d'hésitation orale.
-4. HUMAIN : Parle comme un pote sur Discord (langage SMS léger autorisé si mon style le permet).
+${lang.sections.rules} :
+${rulesText}
 
-MISSION :
-Réponds de manière naturelle. NE RENVOIE QUE LE TEXTE DE TA RÉPONSE.`;
+${lang.sections.mission} :
+${lang.mission}`;
 
         const reply = await groqChat({
             messages: [
-                { role: "system", content: "Tu es un AutoResponder ultra-personnalisable pour Discord." },
+                { role: "system", content: lang.system },
                 { role: "user", content: prompt }
             ],
             temperature: 0.7,
