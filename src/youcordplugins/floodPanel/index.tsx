@@ -25,6 +25,30 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Randomize message order by default.",
         default: true
+    },
+    customMessages: {
+        type: OptionType.CUSTOM,
+        default: [] as string[],
+        hidden: true,
+        description: ""
+    },
+    customFileName: {
+        type: OptionType.CUSTOM,
+        default: null as string | null,
+        hidden: true,
+        description: ""
+    },
+    customDelay: {
+        type: OptionType.CUSTOM,
+        default: "500" as string,
+        hidden: true,
+        description: ""
+    },
+    customShuffle: {
+        type: OptionType.CUSTOM,
+        default: true as boolean,
+        hidden: true,
+        description: ""
     }
 });
 

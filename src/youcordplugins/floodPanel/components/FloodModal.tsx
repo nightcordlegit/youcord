@@ -10,6 +10,7 @@ import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 import { RestAPI, SearchableSelect, TextArea, useEffect, useMemo, useRef, useState } from "@webpack/common";
+import { settings } from "../index";
 
 const DEFAULT_MESSAGES = [
     "you literal npc",
@@ -60,12 +61,21 @@ function makeNonce(): string {
 }
 
 export function FloodModal({ channel, rootProps, onRunningChange }: Props) {
-    const [messages, setMessages] = useState<string[]>(DEFAULT_MESSAGES);
-    const [fileName, setFileName] = useState<string | null>(null);
+    const savedMessages = settings.store.customMessages;
+    const [messages, setMessages] = useState<string[]>(
+        savedMessages && savedMessages.length > 0 ? savedMessages : DEFAULT_MESSAGES
+    );
+    const [fileName, setFileName] = useState<string | null>(
+        settings.store.customFileName
+    );
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState("");
-    const [delayMs, setDelayMs] = useState("500");
-    const [shuffle, setShuffle] = useState(true);
+    const [delayMs, setDelayMs] = useState(
+        settings.store.customDelay ?? String(settings.store.defaultDelay ?? 500)
+    );
+    const [shuffle, setShuffle] = useState(
+        settings.store.customShuffle ?? settings.store.defaultShuffle ?? true
+    );
     const [running, setRunning] = useState(false);
     const [status, setStatus] = useState("");
 
@@ -152,7 +162,10 @@ export function FloodModal({ channel, rootProps, onRunningChange }: Props) {
                                 const lines = editValue.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
                                 if (lines.length > 0) {
                                     setMessages(lines);
-                                    setFileName(`Custom (${lines.length} phrases)`);
+                                    const name = `Custom (${lines.length} phrases)`;
+                                    setFileName(name);
+                                    settings.store.customMessages = lines;
+                                    settings.store.customFileName = name;
                                 }
                                 setIsEditing(false);
                             }}>
@@ -175,7 +188,12 @@ export function FloodModal({ channel, rootProps, onRunningChange }: Props) {
                             }}>
                                 Edit phrases
                             </Button>
-                            <Button variant="secondary" size="small" onClick={() => { setMessages(DEFAULT_MESSAGES); setFileName(null); }}>
+                            <Button variant="secondary" size="small" onClick={() => {
+                                setMessages(DEFAULT_MESSAGES);
+                                setFileName(null);
+                                settings.store.customMessages = [];
+                                settings.store.customFileName = null;
+                            }}>
                                 Default
                             </Button>
                         </div>
@@ -193,7 +211,10 @@ export function FloodModal({ channel, rootProps, onRunningChange }: Props) {
                         placeholder="Choose a delay"
                         maxVisibleItems={8}
                         closeOnSelect={true}
-                        onChange={(v: string) => setDelayMs(v)}
+                        onChange={(v: string) => {
+                            setDelayMs(v);
+                            settings.store.customDelay = v;
+                        }}
                     />
                 </div>
 
