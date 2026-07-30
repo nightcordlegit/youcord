@@ -94,7 +94,7 @@ let origAccept: Function | null = null;
 
 function patchAcceptFriend() {
     try {
-        const RA = find(filters.byProps("acceptFriend", "addFriend")) as any;
+        const RA = find(filters.byProps("acceptFriend", "addFriend"), { isIndirect: true }) as any;
         if (!RA || origAccept) return;
         origAccept = RA.acceptFriend;
         RA.acceptFriend = async function (userId: string, ...args: any[]) {
@@ -115,7 +115,7 @@ function patchAcceptFriend() {
 function unpatchAcceptFriend() {
     try {
         if (!origAccept) return;
-        const RA = find(filters.byProps("acceptFriend", "addFriend")) as any;
+        const RA = find(filters.byProps("acceptFriend", "addFriend"), { isIndirect: true }) as any;
         if (RA) RA.acceptFriend = origAccept;
         origAccept = null;
     } catch { }
@@ -654,7 +654,7 @@ const fakeMessageRequests = new Map<string, { user: any; channelId: string; msgI
 function patchMessageRequestStore() {
     if (MessageRequestStore) return;
     try {
-        const store = find(filters.byProps("getRequests", "hasRequest")) as any;
+        const store = find(filters.byProps("getRequests", "hasRequest"), { isIndirect: true }) as any;
         if (!store) return;
         MessageRequestStore = store;
 
