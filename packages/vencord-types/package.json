@@ -23,7 +23,7 @@
         "highlight.js": "11.11.1",
         "moment": "^2.22.2",
         "ts-pattern": "^5.9.0",
-        "type-fest": "^4.35.0"
+        "type-fest": "^5.8.0"
     },
     "peerDependencies": {
         "@types/react": "18.3.1",
