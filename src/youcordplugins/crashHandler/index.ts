@@ -12,16 +12,31 @@ import { Logger } from "@utils/Logger";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
-import { filters, findBulk, proxyLazyWebpack } from "@webpack";
+import { proxyLazyWebpack, wreq } from "@webpack";
 import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 
+// Silent webpack search: unlike findBulk, never logs "found no module" warnings
+// when the targeted modules are renamed/missing on the current Discord build.
+function silentFindByProps(...props: string[]): any | undefined {
+    const cache = wreq.m as Record<string, { loaded?: boolean; exports?: any; }>;
+    for (const key in cache) {
+        const mod = cache[key];
+        if (!mod?.loaded || mod.exports == null) continue;
+        const candidates = typeof mod.exports === "object" ? Object.values(mod.exports) : [];
+        for (const ex of [mod.exports, ...candidates]) {
+            if (ex && typeof ex === "object" && props.every(p => ex[p] !== undefined)) return ex;
+        }
+    }
+    return undefined;
+}
+
 const { ModalStack, DraftManager } = proxyLazyWebpack(() => {
-    const [ModalStack, DraftManager] = findBulk(
-        filters.byProps("pushLazy", "popAll"),
-        filters.byProps("clearDraft", "saveDraft"),
-    );
+    const [ModalStack, DraftManager] = [
+        silentFindByProps("pushLazy", "popAll"),
+        silentFindByProps("clearDraft", "saveDraft"),
+    ];
 
     return {
         ModalStack,
