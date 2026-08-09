@@ -12,6 +12,7 @@ import { addHeaderBarButton, HeaderBarButton, removeHeaderBarButton } from "@api
 import { DataStore } from "@api/index";
 import { tPlugin as t } from "@api/pluginI18n";
 import { Settings } from "@api/Settings";
+import { ApngBlendOp, ApngDisposeOp, parseAPNG } from "@utils/apng";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { AuthenticationStore, Button, FluxDispatcher, GuildMemberStore, IconUtils, Menu, OAuth2AuthorizeModal, React, Select, SnowflakeUtils, UserProfileStore, UserStore } from "@webpack/common";
@@ -19,6 +20,7 @@ import virtualMerge from "virtual-merge";
 
 import { beginDiscordOAuth,getStoredToken, storeToken } from "../../api/OAuth2";
 import { getPublicPluginConfig, saveOwnPluginConfig } from "../../api/PluginSync";
+import { PROFILE_EFFECT_ASSETS, ProfileEffectAsset } from "./effectAssets";
 
 const DS_KEY = "customProfile_data";
 const DS_ENABLED = "customProfile_enabled";
@@ -1346,23 +1348,232 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                         className={`cp-badge ${!data.profileEffectId ? "cp-badge--on" : ""}`} style={{ minWidth: 60 }}>
                         {t("None")}
                     </button>
-                    {PROFILE_EFFECTS.map(eff => (
-                        <button key={eff.id}
-                            onClick={() => set("profileEffectId", data.profileEffectId === eff.id ? undefined : eff.id)}
-                            className={`cp-badge ${data.profileEffectId === eff.id ? "cp-badge--on" : ""}`}
-                            title={eff.label} style={{ padding: 3, lineHeight: 0, width: 52, height: 52, borderRadius: 6 }}>
-                            <img src={getProfileEffectUrl(eff.id)} alt={eff.label}
-                                style={{ width: 46, height: 46, objectFit: "contain", display: "block" }}
-                                onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; const sib = (e.currentTarget as HTMLImageElement).nextElementSibling as HTMLElement; if (sib) sib.style.display = "block"; }} />
-                            <span style={{ display: "none", fontSize: 9, lineHeight: 1.1, textAlign: "center", color: "var(--text-muted)" }}>{eff.label}</span>
-                        </button>
-                    ))}
+                    {PROFILE_EFFECTS.map(eff => {
+                        const asset = PROFILE_EFFECT_ASSETS[eff.id];
+                        const thumb = asset?.thumb;
+                        return (
+                            <div key={eff.id} className={`cp-badge cp-effect-tile ${data.profileEffectId === eff.id ? "cp-badge--on" : ""}`}>
+                                <button
+                                    onClick={() => set("profileEffectId", data.profileEffectId === eff.id ? undefined : eff.id)}
+                                    className="cp-effect-tile-btn"
+                                    title={eff.label}>
+                                    <img src={getProfileEffectUrl(eff.id)} alt={eff.label} loading="lazy"
+                                        onError={e => {
+                                            const img = e.currentTarget;
+                                            if (thumb) {
+                                                img.src = thumb;
+                                                img.onerror = null;
+                                            } else {
+                                                img.style.display = "none";
+                                            }
+                                        }} />
+                                </button>
+                                <span className="cp-effect-tile-label">{eff.label}</span>
+                                <button className="cp-effect-eye" title={t("Preview")}
+                                    onClick={() => openModal(p => (
+                                        <ProfileEffectPreviewModal
+                                            rootProps={p}
+                                            effectId={eff.id}
+                                            avatar={data.avatar}
+                                            displayName={data.globalName || data.username}
+                                            onApply={id => set("profileEffectId", data.profileEffectId === id ? undefined : id)}
+                                        />
+                                    ))}>
+                                    <EyeIcon size={12} />
+                                </button>
+                            </div>
+                        );
+                    })}
                 </div>
             </ModalContent>
             <ModalFooter className="cp-footer">
                 <button className="cp-btn cp-btn-ghost" onClick={rootProps.onClose}>{t("Cancel")}</button>
                 <button className="cp-btn cp-btn-danger" onClick={reset}><TrashIcon /><span>{t("Reset")}</span></button>
                 <button className="cp-btn cp-btn-primary" onClick={save} disabled={saving}><SaveIcon /><span>{saving ? t("Saving...") : t("Save")}</span></button>
+            </ModalFooter>
+        </ModalRoot>
+    );
+}
+
+function EyeIcon({ size = 14 }: { size?: number; }) {
+    return <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5Zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z" /></svg>;
+}
+
+const apngCache = new Map<string, Promise<any | null>>();
+function fetchAnimation(src: string): Promise<any | null> {
+    let p = apngCache.get(src);
+    if (!p) {
+        p = fetch(src)
+            .then(r => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(`HTTP ${r.status}`))))
+            .then(parseAPNG)
+            .catch(() => null);
+        apngCache.set(src, p);
+    }
+    return p;
+}
+
+interface LiveEffectLayer {
+    frames: any[];
+    total: number;
+    loop: boolean;
+    loopDelay: number;
+    canvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
+    idx: number;
+    before: ImageData | null;
+}
+
+function updateEffectLayer(layer: LiveEffectLayer, local: number) {
+    const { frames, ctx } = layer;
+    let acc = 0;
+    let target = frames.length - 1;
+    for (let i = 0; i < frames.length; i++) {
+        if (local < acc + frames[i].delay) {
+            target = i;
+            break;
+        }
+        acc += frames[i].delay;
+    }
+    let guard = 0;
+    while (layer.idx !== target && guard++ < frames.length * 2) {
+        const next = (layer.idx + 1) % frames.length;
+        const f = frames[next];
+        // capture the region state BEFORE drawing `next` (for PREVIOUS disposal)
+        layer.before = ctx.getImageData(f.left, f.top, f.width, f.height);
+        if (f.blendOp === ApngBlendOp.SOURCE) {
+            ctx.clearRect(f.left, f.top, f.width, f.height);
+        }
+        ctx.drawImage(f.img, f.left, f.top, f.width, f.height);
+        if (f.disposeOp === ApngDisposeOp.BACKGROUND) {
+            ctx.clearRect(f.left, f.top, f.width, f.height);
+        } else if (f.disposeOp === ApngDisposeOp.PREVIOUS && layer.before) {
+            ctx.putImageData(layer.before, f.left, f.top);
+        }
+        layer.idx = next;
+    }
+}
+
+function EffectAnimator({ asset }: { asset: ProfileEffectAsset; }) {
+    const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+    const [failed, setFailed] = React.useState(false);
+
+    React.useEffect(() => {
+        let alive = true;
+        let raf = 0;
+
+        (async () => {
+            const frames = (asset.frames || []).slice().sort((a, b) => a.zIndex - b.zIndex);
+            const layers: LiveEffectLayer[] = [];
+
+            for (const f of frames) {
+                const anim = await fetchAnimation(f.src);
+                if (!alive) return;
+                if (!anim || !Array.isArray(anim.frames) || anim.frames.length === 0) continue;
+                const canvas = document.createElement("canvas");
+                canvas.width = anim.width || 450;
+                canvas.height = anim.height || 880;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) continue;
+                layers.push({
+                    frames: anim.frames,
+                    total: f.duration > 0 ? f.duration : (anim.playTime || 2880),
+                    loop: !!f.loop,
+                    loopDelay: f.loopDelay || 0,
+                    canvas,
+                    ctx,
+                    idx: -1,
+                    before: null,
+                });
+            }
+
+            if (!alive) return;
+            if (layers.length === 0) {
+                setFailed(true);
+                return;
+            }
+
+            const main = canvasRef.current;
+            if (!main) return;
+            const mctx = main.getContext("2d");
+            if (!mctx) {
+                setFailed(true);
+                return;
+            }
+
+            let w = 450;
+            let h = 880;
+            for (const l of layers) {
+                w = Math.max(w, l.canvas.width);
+                h = Math.max(h, l.canvas.height);
+            }
+            main.width = w;
+            main.height = h;
+
+            const startAt = performance.now();
+            const tick = (nowMs: number) => {
+                if (!alive) return;
+                const now = nowMs - startAt;
+                for (const l of layers) {
+                    const local = l.loop ? now % (l.total + l.loopDelay) : Math.min(now, l.total);
+                    updateEffectLayer(l, local);
+                }
+                mctx.clearRect(0, 0, w, h);
+                for (const l of layers) {
+                    mctx.drawImage(l.canvas, 0, 0);
+                }
+                raf = requestAnimationFrame(tick);
+            };
+            raf = requestAnimationFrame(tick);
+        })();
+
+        return () => {
+            alive = false;
+            cancelAnimationFrame(raf);
+        };
+    }, [asset]);
+
+    const fallbackSrc = asset.reducedMotion ?? asset.staticFrame ?? asset.thumb;
+    if (failed && fallbackSrc) {
+        return <img src={fallbackSrc} alt="" className="cp-effect-fallback" />;
+    }
+    return <canvas ref={canvasRef} className="cp-effect-canvas" />;
+}
+
+function ProfileEffectPreviewModal({ rootProps, effectId, avatar, displayName, onApply }: {
+    rootProps: any;
+    effectId: string;
+    avatar?: string;
+    displayName?: string;
+    onApply: (id: string) => void;
+}) {
+    const eff = PROFILE_EFFECTS.find(e => e.id === effectId);
+    const asset = PROFILE_EFFECT_ASSETS[effectId];
+
+    return (
+        <ModalRoot {...rootProps} size="medium">
+            <ModalHeader separator={false}>
+                <div className="cp-header">
+                    <span className="cp-header-title">{eff?.label ?? effectId}</span>
+                </div>
+                <ModalCloseButton onClick={rootProps.onClose} />
+            </ModalHeader>
+            <ModalContent>
+                <div className="cp-effect-stage">
+                    <div className="cp-effect-card">
+                        {avatar && <img src={avatar} alt="" className="cp-effect-card-avatar" />}
+                        <span className="cp-effect-card-name">{displayName || t("You")}</span>
+                    </div>
+                    <EffectAnimator asset={asset ?? { thumb: null, reducedMotion: null, staticFrame: null, frames: [] }} />
+                </div>
+            </ModalContent>
+            <ModalFooter className="cp-footer">
+                <button className="cp-btn cp-btn-ghost" onClick={rootProps.onClose}>{t("Cancel")}</button>
+                <button className="cp-btn cp-btn-primary" onClick={() => {
+                    onApply(effectId);
+                    rootProps.onClose();
+                }}>
+                    <span>{t("Use this effect")}</span>
+                </button>
             </ModalFooter>
         </ModalRoot>
     );

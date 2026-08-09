@@ -437,3 +437,129 @@
 .cp-btn-primary:hover:not(:disabled) {
     background: #4752c4;
 }
+
+/* ── Profile effect tiles + preview ── */
+
+.cp-effect-stage {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    border: 1px solid rgb(255 255 255 / 8%);
+    border-radius: 12px;
+    overflow: hidden;
+    background: radial-gradient(circle at 30% 20%, rgb(88 101 242 / 22%), rgb(17 17 22 / 95%) 60%);
+}
+
+.cp-effect-canvas {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 230px;
+    height: 320px;
+    object-fit: contain;
+}
+
+.cp-effect-card {
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 240px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 10;
+    padding: 10px 14px;
+    background: rgb(19 19 24 / 60%);
+    border: 1px solid rgb(255 255 255 / 12%);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.cp-effect-card-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.cp-effect-card-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cp-effect-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    cursor: pointer;
+    width: 64px;
+}
+
+.cp-effect-tile-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    line-height: 0;
+}
+
+.cp-effect-tile-btn img {
+    width: 46px;
+    height: 46px;
+    object-fit: contain;
+    display: block;
+}
+
+.cp-effect-tile-label {
+    font-size: 9px;
+    line-height: 1.1;
+    text-align: center;
+    color: var(--text-muted);
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cp-effect-eye {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: #5865f2;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 40%);
+    transition: background 0.1s, transform 0.1s;
+    z-index: 2;
+}
+
+.cp-effect-eye:hover {
+    background: #4752c4;
+    transform: scale(1.1);
+}
+
+.cp-effect-fallback {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 230px;
+    height: 320px;
+    object-fit: contain;
+}
