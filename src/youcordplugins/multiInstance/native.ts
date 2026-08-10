@@ -146,6 +146,11 @@ function createTokenPreload(token: string): string {
 // Compteur d'icones detached : tourne de 1 a 5
 let iconCounter = 1;
 
+// Verrou anti-double-ouverture : protège la fenêtre entre la création du
+// BrowserWindow et son enregistrement dans openWindows
+const openingLocks = new Set<string>();
+const groupedOpeningLocks = new Set<string>();
+
 // Chemin vers le dossier d'icones detached (multi-instance-icons/ dans le dist)
 function getDetachedIconDir(): string {
     // En production : {app_dir}/multi-instance-icons/
@@ -174,6 +179,8 @@ export async function openInstanceWindow(
             existing.focus();
             return { ok: true };
         }
+        if (openingLocks.has(userId)) return { ok: true, error: "already opening" };
+        openingLocks.add(userId);
 
         // ID unique par instance - Windows groupe les fenetres par AppUserModelId
         // En donnant un ID different a chaque fenetre, elles ne se regroupent pas
@@ -247,6 +254,7 @@ export async function openInstanceWindow(
         }
 
         openWindows.set(userId, win);
+        openingLocks.delete(userId);
 
         win.on("enter-html-full-screen", () => {
             win.setFullScreen(true);
@@ -345,6 +353,8 @@ export async function openInstanceWindowGrouped(
             existing.focus();
             return { ok: true };
         }
+        if (groupedOpeningLocks.has(userId)) return { ok: true, error: "already opening" };
+        groupedOpeningLocks.add(userId);
 
         // Session isolee par userId
         const partition = `persist:youcord-mi-${userId}`;
@@ -391,6 +401,7 @@ export async function openInstanceWindowGrouped(
         });
 
         openGroupedWindows.set(userId, win);
+        groupedOpeningLocks.delete(userId);
 
         win.on("enter-html-full-screen", () => {
             win.setFullScreen(true);

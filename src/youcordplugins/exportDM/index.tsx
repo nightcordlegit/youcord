@@ -87,6 +87,11 @@ async function fetchAllMessages(channelId: string, token: string, onProgress: (n
     while (true) {
         const url = `https://discord.com/api/v9/channels/${channelId}/messages?limit=100${beforeId ? `&before=${beforeId}` : ""}`;
         const res = await fetch(url, { headers: { Authorization: token } });
+        if (res.status === 429) {
+            const retryAfter = Number(res.headers.get("retry-after") ?? 5);
+            await new Promise(r => setTimeout(r, Math.max(1, retryAfter) * 1000));
+            continue;
+        }
         if (!res.ok) break;
         const batch: any[] = await res.json();
         if (!batch.length) break;

@@ -214,6 +214,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Send a notification when a plugin may make Discord lag.",
         default: true
+    },
+    trackResources: {
+        type: OptionType.BOOLEAN,
+        description: "Track timers, animation frames and event listeners created by plugins. This patches browser scheduling functions and adds a small cost to every timer and listener in the app. Disable for zero extra overhead.",
+        default: true
     }
 });
 
@@ -1719,9 +1724,8 @@ export default definePlugin({
     start() {
         try {
             startedAt = Date.now();
-            installGlobalProbes();
+            if (settings.store.trackResources) installGlobalProbes();
             for (const plugin of Object.values(plugins)) instrumentPlugin(plugin);
-            startLagNotifications();
             SettingsPlugin.customEntries.push({
                 key: ENTRY_KEY,
                 title: "Client diagnostics",

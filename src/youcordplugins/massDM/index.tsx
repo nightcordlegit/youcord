@@ -98,6 +98,11 @@ async function startSending(message: string, excludedIds: Set<string> = new Set(
         } catch (e: any) {
             state.failed++;
             state.log.push(`❌ ${name}`);
+            if (e?.status === 429 || e?.statusCode === 429) {
+                state.log.push("⏳ Rate limit — pausing 15s");
+                state.notify();
+                if (!state.aborted) await sleep(15000);
+            }
         }
         state.notify();
         if (!state.aborted) await sleep(state.delayMs);
@@ -263,13 +268,13 @@ function MassDMModal({ rootProps }: { rootProps: any; }) {
                                 ref={delayInputRef}
                                 className="mdm-delay-input"
                                 type="number"
-                                step="0.1"
-                                min="0.1"
+                                step="0.5"
+                                min="1"
                                 max="60"
                                 value={delayInput}
                                 onChange={e => setDelayInput(e.currentTarget.value)}
                                 onBlur={() => {
-                                    const val = Math.max(0.1, Math.min(60, parseFloat(delayInput) || 0.8));
+                                    const val = Math.max(1, Math.min(60, parseFloat(delayInput) || DEFAULT_DELAY_MS / 1000));
                                     state.delayMs = Math.round(val * 1000);
                                     setDelayInput(String(val));
                                     setEditingDelay(false);

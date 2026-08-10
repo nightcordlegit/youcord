@@ -1293,6 +1293,7 @@ const settings = definePluginSettings({
 
 const channelCooldowns = new Map<string, number>();
 let messageTimestamps: number[] = [];
+const pendingReplyTimers = new Set<ReturnType<typeof setTimeout>>();
 
 function isRateLimited(channelId: string): boolean {
     const lastReply = channelCooldowns.get(channelId);
@@ -1528,7 +1529,8 @@ Réponds à ce dernier message en tenant compte du contexte ci-dessus. Avant d'e
 
         try { TypingActions.startTyping(message.channel_id); } catch { }
 
-        setTimeout(async () => {
+        const replyTimer = setTimeout(async () => {
+            pendingReplyTimers.delete(replyTimer);
             try {
                 await RestAPI.post({
                     url: `/channels/${message.channel_id}/messages`,
@@ -1555,6 +1557,7 @@ Réponds à ce dernier message en tenant compte du contexte ci-dessus. Avant d'e
                 console.error("[Dmserveur] Failed to send message:", e);
             }
         }, delay);
+        pendingReplyTimers.add(replyTimer);
     } catch (err) {
         console.error("[Dmserveur] Error:", err);
     }
@@ -1606,5 +1609,8 @@ export default definePlugin({
     start() {
         console.log("[Dmserveur] plugin started, isActive:", settings.store.isActive, "responseMode:", settings.store.responseMode);
     },
-    stop() { },
+    stop() {
+        for (const timer of pendingReplyTimers) clearTimeout(timer);
+        pendingReplyTimers.clear();
+    },
 });

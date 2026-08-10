@@ -32,6 +32,10 @@ waitFor(["dispatch", "subscribe"], m => {
         _resolveReady();
     };
     m.subscribe("CONNECTION_OPEN", cb);
+
+    // Fallback : si Discord ne parvient jamais à ouvrir une connexion (offline
+    // prolongé), ne pas bloquer init() éternellement — résoudre après 60 s.
+    setTimeout(cb, 60_000);
 });
 
 export let ComponentDispatch: any;

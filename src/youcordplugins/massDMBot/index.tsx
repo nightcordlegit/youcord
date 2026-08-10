@@ -27,7 +27,11 @@ async function botFetch(token: string, url: string, options: RequestInit = {}): 
     });
     if (!res.ok) {
         const text = await res.text().catch(() => "");
-        throw new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`);
+        const err: any = new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`);
+        err.status = res.status;
+        const retryAfter = res.headers.get?.("retry-after");
+        err.retryAfter = retryAfter ? Number(retryAfter) : undefined;
+        throw err;
     }
     if (res.status === 204) return null;
     return res.json();
@@ -37,14 +41,26 @@ async function fetchGuildMembers(token: string, guildId: string) {
     const members: any[] = [];
     let after = "0";
     while (true) {
-        const batch = await botFetch(
-            token,
-            `${API_BASE}/guilds/${guildId}/members?limit=1000&after=${after}`
-        );
+        let batch: any[];
+        try {
+            batch = await botFetch(
+                token,
+                `${API_BASE}/guilds/${guildId}/members?limit=1000&after=${after}`
+            );
+        } catch (e: any) {
+            if (e?.status === 429) {
+                const pause = Math.max(10, e.retryAfter ?? 15);
+                if (state.aborted) break;
+                await sleep(pause * 1000);
+                continue;
+            }
+            throw e;
+        }
         if (!Array.isArray(batch) || batch.length === 0) break;
         members.push(...batch);
         if (batch.length < 1000) break;
         after = batch[batch.length - 1].user?.id ?? "0";
+        await sleep(250);
     }
     return members;
 }
@@ -135,6 +151,12 @@ async function startSending(token: string, guildIds: string[], message: string, 
             } catch (e: any) {
                 state.failed++;
                 state.log.push(`FAIL ${name}: ${e.message.slice(0, 80)}`);
+                if (e?.status === 429) {
+                    const pause = Math.max(10, e.retryAfter ?? 15);
+                    state.log.push(`⏳ Rate limit — pausing ${pause}s`);
+                    state.notify();
+                    if (!state.aborted) await sleep(pause * 1000);
+                }
             }
             state.notify();
             if (!state.aborted) await sleep(state.delayMs);
@@ -432,13 +454,13 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
                                     <input
                                         className="mdb-delay-input"
                                         type="number"
-                                        step="0.1"
-                                        min="0.1"
+                                        step="0.5"
+                                        min="1"
                                         max="60"
                                         value={delayInput}
                                         onChange={e => setDelayInput(e.currentTarget.value)}
                                         onBlur={() => {
-                                            const val = Math.max(0.1, Math.min(60, parseFloat(delayInput) || 1));
+                                            const val = Math.max(1, Math.min(60, parseFloat(delayInput) || 1));
                                             state.delayMs = Math.round(val * 1000);
                                             setDelayInput(String(val));
                                             setEditingDelay(false);

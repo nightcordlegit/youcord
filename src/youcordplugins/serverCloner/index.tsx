@@ -44,12 +44,22 @@ function hasAdmin(guildId: string): boolean {
 async function apiCall(method: "get" | "post" | "patch" | "put" | "del", url: string, body?: any): Promise<any> {
     const opts: any = { url };
     if (body) opts.body = body;
-    const res = await (RestAPI as any)[method](opts);
-    if (!res.ok) {
-        const msg = res.body?.message || res.text || `HTTP ${res.status}`;
-        throw new Error(msg);
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+        const res = await (RestAPI as any)[method](opts);
+        if (res?.status === 429) {
+            const retryAfter = Number((res as any)?.headers?.["retry-after"] ?? 5);
+            await wait(Math.max(1, retryAfter) * 1000);
+            continue;
+        }
+        if (!res.ok) {
+            const msg = res.body?.message || res.text || `HTTP ${res.status}`;
+            throw new Error(msg);
+        }
+        return res?.body;
     }
-    return res?.body;
+
+    throw new Error("Rate limited (HTTP 429) after 3 retries");
 }
 
 async function wait(ms: number) { return new Promise(r => setTimeout(r, ms)); }
@@ -405,16 +415,23 @@ async function cloneServer(
                             }
                             if (msg.content) webhookBody.content = msg.content;
 
-                            const resp = await fetch(`https://discord.com/api/v9/webhooks/${webhook.id}/${webhook.token}?wait=true`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify(webhookBody),
-                            });
-                            if (resp.ok) {
+                            let resp: Response | null = null;
+                            for (let attempt = 0; attempt < 3 && !resp?.ok; attempt++) {
+                                resp = await fetch(`https://discord.com/api/v9/webhooks/${webhook.id}/${webhook.token}?wait=true`, {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify(webhookBody),
+                                });
+                                if (resp.status === 429) {
+                                    const retryAfter = Number(resp.headers.get("retry-after") ?? 5);
+                                    await wait(Math.max(2, retryAfter) * 1000);
+                                }
+                            }
+                            if (resp?.ok) {
                                 embedCount++;
                             } else {
-                                const errText = await resp.text().catch(() => "?");
-                                log({ text: `  Webhook error (${resp.status}): ${errText.slice(0, 200)}`, type: "err" });
+                                const errText = await resp?.text().catch(() => "?") ?? "?";
+                                log({ text: `  Webhook error (${resp?.status}): ${errText.slice(0, 200)}`, type: "err" });
                             }
                             await wait(800);
                         } catch (e: any) {

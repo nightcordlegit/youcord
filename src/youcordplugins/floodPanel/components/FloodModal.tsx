@@ -37,8 +37,6 @@ const DEFAULT_MESSAGES = [
 ];
 
 const DELAY_OPTIONS = [
-    { label: "0ms", value: "0" },
-    { label: "50ms", value: "50" },
     { label: "100ms", value: "100" },
     { label: "250ms", value: "250" },
     { label: "500ms", value: "500" },
@@ -112,7 +110,7 @@ export function FloodModal({ channel, rootProps, onRunningChange }: Props) {
 
     function scheduleNext(extraDelay = 0) {
         const ms = Number(delayMs);
-        const delay = Math.max(0, (ms > 0 ? ms : 50) + extraDelay);
+        const delay = Math.max(100, (ms > 0 ? ms : 100) + extraDelay);
         timerRef.current = setTimeout(tick, delay);
     }
 

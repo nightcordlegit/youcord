@@ -20,7 +20,6 @@ const APP_NAME = "StereoInstaller";
 const DATA_DIR_NAME = "DiscordStereoHubSimple";
 const MAX_DOWNLOAD_BYTES = 160 * 1024 * 1024;
 const MAX_VISIBLE_LOG_LINES = 500;
-const SOURCE_DISCORD_VOICE_DIR = "C:/Users/Hisako/Documents/Illegalcord/src/userplugins/stereoInstaller.desktop/StereoMethods/Discord-Voice";
 const PATCHED_WINDOWS_GITHUB_CONTENTS_API = "https://api.github.com/repos/ProdHallow/Discord-Stereo-Windows-MacOS-Linux/contents/Updates%2FNodes%2FPatched%20Nodes%20%28for%20Installer%29%2FWindows";
 const PATCHED_LINUX_GITHUB_CONTENTS_API = "https://api.github.com/repos/ProdHallow/Discord-Stereo-Windows-MacOS-Linux/contents/Updates%2FNodes%2FPatched%20Nodes%20%28for%20Installer%29%2FLinux";
 
@@ -402,8 +401,6 @@ function discordVoiceLoggingDir(): string {
 }
 
 function sourceDiscordVoiceDir(): string | undefined {
-    if (existsSync(SOURCE_DISCORD_VOICE_DIR)) return SOURCE_DISCORD_VOICE_DIR;
-
     const relativeDiscordVoiceDir = join("src", "userplugins", "stereoInstaller.desktop", "StereoMethods", "Discord-Voice");
     const roots = [
         process.cwd(),
@@ -1228,8 +1225,9 @@ async function scheduleWorker(actionName: "Patch" | "Revert", sourceDir: string,
     log.info(`Worker executable: ${workerExecutable}`);
     log.info(`Worker config: ${configPath}`);
 
+    let workerStarted = false;
     if (usePowershellWorker) {
-        await startWindowsWorker(launcherScript, taskName || "StereoInstaller", log);
+        workerStarted = await startWindowsWorker(launcherScript, taskName || "StereoInstaller", log);
     } else {
         const child = spawn(workerExecutable, [workerScript, configPath], {
         detached: true,
@@ -1241,8 +1239,17 @@ async function scheduleWorker(actionName: "Patch" | "Revert", sourceDir: string,
         }
     });
 
-        child.once("error", (error: Error) => log.fail(`Worker failed to start: ${errorMessage(error)}`));
+        child.once("error", (error: Error) => {
+            workerStarted = false;
+            log.fail(`Worker failed to start: ${errorMessage(error)}`);
+        });
+        child.once("spawn", () => { workerStarted = true; });
         child.unref();
+    }
+
+    if (!workerStarted) {
+        log.fail("Worker did not start — aborting without exiting Discord.");
+        return;
     }
 
     log.info(`Worker started from ${workerScript}.`);
@@ -1252,7 +1259,7 @@ async function scheduleWorker(actionName: "Patch" | "Revert", sourceDir: string,
     setTimeout(() => app.exit(0), 700).unref();
 }
 
-async function startWindowsWorker(launcherScript: string, taskName: string, log: ActionLog): Promise<void> {
+async function startWindowsWorker(launcherScript: string, taskName: string, log: ActionLog): Promise<boolean> {
     const scheduledTime = windowsTaskTime();
     const taskCommand = `${commandProcessorPath()} /d /s /c ""${launcherScript}""`;
     const createTask = await runProcess(schtasksPath(), ["/Create", "/TN", taskName, "/SC", "ONCE", "/ST", scheduledTime, "/TR", taskCommand, "/F", "/RL", "LIMITED"]);
@@ -1261,7 +1268,7 @@ async function startWindowsWorker(launcherScript: string, taskName: string, log:
         const runTask = await runProcess(schtasksPath(), ["/Run", "/TN", taskName]);
         if (runTask.code === 0) {
             log.info(`Windows Task Scheduler started worker task: ${taskName}`);
-            return;
+            return true;
         }
 
         log.warn(`Task Scheduler run failed: ${runTask.output || `exit ${runTask.code}`}`);
@@ -1269,15 +1276,23 @@ async function startWindowsWorker(launcherScript: string, taskName: string, log:
         log.warn(`Task Scheduler create failed: ${createTask.output || `exit ${createTask.code}`}`);
     }
 
-    const child = spawn(commandProcessorPath(), ["/d", "/s", "/c", "start", "\"\"", "/min", launcherScript], {
-        detached: true,
-        stdio: "ignore",
-        windowsHide: true
-    });
+    return new Promise<boolean>(resolveProcess => {
+        const child = spawn(commandProcessorPath(), ["/d", "/s", "/c", "start", "\"\"", "/min", launcherScript], {
+            detached: true,
+            stdio: "ignore",
+            windowsHide: true
+        });
 
-    child.once("error", (error: Error) => log.fail(`Windows launcher failed to start: ${errorMessage(error)}`));
-    child.unref();
-    log.warn("Falling back to cmd start for the worker launcher.");
+        let started = false;
+        child.once("spawn", () => { started = true; resolveProcess(true); });
+        child.once("error", (error: Error) => {
+            started = false;
+            log.fail(`Windows launcher failed to start: ${errorMessage(error)}`);
+            resolveProcess(false);
+        });
+        child.once("close", () => { if (!started) resolveProcess(false); });
+        child.unref();
+    });
 }
 
 function runProcess(file: string, args: string[]): Promise<ProcessResult> {

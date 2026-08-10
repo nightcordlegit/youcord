@@ -18,6 +18,7 @@ import plugins from "~plugins";
 import { getGroqKey, groqChat } from "../youcordAI/groqManager";
 
 const MessageStore = findByPropsLazy("getMessages");
+const pendingReplyTimers = new Set<ReturnType<typeof setTimeout>>();
 
 const LANGUAGES: Record<string, {
     label: string;
@@ -448,12 +449,14 @@ ${lang.mission}`;
                 TypingActions.startTyping(message.channel_id);
             } catch { }
 
-            setTimeout(async () => {
+            const timer = setTimeout(async () => {
+                pendingReplyTimers.delete(timer);
                 await RestAPI.post({
                     url: `/channels/${message.channel_id}/messages`,
                     body: { content: reply }
                 });
             }, totalDelay);
+            pendingReplyTimers.add(timer);
         }
     } catch (err) {
         console.error("[AutoResponder] Error:", err);
@@ -611,5 +614,7 @@ export default definePlugin({
     },
 
     stop() {
+        for (const timer of pendingReplyTimers) clearTimeout(timer);
+        pendingReplyTimers.clear();
     }
 });

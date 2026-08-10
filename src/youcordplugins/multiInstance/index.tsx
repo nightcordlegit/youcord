@@ -170,10 +170,11 @@ interface CtxMenuProps extends CtxState {
     onNewDetached(): void;
     onNewGrouped(): void;
     onSwitch(): void;
+    onRemove(): void;
 }
 
 function ContextMenuPortal(props: CtxMenuProps) {
-    const { x, y, acc, isOpen, onClose, onNewWindow, onNewDetached, onNewGrouped, onSwitch } = props;
+    const { x, y, acc, isOpen, onClose, onNewWindow, onNewDetached, onNewGrouped, onSwitch, onRemove } = props;
     const ref = React.useRef<HTMLDivElement>(null);
     const [pos, setPos] = React.useState({ left: x, top: y });
 
@@ -244,6 +245,13 @@ function ContextMenuPortal(props: CtxMenuProps) {
                     onClose();
                 }}>
                     <CloseIcon /> {t("Close instance")}
+                </div>
+            </>}
+
+            {!acc.isNative && <>
+                <div className="mi-ctx-separator" />
+                <div className="mi-ctx-item mi-ctx-item--danger" onClick={() => { onRemove(); onClose(); }}>
+                    <TrashIcon /> {t("Remove account")}
                 </div>
             </>}
         </div>
@@ -339,6 +347,20 @@ function MultiInstanceModal({ rootProps }: { rootProps: any; }) {
         } else {
             setStatus(`${t("Error:")} ` + ((res as any).error ?? t("unknown")));
         }
+        setTimeout(() => setStatus(null), 3000);
+    };
+
+    const handleRemoveAccount = async (acc: AccountEntry) => {
+        if (acc.isNative) return;
+        if (!window.confirm(t("Remove this account from Multi-Instance?"))) return;
+        setCtx(null);
+        const list = (await DataStore.get<SavedAccount[]>(STORE_KEY)) ?? [];
+        const next = list.filter(a => a.id !== acc.id);
+        await DataStore.set(STORE_KEY, next).catch(() => { });
+        delete tokenCache[acc.id];
+        await saveTokenCache();
+        setSavedAccounts(next);
+        setStatus(t("Account removed"));
         setTimeout(() => setStatus(null), 3000);
     };
 
@@ -442,6 +464,7 @@ function MultiInstanceModal({ rootProps }: { rootProps: any; }) {
                         onNewDetached={() => handleNewDetached(acc)}
                         onNewGrouped={() => handleNewGrouped(acc)}
                         onSwitch={() => acc.token ? switchToQuick(acc.token) : switchNativeAccount(acc.id)}
+                        onRemove={() => handleRemoveAccount(acc)}
                     />
                 );
             })()}
@@ -509,6 +532,14 @@ function CloseIcon() {
     return (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+        </svg>
+    );
+}
+
+function TrashIcon() {
+    return (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 3v1H4v2h1v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6h1V4h-5V3H9zM7 6h10v13H7V6zm2 2v9h2V8H9zm4 0v9h2V8h-2z" />
         </svg>
     );
 }

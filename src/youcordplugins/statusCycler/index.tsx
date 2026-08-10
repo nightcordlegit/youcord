@@ -804,7 +804,7 @@ const settings = definePluginSettings({
     rotationInterval: {
         type: OptionType.NUMBER,
         description: t("Seconds between each custom status change."),
-        default: 10,
+        default: 60,
         isValid: (value: number) => value >= 1 || t("Rotation interval must be at least 1 second."),
         onChange: restartRotation
     },

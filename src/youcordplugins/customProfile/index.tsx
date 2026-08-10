@@ -11,10 +11,10 @@ import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatc
 import { addHeaderBarButton, HeaderBarButton, removeHeaderBarButton } from "@api/HeaderBar";
 import { DataStore } from "@api/index";
 import { tPlugin as t } from "@api/pluginI18n";
-import { Settings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { ApngBlendOp, ApngDisposeOp, parseAPNG } from "@utils/apng";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { AuthenticationStore, Button, FluxDispatcher, GuildMemberStore, IconUtils, Menu, OAuth2AuthorizeModal, React, Select, SnowflakeUtils, UserProfileStore, UserStore } from "@webpack/common";
 import virtualMerge from "virtual-merge";
 
@@ -24,6 +24,14 @@ import { PROFILE_EFFECT_ASSETS, ProfileEffectAsset } from "./effectAssets";
 
 const DS_KEY = "customProfile_data";
 const DS_ENABLED = "customProfile_enabled";
+
+const settings = definePluginSettings({
+    showCopyProfileInUserMenu: {
+        type: OptionType.BOOLEAN,
+        description: "Show \"Copy this profile\" in the user context menu",
+        default: true,
+    },
+});
 
 const FLAG = {
     STAFF: 1,
@@ -536,10 +544,10 @@ async function copyUserProfile(userId: string) {
         } catch { }
 
         try {
-            const flags = user.publicFlags ?? 0;
-            let badgeFlags = 0;
-            for (const { flag } of BADGES) { if (flags & flag) badgeFlags |= flag; }
-            newData.badgeFlags = badgeFlags;
+            // Ne pas copier les badges de l'utilisateur copié : ils restent visibles
+            // dans la liste des badges et peuvent révéler que le profil est falsifié.
+            // L'utilisateur peut les sélectionner manuellement dans les réglages.
+            newData.badgeFlags = 0;
             if (user.avatarDecorationData?.asset) newData.decorationAsset = user.avatarDecorationData.asset;
         } catch { }
 
@@ -572,6 +580,7 @@ async function copyUserProfile(userId: string) {
 
 const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: any) => {
     if (!children || !Array.isArray(children) || !user || !user.id) return;
+    if (!settings.store.showCopyProfileInUserMenu) return;
     try {
         const me = UserStore.getCurrentUser();
         if (!me || user.id === me.id) return;

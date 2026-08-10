@@ -83,6 +83,7 @@ async function muteAllServers() {
     if (guildIds.length > 0) {
         let count = 0;
         const updateSettings = findByPropsLazy("updateGuildNotificationSettings");
+        const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
         for (const id of guildIds) {
             try {
@@ -98,12 +99,26 @@ async function muteAllServers() {
                     mobile_push: false,
                 };
 
-                if (updateSettings?.updateGuildNotificationSettings) {
-                    await updateSettings.updateGuildNotificationSettings(id, settings);
-                } else {
-                    await RestAPI.patch({ url: `/users/@me/guilds/${id}/settings`, body: settings });
+                try {
+                    if (updateSettings?.updateGuildNotificationSettings) {
+                        await updateSettings.updateGuildNotificationSettings(id, settings);
+                    } else {
+                        await RestAPI.patch({ url: `/users/@me/guilds/${id}/settings`, body: settings });
+                    }
+                    count++;
+                } catch (e: any) {
+                    if (e?.httpStatus === 429 || e?.response?.status === 429) {
+                        const retryAfter = Number(e?.response?.headers?.["retry-after"] ?? 5) * 1000;
+                        await sleep(Math.max(1000, retryAfter));
+                        await RestAPI.patch({ url: `/users/@me/guilds/${id}/settings`, body: settings });
+                        count++;
+                    } else {
+                        throw e;
+                    }
                 }
-                count++;
+
+                // Espacement pour éviter les rate limits en rafale (429 sur ack / settings)
+                await sleep(400 + Math.random() * 400);
             } catch (e) {
                 console.warn(`[MuteAllServers] Error for ${id}:`, e);
             }

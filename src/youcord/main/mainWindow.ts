@@ -477,8 +477,16 @@ export function loadUrl(uri: string | undefined) {
 }
 
 const retryDelay = 1000;
+let retryAttempts = 0;
+const MAX_RETRY_ATTEMPTS = 5;
 function retryUrl(url: string, description: string) {
-    console.log(`retrying in ${retryDelay}ms`);
+    if (retryAttempts >= MAX_RETRY_ATTEMPTS) {
+        console.error(`[YouCord] Giving up loading ${url} after ${MAX_RETRY_ATTEMPTS} attempts: ${description}`);
+        updateSplashMessage(`Failed to load Discord: ${description}`);
+        return;
+    }
+    retryAttempts++;
+    console.log(`retrying in ${retryDelay}ms (${retryAttempts}/${MAX_RETRY_ATTEMPTS})`);
     updateSplashMessage(`Failed to load Discord: ${description}`);
     setTimeout(() => loadUrl(url), retryDelay);
 }

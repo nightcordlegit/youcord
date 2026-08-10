@@ -87,7 +87,12 @@ async function startBomb(guildId: string, roleId: string | "all", message: strin
             state.done++;
             state.log.push(`âœ… ${name}`);
         } catch (e: any) {
-            state.log.push(`âŒ ${name} â€” ${e?.message ?? "error (rate limit?)"}`);
+            state.log.push(`❌ ${name} — ${e?.message ?? "error (rate limit?)"}`);
+            if (e?.status === 429 || e?.statusCode === 429) {
+                state.log.push("⏳ Rate limit — pausing 15s");
+                state.notify();
+                if (!state.aborted) await sleep(15000);
+            }
         }
         state.notify();
         if (!state.aborted) await sleep(state.delayMs);

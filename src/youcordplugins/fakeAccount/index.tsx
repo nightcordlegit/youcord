@@ -7,13 +7,22 @@
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { addHeaderBarButton, HeaderBarButton, removeHeaderBarButton } from "@api/HeaderBar";
 import { DataStore } from "@api/index";
-import definePlugin from "@utils/types";
+import { definePluginSettings } from "@api/Settings";
+import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy, waitFor } from "@webpack";
 import { FluxDispatcher, Menu, React, UserStore } from "@webpack/common";
 
 const UserProfileStore = findStoreLazy("UserProfileStore");
 const EmojiStore = findStoreLazy("EmojiStore");
 const DS_KEY = "fakeAccount_switcher";
+
+const settings = definePluginSettings({
+    showInUserMenu: {
+        type: OptionType.BOOLEAN,
+        description: "Show \"Add to Switcher (Fake)\" in the user context menu",
+        default: true,
+    },
+});
 
 // â”€â”€ Global State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let fakeAccounts: any[] = [];
@@ -292,7 +301,11 @@ function RestoreIcon() {
 function RestoreButton() {
     const [active, setActive] = React.useState(!!activeFakeId);
     React.useEffect(() => {
-        const t = setInterval(() => setActive(!!activeFakeId), 300);
+        if (_store) {
+            const unsubscribe = _store.addChangeListener(() => setActive(!!activeFakeId));
+            return () => { unsubscribe?.(); };
+        }
+        const t = setInterval(() => setActive(!!activeFakeId), 1000);
         return () => clearInterval(t);
     }, []);
     if (!active) return null;
@@ -317,6 +330,7 @@ const ctxPatch: NavContextMenuPatchCallback = (children, { user }) => {
     if (!children || !Array.isArray(children)) return;
     try {
         if (!user || user.id === UserStore.getCurrentUser()?.id) return;
+        if (!settings.store.showInUserMenu) return;
         children.push(
             <Menu.MenuItem
                 id="fake-account-add"

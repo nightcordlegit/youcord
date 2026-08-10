@@ -57,9 +57,12 @@ const SilentDeleteIcon = () => (
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
 async function silentDeleteMessage(channelId: string, messageId: string, deleteOriginal = true): Promise<boolean> {
-    try {
-        const { replacementText = "** **", deleteDelay = 200, suppressNotifications = true, deleteOriginal: shouldDelete = true } = settings.store;
+    const { replacementText = "** **", deleteDelay = 200, suppressNotifications = true, deleteOriginal: shouldDelete = true } = settings.store;
 
+    const isRateLimited = (error: any) => error?.httpStatus === 429 || error?.response?.status === 429;
+    const retryAfter = (error: any) => Math.max(1000, Number(error?.response?.headers?.["retry-after"] ?? 5) * 1000);
+
+    try {
         const response = await RestAPI.post({
             url: Constants.Endpoints.MESSAGES(channelId),
             body: {
@@ -80,7 +83,11 @@ async function silentDeleteMessage(channelId: string, messageId: string, deleteO
         }
 
         return true;
-    } catch (error) {
+    } catch (error: any) {
+        if (isRateLimited(error)) {
+            await sleep(retryAfter(error));
+            return silentDeleteMessage(channelId, messageId, deleteOriginal);
+        }
         console.error("[SilentDelete] Error:", error);
         return false;
     }

@@ -201,7 +201,7 @@ async function reapplyFakeStates() {
                     incoming: true,
                 });
             }
-            await new Promise(r => setTimeout(r, 50));
+            await new Promise(r => setTimeout(r, 300));
         } catch { }
     }
 }

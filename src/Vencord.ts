@@ -134,6 +134,7 @@ async function syncSettings() {
 }
 
 let notifiedForUpdatesThisSession = false;
+let updateCheckInFlight = false;
 
 function showGreenUpdateBanner() {
     if (document.getElementById("youcord-core-updater-root")) return;
@@ -293,6 +294,8 @@ window.showYouCordUpdateBanner = showGreenUpdateBanner;
 
 async function runUpdateCheck() {
     if (IS_UPDATER_DISABLED) return;
+    if (updateCheckInFlight) return;
+    updateCheckInFlight = true;
 
     try {
         const isOutdated = await checkForUpdates();
@@ -306,6 +309,8 @@ async function runUpdateCheck() {
         setTimeout(() => showGreenUpdateBanner(), 8_000);
     } catch (err) {
         UpdateLogger.error("Failed to check for updates", err);
+    } finally {
+        updateCheckInFlight = false;
     }
 }
 
@@ -343,9 +348,11 @@ function initTrayIpc() {
 async function init() {
     await onceReady;
 
-    startAllPlugins(StartAt.WebpackReady);
-
-    syncSettings();
+    // startAllPlugins et syncSettings bloquent le thread principal sur des centaines
+    // de démarrages synchrones : on les décale sur les temps morts du rendu pour
+    // ne pas geler le premier paint.
+    scheduleIdleCallback(() => startAllPlugins(StartAt.WebpackReady));
+    scheduleIdleCallback(syncSettings);
     initTrayIpc();
 
     const hasOpened = localStorage.getItem("youcord_discord_opened");

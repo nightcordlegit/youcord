@@ -10,7 +10,7 @@ import { HeaderBarButton } from "@api/HeaderBar";
 import { ModalCloseButton,ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { Forms, React, useEffect, useMemo, useState } from "@webpack/common";
+import { Forms, React, RestAPI, useEffect, useMemo, useState } from "@webpack/common";
 
 import { t, useTranslation } from "../autoTranslateYouCord";
 
@@ -25,10 +25,8 @@ function removeFriend(id: string): Promise<any> {
             return Promise.resolve(RelationshipActions.removeFriend(id));
         }
     } catch { }
-    // Method 2: direct REST API fallback
-    const token = (() => { try { return (window as any).Vencord?.Webpack?.findByProps?.("getToken")?.getToken?.() ?? ""; } catch { return ""; } })();
-    if (!token) return Promise.reject(new Error("No token"));
-    return fetch(`https://discord.com/api/v9/users/@me/relationships/${encodeURIComponent(id)}`, { method: "DELETE", headers: { Authorization: token } });
+    // Method 2: direct REST API fallback (RestAPI handles 429 retries)
+    return RestAPI.del({ url: `/users/@me/relationships/${encodeURIComponent(id)}` });
 }
 
 function BulkRemoveIcon({ width = 20, height = 20 }: { width?: number; height?: number; }) {
@@ -128,7 +126,7 @@ function BulkFriendRemoveModal({ rootProps }: { rootProps: any; }) {
                 setFriends(p => p.map(x => x.id === f.id ? { ...x, removing: false, selected: false } : x));
             }
             setProgress({ done: i + 1, total: selected.length });
-            await new Promise(r => setTimeout(r, 800));
+            await new Promise(r => setTimeout(r, 600 + Math.random() * 400));
         }
         setRemoving(false);
     }

@@ -146,10 +146,20 @@ function applyCaretPosition() {
 }
 
 let observer: MutationObserver | null = null;
+let rafPending = false;
+
+function scheduleApplyCaretPosition() {
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(() => {
+        rafPending = false;
+        applyCaretPosition();
+    });
+}
 
 function startObserver() {
     if (observer || document.visibilityState === "hidden") return;
-    observer = new MutationObserver(() => applyCaretPosition());
+    observer = new MutationObserver(() => scheduleApplyCaretPosition());
     observer.observe(document.body, { childList: true, subtree: true });
 }
 

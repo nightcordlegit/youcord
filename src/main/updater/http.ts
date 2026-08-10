@@ -24,12 +24,19 @@ let pendingVersion: string | null = null;
 let isApplying = false;
 
 async function githubGet<T = any>(endpoint: string): Promise<T> {
-    return fetchJson<T>(GITHUB_API + endpoint, {
-        headers: {
-            Accept: "application/vnd.github.v3+json",
-            "User-Agent": VENCORD_USER_AGENT
-        }
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20_000);
+    try {
+        return await fetchJson<T>(GITHUB_API + endpoint, {
+            headers: {
+                Accept: "application/vnd.github.v3+json",
+                "User-Agent": VENCORD_USER_AGENT
+            },
+            signal: controller.signal
+        });
+    } finally {
+        clearTimeout(timer);
+    }
 }
 
 async function fetchUpdates(): Promise<boolean> {
@@ -73,7 +80,14 @@ async function applyUpdates(): Promise<boolean> {
     isApplying = true;
 
     try {
-        const data = await fetchBuffer(pendingDownloadUrl);
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 120_000);
+        let data: Buffer;
+        try {
+            data = await fetchBuffer(pendingDownloadUrl, { signal: controller.signal });
+        } finally {
+            clearTimeout(timer);
+        }
 
         // Save zip to temp
         const zipPath = join(app.getPath("temp"), `youcord-update-${Date.now()}.zip`);
