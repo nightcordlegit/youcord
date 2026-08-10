@@ -35,47 +35,179 @@ const settings = definePluginSettings({
             { label: "Portuguese", value: "pt" },
         ],
     },
-    aggressiveness: {
-        type: OptionType.SELECT,
-        description: "Correction level",
-        options: [
-            { label: "Soft — obvious mistakes only", value: "low", default: true },
-            { label: "Normal — mistakes + style", value: "medium" },
-            { label: "Aggressive — full rewrite", value: "high" },
-        ],
-        default: "low",
-    },
 });
+
+// ── Protected tokens (never sent to / touched by the model) ────────────────────
+// Discord mentions, custom emojis, links and code spans are masked before the
+// request and restored verbatim afterwards, so the model literally cannot
+// alter them (no risk of it "translating" a mention or mangling a URL).
+
+const PROTECTED_REGEXES: RegExp[] = [
+    /<a?:\w+:\d+>/g,      // custom emoji
+    /<@!?\d+>/g,          // user mention
+    /<@&\d+>/g,           // role mention
+    /<#\d+>/g,            // channel mention
+    /https?:\/\/\S+/g,    // links
+    /```[\s\S]*?```/g,    // code block
+    /`[^`]+`/g,           // inline code
+];
+
+// ── Slang / abbreviation whitelist ──────────────────────────────────────────────
+// Words a human never actually "misspells" on purpose — internet/SMS shorthand
+// that the model must leave completely untouched instead of "fixing" or
+// expanding into a full sentence. Matched as whole words, case-insensitive.
+
+const SLANG_WHITELIST = [
+    // French — internet / SMS
+    "mdr", "mdrr", "mdrrr", "mdrrrr", "ptdr", "xptdr", "jsp", "jss", "jpp", "wsh", "wesh",
+    "tkt", "tqt", "dsl", "stp", "svp", "bcp", "cc", "slt", "bjr", "bsr", "bg", "gg", "ggwp",
+    "wp", "ez", "rip", "osef", "askip", "chelou", "grv", "tavu", "tavue", "jtm", "jtmm",
+    "bnj", "frr", "frerot", "frero", "reuf", "reufrere", "poto", "gow", "ptn", "ptnr",
+    "cimer", "khey", "kheyou", "wallah", "wallahi", "oklm", "seum", "nrv", "relou",
+    "chanmé", "chanme", "zbi", "wsp", "dac", "dacc", "auj", "tlm", "tt", "tjrs", "tjs",
+    "pk", "pq", "qqn", "qqch", "jveux", "jve", "jvais", "chuis", "chui", "jsuis", "ct",
+    "jpense", "jcrois", "biensur", "kikoo", "miskine", "askip", "carj", "nikel",
+    // English — internet / Discord
+    "lol", "lmao", "lmfao", "rofl", "omg", "wtf", "idk", "imo", "imho", "tbh", "btw",
+    "afaik", "brb", "gtg", "irl", "fyi", "asap", "ngl", "icl", "tbf", "smh", "rn", "ily",
+    "gl", "hf", "afk", "dm", "pm", "noob", "pog", "poggers", "kek", "cya", "ty", "yw",
+    "np", "nvm", "ikr", "omw", "wyd", "hbu", "xd",
+];
+
+function escapeRegExp(s: string): string {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const SLANG_REGEX = new RegExp(`\\b(?:${SLANG_WHITELIST.map(escapeRegExp).join("|")})\\b`, "gi");
+
+interface MaskResult {
+    masked: string;
+    map: Map<string, string>;
+}
+
+function maskProtectedTokens(text: string): MaskResult {
+    const map = new Map<string, string>();
+    let counter = 0;
+    let masked = text;
+
+    const mask = (match: string) => {
+        const placeholder = `@@${counter++}@@`;
+        map.set(placeholder, match);
+        return placeholder;
+    };
+
+    for (const re of PROTECTED_REGEXES) masked = masked.replace(re, mask);
+    masked = masked.replace(SLANG_REGEX, mask);
+
+    return { masked, map };
+}
+
+function unmaskTokens(text: string, map: Map<string, string>): string {
+    let result = text;
+    for (const [placeholder, original] of map) result = result.split(placeholder).join(original);
+    return result;
+}
+
+// ── Safety nets ──────────────────────────────────────────────────────────────
+// Kept minimal on purpose: this is a "just correct it normally" plugin, not a
+// strict word-for-word validator. We only guard against the two things that
+// can actually go wrong with a small model: it refusing to answer, or it
+// hallucinating an offensive word that wasn't in the original message.
+
+function coreWord(w: string): string {
+    return w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+}
+
+const SEVERE_TERMS = new Set([
+    "viol", "violeur", "violeurs", "violeuse", "violer", "viole", "pedophile", "pedocriminel",
+    "pute", "putes", "salope", "salopes", "negro", "negre", "bougnoule", "youpin", "pd", "tapette",
+    "nazi", "hitler", "terroriste", "suicide", "suicider", "pendre", "pendaison", "nique", "niquer",
+]);
+
+function normalizeForSeverityCheck(w: string): string {
+    return coreWord(w).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function introducesHallucinatedSevereTerm(original: string, corrected: string): boolean {
+    const originalWords = new Set(original.trim().split(/\s+/).map(normalizeForSeverityCheck).filter(Boolean));
+    const correctedWords = corrected.trim().split(/\s+/).map(normalizeForSeverityCheck).filter(Boolean);
+
+    return correctedWords.some(w => SEVERE_TERMS.has(w) && !originalWords.has(w));
+}
+
+const REFUSAL_PATTERNS: RegExp[] = [
+    /i['\u2019]m sorry/i,
+    /i am sorry/i,
+    /i cannot (help|assist|comply|do that|fulfill)/i,
+    /i can['\u2019]t (help|assist|comply|do that|fulfill)/i,
+    /i['\u2019]m (not able|unable) to/i,
+    /i am (not able|unable) to/i,
+    /as an ai( language model)?/i,
+    /i won['\u2019]t (be able to |)help/i,
+    /d[ée]sol[ée]e?,? je ne peux pas/i,
+    /je ne peux pas (t['\u2019]|vous |)aider/i,
+    /je ne suis pas en mesure/i,
+    /en tant qu['\u2019]ia/i,
+    /je ne peux pas (r[ée]pondre|traiter|corriger)/i,
+];
+
+function isRefusalResponse(text: string): boolean {
+    return REFUSAL_PATTERNS.some(re => re.test(text));
+}
 
 // ── Correction via groqManager ────────────────────────────────────────────────
 
-const LANG_PROMPTS: Record<string, string> = {
-    fr: "Tu es un correcteur orthographique. Corrige UNIQUEMENT les fautes d'orthographe et de grammaire. Retourne le texte corrigé sans explication ni guillemets. INTERDIT: ajouter des mots, changer le sens, reformuler. Si le texte est correct, retourne-le identique.",
-    en: "You are a spell-checker. Fix ONLY spelling and grammar mistakes. Return the corrected text without explanation or quotes. FORBIDDEN: adding words, changing meaning, rephrasing. If already correct, return as-is.",
-    es: "Eres un corrector ortográfico. Corrige SOLO errores ortográficos y gramaticales. Devuelve el texto corregido sin explicación. PROHIBIDO: añadir palabras, cambiar el sentido.",
-    de: "Du bist ein Rechtschreibprüfer. Korrigiere NUR Rechtschreib- und Grammatikfehler. Gib den korrigierten Text ohne Erklärung zurück. VERBOTEN: Wörter hinzufügen, Bedeutung ändern.",
-    it: "Sei un correttore ortografico. Correggi SOLO errori ortografici e grammaticali. Restituisci il testo corretto senza spiegazioni. VIETATO: aggiungere parole, cambiare il significato.",
-    pt: "Você é um corretor ortográfico. Corrija SOMENTE erros ortográficos e gramaticais. Retorne o texto corrigido sem explicação. PROIBIDO: adicionar palavras, mudar o sentido.",
-};
+const PLACEHOLDER_RULE =
+    "Certains mots ou groupes ont été remplacés par des jetons de la forme @@0@@, @@1@@, etc. " +
+    "Ce sont des mentions, emojis, liens ou abréviations volontaires : recopie-les EXACTEMENT tels quels, " +
+    "sans les modifier, les traduire ni les supprimer.\n" +
+    "Some words were replaced by tokens like @@0@@, @@1@@, etc. " +
+    "These are mentions, emojis, links, or intentional abbreviations: copy them back EXACTLY as-is, " +
+    "never modify, translate, or remove them.";
 
-const AGGR_SUFFIX: Record<string, string> = {
-    low: " STRICT INSTRUCTION: DO NOT FIX STYLE. ONLY fix obvious typos and basic grammar. DO NOT change the choice of words. KEEP THE TEXT AS IDENTICAL AS POSSIBLE. Return ONLY the text.",
-    medium: " Fix mistakes and slightly improve clarity if necessary, but don't change the meaning.",
-    high: " Fix everything and rewrite for perfect, fluid, and professional text.",
+const LANG_PROMPTS: Record<string, string> = {
+    fr: "Tu es un correcteur orthographique et grammatical. Corrige les fautes d'orthographe, de grammaire, " +
+        "de conjugaison et d'accord, ainsi que la ponctuation (virgules, points, points d'interrogation/" +
+        "d'exclamation, apostrophes, majuscules de début de phrase) pour que le texte soit correct et lisible. " +
+        "Ne change pas le sens du message, ne reformule pas les phrases déjà correctes, et ne remplace pas un " +
+        "mot par un synonyme. Si le texte est déjà correct, retourne-le identique. Retourne UNIQUEMENT le " +
+        "texte corrigé, sans guillemets ni explication.",
+    en: "You are a spelling and grammar checker. Fix spelling, grammar, conjugation and agreement mistakes, " +
+        "as well as punctuation (commas, periods, question/exclamation marks, apostrophes, sentence-starting " +
+        "capital letters) so the text reads correctly. Don't change the meaning of the message, don't reword " +
+        "sentences that are already correct, and don't swap a word for a synonym. If the text is already " +
+        "correct, return it as-is. Return ONLY the corrected text, without quotes or explanation.",
+    es: "Eres un corrector ortográfico y gramatical. Corrige errores de ortografía, gramática, conjugación y " +
+        "concordancia, así como la puntuación (comas, puntos, signos de interrogación/exclamación, apóstrofes, " +
+        "mayúsculas al inicio de frase). No cambies el sentido del mensaje ni reformules frases ya correctas. " +
+        "Devuelve SOLO el texto corregido, sin comillas ni explicación.",
+    de: "Du bist ein Rechtschreib- und Grammatikprüfer. Korrigiere Rechtschreib-, Grammatik-, Konjugations- und " +
+        "Kongruenzfehler sowie die Zeichensetzung (Kommas, Punkte, Frage-/Ausrufezeichen, Apostrophe, " +
+        "Großschreibung am Satzanfang). Ändere nicht die Bedeutung und formuliere bereits korrekte Sätze nicht " +
+        "um. Gib NUR den korrigierten Text zurück, ohne Anführungszeichen oder Erklärung.",
+    it: "Sei un correttore ortografico e grammaticale. Correggi errori di ortografia, grammatica, coniugazione e " +
+        "concordanza, oltre alla punteggiatura (virgole, punti, punti interrogativi/esclamativi, apostrofi, " +
+        "maiuscole a inizio frase). Non cambiare il significato né riformulare frasi già corrette. Restituisci " +
+        "SOLO il testo corretto, senza virgolette né spiegazioni.",
+    pt: "Você é um corretor ortográfico e gramatical. Corrija erros de ortografia, gramática, conjugação e " +
+        "concordância, além da pontuação (vírgulas, pontos, pontos de interrogação/exclamação, apóstrofos, " +
+        "maiúsculas no início da frase). Não mude o sentido da mensagem nem reformule frases já corretas. " +
+        "Retorne APENAS o texto corrigido, sem aspas ou explicação.",
 };
 
 async function correctText(text: string): Promise<string> {
     if (text.trim().length < 3) return text;
 
     const lang = settings.store.language ?? "en";
-    const aggr = settings.store.aggressiveness ?? "low";
-    const systemPrompt = (LANG_PROMPTS[lang] ?? LANG_PROMPTS.en) + (AGGR_SUFFIX[aggr] ?? "");
+    const systemPrompt = (LANG_PROMPTS[lang] ?? LANG_PROMPTS.en) + "\n\n" + PLACEHOLDER_RULE;
+
+    const { masked, map } = maskProtectedTokens(text);
 
     try {
-        const corrected = await groqChat({
+        const correctedMasked = await groqChat({
             messages: [
                 { role: "system", content: systemPrompt },
-                { role: "user", content: text },
+                { role: "user", content: masked },
             ],
             temperature: 0,
             maxTokens: 512,
@@ -83,25 +215,33 @@ async function correctText(text: string): Promise<string> {
             forceModel: "openai/gpt-oss-20b",
         });
 
-        if (!corrected || corrected.trim() === "" || corrected === text) return text;
+        if (!correctedMasked || correctedMasked.trim() === "") return text;
+
+        // Le modèle a refusé de traiter le message (garde-fou interne à Groq) —
+        // ce refus n'est pas une correction, on garde le texte original.
+        if (isRefusalResponse(correctedMasked)) {
+            console.warn("[AutoCorrect] Rejected: model refused instead of correcting", { text, response: correctedMasked });
+            return text;
+        }
+
+        const corrected = unmaskTokens(correctedMasked, map).replace(/^"(.*)"$/, "$1").trim();
+
+        if (corrected === text) return text;
 
         // Sécurité contre les répétitions infinies ou les hallucinations
         if (corrected.toLowerCase().includes("correction:") || corrected.toLowerCase().includes("text:")) return text;
 
-        // Sécurité : réponse trop différente → on n'applique pas
-        if (corrected.length > text.length * 1.5 || corrected.length < text.length * 0.4) return text;
+        // Sécurité : réponse trop différente en longueur → on n'applique pas
+        if (corrected.length > text.length * 1.6 || corrected.length < text.length * 0.4) return text;
 
-        // En mode low : vérification plus stricte du nombre de mots
-        if (aggr === "low") {
-            const srcWords = text.trim().split(/\s+/).filter(w => w.length > 0).length;
-            const corrWords = corrected.trim().split(/\s+/).filter(w => w.length > 0).length;
-            // Mode soft ne doit pas ajouter/enlever plus d'un mot sur des phrases courtes
-            if (Math.abs(corrWords - srcWords) > Math.max(1, Math.floor(srcWords * 0.15))) {
-                console.log("[AutoCorrect] Soft mode rejected: word count changed too much", { srcWords, corrWords });
-                return text;
-            }
+        // Filet de sécurité absolu : jamais de mot sensible/offensant halluciné,
+        // même si le reste de la correction semblait raisonnable.
+        if (introducesHallucinatedSevereTerm(text, corrected)) {
+            console.warn("[AutoCorrect] Rejected: correction introduced a sensitive term absent from the original", { text, corrected });
+            return text;
         }
-        return corrected.replace(/^"(.*)"$/, "$1").trim(); // Nettoie les guillemets éventuels
+
+        return corrected;
     } catch (e: any) {
         console.warn("[AutoCorrect] Error correction:", e.message);
         return text; // En cas d'error, envoyer le texte original
@@ -170,7 +310,7 @@ const AutoCorrectChatBarButton: ChatBarButtonFactory = ({ type }) => {
 export default definePlugin({
     name: "AutoCorrect",
     enabledByDefault: true,
-    description: "Automatically corrects spelling and grammar before sending. Requires a free Groq API key configured in YouCordAI.",
+    description: "Automatically corrects spelling, grammar and punctuation before sending. Requires a free Groq API key configured in YouCordAI.",
     authors: [{ name: "YouCord", id: 0n }],
     settings,
 
