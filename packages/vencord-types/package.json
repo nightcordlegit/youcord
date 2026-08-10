@@ -14,11 +14,11 @@
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
         "fs-extra": "^11.3.6",
-        "tsx": "^4.19.2"
+        "tsx": "^4.23.10"
     },
     "dependencies": {
-        "@types/lodash": "4.17.24",
-        "@types/node": "^26.1.1",
+        "@types/lodash": "4.17.25",
+        "@types/node": "^26.1.2",
         "@vencord/discord-types": "^1.0.1",
         "highlight.js": "11.11.1",
         "moment": "^2.22.2",
