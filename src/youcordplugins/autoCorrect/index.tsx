@@ -43,13 +43,13 @@ const settings = definePluginSettings({
 // alter them (no risk of it "translating" a mention or mangling a URL).
 
 const PROTECTED_REGEXES: RegExp[] = [
-    /<a?:\w+:\d+>/g,      // custom emoji
-    /<@!?\d+>/g,          // user mention
-    /<@&\d+>/g,           // role mention
-    /<#\d+>/g,            // channel mention
-    /https?:\/\/\S+/g,    // links
-    /```[\s\S]*?```/g,    // code block
-    /`[^`]+`/g,           // inline code
+    /<a?:\w+:\d+>/g, // custom emoji
+    /<@!?\d+>/g, // user mention
+    /<@&\d+>/g, // role mention
+    /<#\d+>/g, // channel mention
+    /https?:\/\/\S+/g, // links
+    /```[\s\S]*?```/g, // code block
+    /`[^`]+`/g, // inline code
 ];
 
 // ── Slang / abbreviation whitelist ──────────────────────────────────────────────
