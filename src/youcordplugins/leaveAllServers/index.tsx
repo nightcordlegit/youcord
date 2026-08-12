@@ -8,6 +8,7 @@ import "./styles.css";
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { runDiscordRequest } from "@utils/discordRequestQueue";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -95,12 +96,11 @@ function LeaveAllServersModal({ rootProps }: { rootProps: any; }) {
             setCurrentIdx(i + 1);
             setProgress(`[${i + 1}/${ids.length}] Leaving: ${guild.name}...`);
             try {
-                await GuildActions.leaveGuild(ids[i]);
+                await runDiscordRequest(() => Promise.resolve(GuildActions.leaveGuild(ids[i])));
                 count++;
             } catch (e) {
                 console.error(`[LeaveAllServers] Failed to leave ${guild.name}:`, e);
             }
-            await new Promise(r => setTimeout(r, 800));
         }
 
         setStatus("done");
@@ -139,7 +139,7 @@ function LeaveAllServersModal({ rootProps }: { rootProps: any; }) {
                         autoFocus
                     />
                     {search && (
-                        <button className="las-search-clear" onClick={() => setSearch("")}>âœ•</button>
+                        <button className="las-search-clear" onClick={() => setSearch("")}>✕</button>
                     )}
                 </div>
 
@@ -173,7 +173,7 @@ function LeaveAllServersModal({ rootProps }: { rootProps: any; }) {
                                     : <div className="las-avatar-placeholder">{g.name.replace(/\s+/g, "").slice(0, 2).toUpperCase()}</div>
                                 }
                                 <span className="las-guild-name">{g.name}</span>
-                                {isSel && <span className="las-check">âœ“</span>}
+                                {isSel && <span className="las-check">✓</span>}
                             </div>
                         );
                     })}
@@ -230,7 +230,7 @@ const patchGuildContext: NavContextMenuPatchCallback = (children, { guild }) => 
 
 export default definePlugin({
     name: "LeaveAllServers",
-    enabledByDefault: true,
+    enabledByDefault: false,
     description: "Leaves all selected servers. Accessible via right-click on a server.",
     authors: [{ name: "YouCord", id: 0n }],
     settings,

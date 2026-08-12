@@ -16,7 +16,7 @@ import { ApplicationAssetUtils, FluxDispatcher,React, ReactDOM, useEffect, useSt
 
 const Native = VencordNative.pluginHelpers.YoutubeInDiscord as PluginNative<typeof import("./native")>;
 
-// â”€â”€â”€ Icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Icons ────────────────────────────────────────────────────────────────────
 
 function YoutubeIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
@@ -49,7 +49,7 @@ function IconExpand() {
     return <svg width={17} height={17} viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>;
 }
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface YtVideo {
     id: string;
@@ -75,7 +75,12 @@ interface SearchResult {
     channelInfo?: any;
 }
 
-// â”€â”€â”€ Player State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+interface YouTubeAccountStatus {
+    connected: boolean;
+    supported: boolean;
+}
+
+// ─── Player State ─────────────────────────────────────────────────────────────
 
 class PlayerState {
     video: YtVideo | null = null;
@@ -102,7 +107,7 @@ function usePlayerState() {
     return playerState;
 }
 
-// â”€â”€â”€ YouTube iframe ghost â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── YouTube iframe ghost ─────────────────────────────────────────────────────
 
 let ytContainer: HTMLDivElement | null = null;
 let ytInterval: any = null;
@@ -269,7 +274,7 @@ function fmt(secs: number) {
     return `${m}:${s}`;
 }
 
-// â”€â”€â”€ Default homepage videos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Default homepage videos ──────────────────────────────────────────────────
 
 const DEFAULT_VIDEOS: YtVideo[] = [
     { id: "dQw4w9WgXcQ", title: "Never Gonna Give You Up", author: "Rick Astley", artworkUrl: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg", durationStr: "3:33", viewCount: "1.5B views" },
@@ -283,7 +288,7 @@ const DEFAULT_VIDEOS: YtVideo[] = [
     { id: "09R8_2nJtjg", title: "Sugar", author: "Maroon 5", artworkUrl: "https://i.ytimg.com/vi/09R8_2nJtjg/hqdefault.jpg", durationStr: "3:55", viewCount: "4.1B views" },
 ];
 
-// â”€â”€â”€ Video Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Video Card ───────────────────────────────────────────────────────────────
 
 function VideoCard({ video, active, onPlay }: { video: YtVideo; active?: boolean; onPlay: (v: YtVideo) => void }) {
     return (
@@ -303,7 +308,7 @@ function VideoCard({ video, active, onPlay }: { video: YtVideo; active?: boolean
     );
 }
 
-// â”€â”€â”€ Home Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Home Modal ───────────────────────────────────────────────────────────────
 
 function YoutubeHomeModal({ onClose, onPlayVideo }: {
     onClose: () => void;
@@ -315,12 +320,51 @@ function YoutubeHomeModal({ onClose, onPlayVideo }: {
     const [channels, setChannels] = useState<YtChannel[]>([]);
     const [channelInfo, setChannelInfo] = useState<any>(null);
     const [loading, setLoading] = useState(false);
-    const [status, setStatus] = useState(t("ðŸ”¥ Trending"));
+    const [status, setStatus] = useState(t("🔥 Trending"));
+    const [accountConnected, setAccountConnected] = useState(false);
+    const [accountSupported, setAccountSupported] = useState(true);
+    const [accountBusy, setAccountBusy] = useState(false);
+
+    async function refreshAccountStatus() {
+        try {
+            const account: YouTubeAccountStatus = JSON.parse(await Native.getYouTubeAccountStatus());
+            setAccountConnected(account.connected);
+            setAccountSupported(account.supported);
+        } catch {
+            setAccountConnected(false);
+        }
+    }
+
+    useEffect(() => {
+        void refreshAccountStatus();
+        const interval = setInterval(() => void refreshAccountStatus(), 2500);
+        return () => clearInterval(interval);
+    }, []);
+
+    async function openAccount() {
+        setAccountBusy(true);
+        try {
+            await Native.openYouTubeAccountLogin();
+            window.setTimeout(() => void refreshAccountStatus(), 1000);
+        } finally {
+            setAccountBusy(false);
+        }
+    }
+
+    async function disconnectAccount() {
+        setAccountBusy(true);
+        try {
+            await Native.disconnectYouTubeAccount();
+            await refreshAccountStatus();
+        } finally {
+            setAccountBusy(false);
+        }
+    }
 
     async function doSearch(e?: React.FormEvent) {
         e?.preventDefault();
         const q = query.trim();
-        if (!q) { setVideos(DEFAULT_VIDEOS); setChannels([]); setChannelInfo(null); setStatus(t("ðŸ”¥ Trending")); return; }
+        if (!q) { setVideos(DEFAULT_VIDEOS); setChannels([]); setChannelInfo(null); setStatus(t("🔥 Trending")); return; }
         setLoading(true);
         setStatus(t("Searching..."));
         try {
@@ -331,7 +375,7 @@ function YoutubeHomeModal({ onClose, onPlayVideo }: {
             if ((res.videos?.length ?? 0) === 0) setStatus(t("No videos found"));
             else setStatus(`${res.videos.length} ${t("results for")} "${q}"`);
         } catch (err) {
-            setStatus(t("âš ï¸ Search failed"));
+            setStatus(t("⚠️ Search failed"));
             console.error("YTD search error:", err);
         }
         setLoading(false);
@@ -348,7 +392,7 @@ function YoutubeHomeModal({ onClose, onPlayVideo }: {
             setChannelInfo(res.channelInfo || null);
             setStatus(`${t("Videos from")} ${ch.title}`);
         } catch {
-            setStatus(t("âš ï¸ Failed to load channel"));
+            setStatus(t("⚠️ Failed to load channel"));
         }
         setLoading(false);
     }
@@ -360,7 +404,23 @@ function YoutubeHomeModal({ onClose, onPlayVideo }: {
                     <YoutubeIcon />
                     {t("YouTube In Discord")}
                 </span>
-                <button className="ytd-close-btn" onClick={onClose}><IconX /></button>
+                <div className="ytd-header-actions">
+                    {accountSupported && (
+                        accountConnected ? (
+                            <>
+                                <span className="ytd-account-state"><span />{t("Connected locally")}</span>
+                                <button className="ytd-account-btn ytd-account-disconnect" disabled={accountBusy} onClick={disconnectAccount}>
+                                    {t("Disconnect")}
+                                </button>
+                            </>
+                        ) : (
+                            <button className="ytd-account-btn" disabled={accountBusy} onClick={openAccount}>
+                                {accountBusy ? "..." : t("Connect YouTube")}
+                            </button>
+                        )
+                    )}
+                    <button className="ytd-close-btn" onClick={onClose}><IconX /></button>
+                </div>
             </div>
 
             <form className="ytd-search-row" onSubmit={doSearch}>
@@ -407,7 +467,7 @@ function YoutubeHomeModal({ onClose, onPlayVideo }: {
                             <div className="ytd-channel-header-title">{channelInfo.title}</div>
                             <div className="ytd-channel-header-stats">
                                 {channelInfo.subscribers && <span>{channelInfo.subscribers}</span>}
-                                {channelInfo.subscribers && channelInfo.videoCount && <span> â€¢ </span>}
+                                {channelInfo.subscribers && channelInfo.videoCount && <span> • </span>}
                                 {channelInfo.videoCount && <span>{channelInfo.videoCount}</span>}
                             </div>
                             {channelInfo.bio && <div className="ytd-channel-header-bio">{channelInfo.bio}</div>}
@@ -469,7 +529,7 @@ function YoutubeHomeModal({ onClose, onPlayVideo }: {
     );
 }
 
-// â”€â”€â”€ Fullscreen Overlay (Portal to body) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Fullscreen Overlay (Portal to body) ──────────────────────────────────────
 
 function FullscreenOverlay({ onClose }: { onClose: () => void }) {
     useEffect(() => {
@@ -509,7 +569,7 @@ function FullscreenOverlay({ onClose }: { onClose: () => void }) {
     );
 }
 
-// â”€â”€â”€ Combined modal switcher â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Combined modal switcher ──────────────────────────────────────────────────
 
 function YoutubeModal({ onClose, startFullscreen }: { onClose: () => void; startFullscreen?: boolean }) {
     const p = usePlayerState();
@@ -546,7 +606,7 @@ function YoutubeModal({ onClose, startFullscreen }: { onClose: () => void; start
     );
 }
 
-// â”€â”€â”€ Rich Presence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Rich Presence ────────────────────────────────────────────────────────────
 
 const RPC_APP_ID = "1108588077900898414"; // Shared YouCord music/media app ID
 const RPC_SOCKET_ID = "youtube_in_discord";
@@ -645,7 +705,7 @@ function clearRichPresence() {
     } catch { }
 }
 
-// â”€â”€â”€ Header Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Header Button ────────────────────────────────────────────────────────────
 
 function YTHeaderBarButton() {
     return (
@@ -661,7 +721,7 @@ function YTHeaderBarButton() {
     );
 }
 
-// â”€â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Settings ─────────────────────────────────────────────────────────────────
 
 const settings = definePluginSettings({
     richPresence: {
@@ -671,7 +731,7 @@ const settings = definePluginSettings({
     },
 });
 
-// â”€â”€â”€ Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Plugin ───────────────────────────────────────────────────────────────────
 
 let rpcUnsub: (() => void) | null = null;
 

@@ -4,7 +4,7 @@
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges>
-        <!-- asInvoker = pas besoin d'admin, LocalAppData est accessible sans Ã©lÃ©vation -->
+        <!-- asInvoker = pas besoin d'admin, LocalAppData est accessible sans élévation -->
         <requestedExecutionLevel level="asInvoker" uiAccess="false"/>
       </requestedPrivileges>
     </security>

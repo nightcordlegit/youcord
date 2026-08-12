@@ -92,7 +92,7 @@ function savePersistLogs() {
     } catch { }
 }
 
-// Seul accountur de version â€” pas de snapshot, pas de copie
+// Seul accountur de version — pas de snapshot, pas de copie
 let globalVersion = 0;
 const updateListeners = new Set<() => void>();
 
@@ -157,7 +157,7 @@ function authorFrom(msg: any) {
     return { authorId: id, authorName: name, authorAvatar: av };
 }
 
-// FIX CRASH DM SCROLL: msgCache réduit de 8000 â†’ 3000 entrées, purge de 1000 â†’ 500
+// FIX CRASH DM SCROLL: msgCache réduit de 8000 → 3000 entrées, purge de 1000 → 500
 // La purge brutale de 1000 entrées d'un coup pendant le scroll provoquait un pic de
 // travail synchrone qui bloquait le thread principal au moment critique du re-render.
 // Taille réduite + purge plus petite = moins d'impact pendant le scroll.
@@ -361,7 +361,7 @@ function LogRow({ e }: { e: LogEntry; }) {
                 {e.type === "message_edit" && (
                     <div className="el-edit-wrap">
                         <div className="el-msg el-msg--before"><span className="el-msg-label">{t("Before:")} </span><span>{renderContent(e.extra || "?")}</span></div>
-                        <div className="el-msg el-msg--after"><span className="el-msg-label">{t("After:")} </span><span>{renderContent(e.content || "â€”")}</span></div>
+                        <div className="el-msg el-msg--after"><span className="el-msg-label">{t("After:")} </span><span>{renderContent(e.content || "—")}</span></div>
                     </div>
                 )}
                 {e.type !== "message_delete" && e.type !== "message_edit" && e.content && (
@@ -549,7 +549,7 @@ function LogsModal({ rootProps }: { rootProps: any; }) {
                         </div>
                         <input className="el-search-input"
                             placeholder={t("Filter...")} value={search} onChange={e => setSearch(e.target.value)} />
-                        {search && <button className="el-clear" onClick={() => setSearch("")}>âœ•</button>}
+                        {search && <button className="el-clear" onClick={() => setSearch("")}>✕</button>}
                         <button className="el-clear-all" style={{ marginRight: 4 }} onClick={saveAsTxt} title={t("Save as .txt")}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" /></svg>
                         </button>
@@ -657,7 +657,7 @@ function subscribeToEvents() {
     sub("LOAD_MESSAGES_SUCCESS", d => {
         if (!d) return;
         // FIX CRASH DM SCROLL: isLoadingMessages bloque la purge du msgCache pendant
-        // le traitement du batch â€” évite un pic synchrone sur le thread principal.
+        // le traitement du batch — évite un pic synchrone sur le thread principal.
         const msgs = [
             ...(Array.isArray(d.messages) ? d.messages : []),
             ...(Array.isArray(d.jump) ? d.jump : []),
@@ -739,7 +739,7 @@ function subscribeToEvents() {
                 const content = (s.selfStream === false && p?.selfStream === true) ? "Stream stopped" : "Left";
                 pushLog({ type: "voice_leave", content, ...b, channelId: oldChannelId });
             }
-            else if (oldChannelId && channelId && oldChannelId !== channelId) { const oc = getChannel(oldChannelId); pushLog({ type: "voice_move", content: `${oc?.name ?? "?"} â†’ ${ch?.name ?? "?"}`, ...b }); }
+            else if (oldChannelId && channelId && oldChannelId !== channelId) { const oc = getChannel(oldChannelId); pushLog({ type: "voice_move", content: `${oc?.name ?? "?"} → ${ch?.name ?? "?"}`, ...b }); }
             const p = prevVS.get(userId);
             if (p) {
                 if (s.selfMute !== p.selfMute) pushLog({ type: "voice_mute", content: s.selfMute ? t("Mic muted") : t("Mic unmuted"), ...b });
@@ -860,7 +860,7 @@ export default definePlugin({
         window.removeEventListener("beforeunload", savePersistLogs);
         removeHeaderBarButton("youcord-event-logs");
         unsubs.forEach(fn => fn()); unsubs = [];
-        // Save before clearing â€” cancel the debounce timer then immediately persist
+        // Save before clearing — cancel the debounce timer then immediately persist
         if (flushTimer !== null) { clearTimeout(flushTimer); flushTimer = null; }
         savePersistLogs();
         logs = []; msgCache.clear(); prevVS.clear(); updateListeners.clear();

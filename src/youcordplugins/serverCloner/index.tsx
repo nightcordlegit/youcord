@@ -10,6 +10,7 @@ import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatc
 import { t } from "@api/i18n";
 import { definePluginSettings } from "@api/Settings";
 import { FormSwitch } from "@components/FormSwitch";
+import { runDiscordRequest } from "@utils/discordRequestQueue";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
@@ -46,7 +47,7 @@ async function apiCall(method: "get" | "post" | "patch" | "put" | "del", url: st
     if (body) opts.body = body;
 
     for (let attempt = 0; attempt < 3; attempt++) {
-        const res = await (RestAPI as any)[method](opts);
+        const res = await runDiscordRequest(() => (RestAPI as any)[method](opts));
         if (res?.status === 429) {
             const retryAfter = Number((res as any)?.headers?.["retry-after"] ?? 5);
             await wait(Math.max(1, retryAfter) * 1000);
@@ -127,12 +128,12 @@ async function cloneServer(
     function advance(stepName: string) {
         currentStep++;
         setProgress(Math.round((currentStep / totalSteps) * 100));
-        log({ text: `â”€â”€ ${stepName} finished (${currentStep}/${totalSteps})`, type: "info" });
+        log({ text: `── ${stepName} finished (${currentStep}/${totalSteps})`, type: "info" });
     }
 
     function isCancelled() {
         if (_cancelled) {
-            log({ text: "â•â•â• Cloning cancelled! â•â•â•", type: "warn" });
+            log({ text: "═══ Cloning cancelled! ═══", type: "warn" });
             return true;
         }
         return false;
@@ -141,7 +142,7 @@ async function cloneServer(
     const sourceGuild = GuildStore.getGuild(sourceId);
     if (!sourceGuild) { log({ text: "Source server not found", type: "err" }); return; }
 
-    log({ text: `Cloning of "${sourceGuild.name}" â†’ target server...`, type: "info" });
+    log({ text: `Cloning of "${sourceGuild.name}" → target server...`, type: "info" });
 
     if (options.guildSettings && !isCancelled()) {
         try {
@@ -456,10 +457,10 @@ async function cloneServer(
 
     setProgress(100);
     if (_cancelled) {
-        log({ text: "â•â•â• Cloning cancelled! â•â•â•", type: "warn" });
+        log({ text: "═══ Cloning cancelled! ═══", type: "warn" });
         Toasts.show({ message: "Cloning cancelled.", type: Toasts.Type.FAILURE, id: Toasts.genId() });
     } else {
-        log({ text: "â•â•â• Cloning finished! â•â•â•", type: "info" });
+        log({ text: "═══ Cloning finished! ═══", type: "info" });
         Toasts.show({ message: "Server cloning finished!", type: Toasts.Type.SUCCESS, id: Toasts.genId() });
     }
 }
@@ -677,7 +678,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ServerCloner",
-    enabledByDefault: true,
+    enabledByDefault: false,
     description: "Clone an entire server (channels, roles, permissions, icon, emojis, embeds) to a server where you have ADMIN permission. Can be opened from server context menu.",
     authors: [{ name: "YouCord", id: 0n }],
     settings,

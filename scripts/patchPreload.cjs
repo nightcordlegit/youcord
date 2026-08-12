@@ -20,7 +20,7 @@ content = content.replace(
     '(typeof window !== "undefined" && (window[$1]=$2))'
 );
 
-// 2. SÃ©curiser require(process.env.DISCORD_PRELOAD)
+// 2. Sécuriser require(process.env.DISCORD_PRELOAD)
 content = content.replace(
     "require(process.env.DISCORD_PRELOAD)",
     "process.env.DISCORD_PRELOAD && require(process.env.DISCORD_PRELOAD)"
@@ -29,5 +29,5 @@ content = content.replace(
 const after = (content.match(/contextBridge/g) || []).length;
 writeFileSync(preloadPath, content, "utf-8");
 
-console.log(`[patch] Done. contextBridge replaced: ${before} â†’ ${after}`);
+console.log(`[patch] Done. contextBridge replaced: ${before} → ${after}`);
 console.log(`[patch] DISCORD_PRELOAD safe: ${content.includes("process.env.DISCORD_PRELOAD &&")}`);

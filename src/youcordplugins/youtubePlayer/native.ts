@@ -4,13 +4,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// â”€â”€â”€ Environment detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Environment detection ────────────────────────────────────────────────────
 
 const IS_ELECTRON = typeof process !== "undefined" && process.versions?.electron;
 
 let _electronNet: typeof import("electron")["net"] | null = null;
 let _BrowserWindow: typeof import("electron")["BrowserWindow"] | null = null;
 let _electronSession: any = null;
+let _youtubeAccountWindow: Electron.BrowserWindow | null = null;
+
+const YOUTUBE_PARTITION = "persist:youcord-youtube";
+const CHROME_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
 if (IS_ELECTRON) {
     try {
@@ -21,14 +25,21 @@ if (IS_ELECTRON) {
     } catch { }
 }
 
-// â”€â”€â”€ Unified fetch â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Unified fetch ────────────────────────────────────────────────────────
 
 async function netGet(url: string): Promise<string> {
     const headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "User-Agent": CHROME_USER_AGENT,
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9",
     };
+    if (_electronSession) {
+        const youtubeSession = _electronSession.fromPartition(YOUTUBE_PARTITION);
+        youtubeSession.setUserAgent(CHROME_USER_AGENT);
+        const resp = await youtubeSession.fetch(url, { credentials: "include", headers });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        return resp.text();
+    }
     if (_electronNet) {
         const resp = await _electronNet.fetch(url, { headers });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -37,6 +48,79 @@ async function netGet(url: string): Promise<string> {
     const resp = await fetch(url, { headers });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     return resp.text();
+}
+
+function isAllowedYoutubeAccountUrl(rawUrl: string): boolean {
+    try {
+        const { hostname, protocol } = new URL(rawUrl);
+        if (protocol !== "https:") return false;
+        return hostname === "youtube.com" || hostname.endsWith(".youtube.com")
+            || hostname === "google.com" || hostname.endsWith(".google.com")
+            || hostname === "googleusercontent.com" || hostname.endsWith(".googleusercontent.com")
+            || hostname === "gstatic.com" || hostname.endsWith(".gstatic.com");
+    } catch {
+        return false;
+    }
+}
+
+export async function getYouTubeAccountStatus(): Promise<string> {
+    if (!IS_ELECTRON || !_electronSession) return JSON.stringify({ connected: false, supported: false });
+    const youtubeSession = _electronSession.fromPartition(YOUTUBE_PARTITION);
+    const [youtubeCookies, googleCookies] = await Promise.all([
+        youtubeSession.cookies.get({ domain: ".youtube.com" }),
+        youtubeSession.cookies.get({ domain: ".google.com" }),
+    ]);
+    const accountCookieNames = new Set(["SAPISID", "APISID", "SID", "LOGIN_INFO", "__Secure-1PAPISID", "__Secure-3PAPISID"]);
+    const connected = [...youtubeCookies, ...googleCookies].some(cookie => accountCookieNames.has(cookie.name));
+    return JSON.stringify({ connected, supported: true });
+}
+
+export async function openYouTubeAccountLogin(): Promise<void> {
+    if (!IS_ELECTRON || !_BrowserWindow || !_electronSession) throw new Error("YouTube account login requires the desktop app");
+    if (_youtubeAccountWindow && !_youtubeAccountWindow.isDestroyed()) {
+        _youtubeAccountWindow.show();
+        _youtubeAccountWindow.focus();
+        return;
+    }
+
+    const youtubeSession = _electronSession.fromPartition(YOUTUBE_PARTITION);
+    youtubeSession.setUserAgent(CHROME_USER_AGENT);
+    _youtubeAccountWindow = new _BrowserWindow({
+        width: 1080,
+        height: 760,
+        minWidth: 720,
+        minHeight: 560,
+        title: "YouTube — compte local YouCord",
+        autoHideMenuBar: true,
+        backgroundColor: "#0f0f0f",
+        webPreferences: {
+            partition: YOUTUBE_PARTITION,
+            nodeIntegration: false,
+            contextIsolation: true,
+            sandbox: true,
+            devTools: false,
+        },
+    });
+
+    const accountWindow = _youtubeAccountWindow;
+    accountWindow.webContents.setUserAgent(CHROME_USER_AGENT);
+    accountWindow.webContents.setWindowOpenHandler(({ url }) => {
+        if (isAllowedYoutubeAccountUrl(url)) void accountWindow.loadURL(url, { userAgent: CHROME_USER_AGENT });
+        return { action: "deny" };
+    });
+    accountWindow.webContents.on("will-navigate", (event, url) => {
+        if (!isAllowedYoutubeAccountUrl(url)) event.preventDefault();
+    });
+    accountWindow.on("closed", () => { _youtubeAccountWindow = null; });
+    await accountWindow.loadURL("https://www.youtube.com/account", { userAgent: CHROME_USER_AGENT });
+}
+
+export async function disconnectYouTubeAccount(): Promise<void> {
+    if (!IS_ELECTRON || !_electronSession) return;
+    if (_youtubeAccountWindow && !_youtubeAccountWindow.isDestroyed()) _youtubeAccountWindow.close();
+    const youtubeSession = _electronSession.fromPartition(YOUTUBE_PARTITION);
+    await youtubeSession.clearStorageData();
+    await youtubeSession.clearCache();
 }
 
 const WATCH_URL_PREFIX = "https://youcord.fr/watch?";
@@ -70,9 +154,6 @@ export async function installWatchingTogetherIntercept(_?: any) {
             });
         } catch (e) { console.error("YTD adblocker error:", e); }
     }
-
-    if (_ytListenerInstalled) return;
-    _ytListenerInstalled = true;
 
     if (_ytListenerInstalled) return;
     _ytListenerInstalled = true;

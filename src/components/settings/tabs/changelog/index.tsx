@@ -113,8 +113,8 @@ function UpdateLogCard({
                             {isRepositoryFetch
                                 ? isUpToDate
                                     ? `Repository check: ${log.fromHash.slice(0, 7)} (up to date)`
-                                    : `Repository check: ${log.fromHash.slice(0, 7)} â†’ ${log.toHash.slice(0, 7)}`
-                                : `Update: ${log.fromHash.slice(0, 7)} â†’ ${log.toHash.slice(0, 7)}`}
+                                    : `Repository check: ${log.fromHash.slice(0, 7)} → ${log.toHash.slice(0, 7)}`
+                                : `Update: ${log.fromHash.slice(0, 7)} → ${log.toHash.slice(0, 7)}`}
                         </span>
                         <Button
                             size="min"
@@ -140,15 +140,15 @@ function UpdateLogCard({
                     <div className="vc-changelog-log-meta">
                         {formatTimestamp(log.timestamp)}
                         {log.commits.length > 0 &&
-                            ` â€¢ ${log.commits.length} commits available`}
-                        {log.commits.length === 0 && " â€¢ No new commits"}
+                            ` • ${log.commits.length} commits available`}
+                        {log.commits.length === 0 && " • No new commits"}
                         {log.newPlugins.length > 0 &&
-                            ` â€¢ ${log.newPlugins.length} new plugins`}
+                            ` • ${log.newPlugins.length} new plugins`}
                         {log.updatedPlugins.length > 0 &&
-                            ` â€¢ ${log.updatedPlugins.length} updated plugins`}
+                            ` • ${log.updatedPlugins.length} updated plugins`}
                         {log.newSettings &&
                             getNewSettingsSize(log.newSettings) > 0 &&
-                            ` â€¢ ${getNewSettingsEntries(log.newSettings).reduce((sum, [, arr]) => sum + arr.length, 0)} new settings`}
+                            ` • ${getNewSettingsEntries(log.newSettings).reduce((sum, [, arr]) => sum + arr.length, 0)} new settings`}
                     </div>
                 </div>
                 <div

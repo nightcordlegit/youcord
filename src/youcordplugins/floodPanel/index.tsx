@@ -13,17 +13,15 @@ import definePlugin, { OptionType } from "@utils/types";
 import { FloodPanelButton } from "./components/ChatBarButton";
 import { FloodIcon } from "./components/Icons";
 
-const enabled = false;
-
 const settings = definePluginSettings({
     defaultDelay: {
         type: OptionType.NUMBER,
-        description: "Default delay between messages (ms).",
-        default: 500
+        description: "Délai par défaut entre les messages (ms).",
+        default: 1200
     },
     defaultShuffle: {
         type: OptionType.BOOLEAN,
-        description: "Randomize message order by default.",
+        description: "Mélanger l’ordre des messages par défaut.",
         default: true
     },
     customMessages: {
@@ -40,7 +38,7 @@ const settings = definePluginSettings({
     },
     customDelay: {
         type: OptionType.CUSTOM,
-        default: "500" as string,
+        default: "1200" as string,
         hidden: true,
         description: ""
     },
@@ -56,9 +54,9 @@ export { settings };
 
 export default definePlugin({
     name: "FloodPanel",
-    description: "Send a flood of messages rapidly in any channel. Load a custom .txt file or use the built-in phrases. Accessible from the chat bar.",
+    description: "Envoie une série de messages dans un salon avec un délai de sécurité. Utilise les phrases intégrées ou une liste personnalisée.",
     authors: [EquicordDevs.nobody],
-    enabledByDefault: true,
+    enabledByDefault: false,
     settings,
 
     chatBarButton: {

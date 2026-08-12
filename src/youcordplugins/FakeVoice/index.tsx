@@ -61,7 +61,7 @@ const syncState = () => {
 let lastSyncTime = 0;
 
 /**
- * Called when Discord itself toggles mute/deafen â€” re-assert our fake state immediately.
+ * Called when Discord itself toggles mute/deafen — re-assert our fake state immediately.
  */
 function onVoiceStateChange(event: any) {
     if (!isGhostActive) return;
@@ -192,7 +192,7 @@ export default definePlugin({
                 configFakeMute = !configFakeMute;
                 isGhostActive = configFakeMute;
                 syncState();
-                sendBotMessage(ctx.channel.id, { content: `ðŸ‘» **Fake Mute** is ${isGhostActive ? t("enabled") : t("disabled")}.` });
+                sendBotMessage(ctx.channel.id, { content: `👻 **Fake Mute** is ${isGhostActive ? t("enabled") : t("disabled")}.` });
             },
         },
         {
@@ -203,7 +203,7 @@ export default definePlugin({
                 configFakeDeafen = !configFakeDeafen;
                 isGhostActive = configFakeDeafen;
                 syncState();
-                sendBotMessage(ctx.channel.id, { content: `ðŸ‘» **Fake Deafen** is ${isGhostActive ? t("enabled") : t("disabled")}.` });
+                sendBotMessage(ctx.channel.id, { content: `👻 **Fake Deafen** is ${isGhostActive ? t("enabled") : t("disabled")}.` });
             },
         },
         {
@@ -216,7 +216,7 @@ export default definePlugin({
                 configFakeDeafen = next;
                 isGhostActive = next;
                 syncState();
-                sendBotMessage(ctx.channel.id, { content: `ðŸ‘» **Fake Deafen & Mute** are ${isGhostActive ? t("enabled") : t("disabled")}.` });
+                sendBotMessage(ctx.channel.id, { content: `👻 **Fake Deafen & Mute** are ${isGhostActive ? t("enabled") : t("disabled")}.` });
             },
         },
     ]

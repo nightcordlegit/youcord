@@ -134,8 +134,8 @@ async function generateDebugInfoMessage() {
     const clientInfo = detectClient();
     let clientString = `${clientInfo.name}`;
     clientString += `${clientInfo.version ? ` v${clientInfo.version}` : ""}`;
-    clientString += `${clientInfo.info ? ` â€¢ ${clientInfo.info}` : ""}`;
-    clientString += `${clientInfo.shortHash ? ` â€¢ [${clientInfo.shortHash}](<https://github.com/Equicord/Equibop/commit/${clientInfo.hash}>)` : ""}`;
+    clientString += `${clientInfo.info ? ` • ${clientInfo.info}` : ""}`;
+    clientString += `${clientInfo.shortHash ? ` • [${clientInfo.shortHash}](<https://github.com/Equicord/Equibop/commit/${clientInfo.hash}>)` : ""}`;
 
     const spoofInfo = IS_EQUIBOP ? tryOrElse(() => VesktopNative.app.getPlatformSpoofInfo?.(), null) : null;
     const platformDisplay = spoofInfo?.spoofed
@@ -144,7 +144,7 @@ async function generateDebugInfoMessage() {
 
     const info = {
         Equicord:
-            `v${VERSION} â€¢ [${gitHashShort}](<https://github.com/Equicord/Equicord/commit/${gitHash}>)` +
+            `v${VERSION} • [${gitHashShort}](<https://github.com/Equicord/Equicord/commit/${gitHash}>)` +
             `${IS_EQUIBOP ? "" : SettingsPlugin.getVersionInfo()} - ${Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${clientString}`,
         Platform: platformDisplay
@@ -175,7 +175,7 @@ async function generateDebugInfoMessage() {
 
     let content = `>>> ${Object.entries(info).map(([k, v]) => `**${k}**: ${v}`).join("\n")}`;
     content += "\n" + Object.entries(commonIssues)
-        .filter(([, v]) => v).map(([k]) => `âš ï¸ ${k}`)
+        .filter(([, v]) => v).map(([k]) => `⚠️ ${k}`)
         .join("\n");
 
     return content.trim();
@@ -192,7 +192,7 @@ async function uploadPluginListFile(channelId: string, fileContent: string, file
                 body: {
                     flags: 0,
                     channel_id: channelId,
-                    content: `âš ï¸ Plugin list attached as file due to high plugin count (${fileContent.split("\n").filter(l => l.startsWith("  -")).length} plugins enabled)`,
+                    content: `⚠️ Plugin list attached as file due to high plugin count (${fileContent.split("\n").filter(l => l.startsWith("  -")).length} plugins enabled)`,
                     nonce: SnowflakeUtils.fromTimestamp(Date.now()),
                     sticker_ids: [],
                     type: 0,

@@ -3,7 +3,7 @@ const { readFileSync, writeFileSync, existsSync, readdirSync, statSync, mkdirSyn
 const { createHash } = require("crypto");
 const { join } = require("path");
 
-// â”€â”€â”€ Configuration de Build YouCord â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Configuration de Build YouCord ─────────────────────────────────────────
 
 function killYouCord() {
     const releaseDir = join(__dirname, "release", "youcord-dist");
@@ -97,7 +97,7 @@ function buildYouCordFromDiscord(discordApp) {
         cpSync(bootstrapSrc, bootstrapDst, { recursive: true });
     }
 
-    console.log("[youcord] PrÃ©paration de _app.asar...");
+    console.log("[youcord] Préparation de _app.asar...");
     let appAsarSrc = join(discordRes, "_app.asar");
     if (!existsSync(appAsarSrc)) appAsarSrc = join(discordRes, "app.asar");
     
@@ -181,11 +181,11 @@ require(path.join(__dirname, "dist", "desktop", "patcher.js"));
         } catch (e) { }
     }
 
-    console.log(`[youcord] Build terminÃ© -> ${outDir}`);
+    console.log(`[youcord] Build terminé -> ${outDir}`);
 }
 
 
-// â”€â”€â”€ Execution du build â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Execution du build ───────────────────────────────────────────────────────
 
 if (require.main === module) {
     killYouCord();

@@ -16,6 +16,8 @@ export interface ChatCallOptions {
     maxTokens?: number;
     forceModel?: string;
     maxRetries?: number;
+    /** OpenAI-compatible reasoning effort. Groq GPT-OSS models support this. */
+    reasoningEffort?: "low" | "medium" | "high";
     /** @internal Retry counter for rate-limit fallback */
     _retryCount?: number;
 }

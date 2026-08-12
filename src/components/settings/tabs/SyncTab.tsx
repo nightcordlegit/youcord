@@ -453,7 +453,7 @@ function SyncTab() {
 
             <Heading className={Margins.top16}>{t("Badges")}</Heading>
             <Paragraph className={Margins.bottom16}>
-                {t("Choose which badge sources to hide on your own profile. Selected sources disappear from your profile for everyone â€” including yourself â€” wherever it's viewed.")}
+                {t("Choose which badge sources to hide on your own profile. Selected sources disappear from your profile for everyone — including yourself — wherever it's viewed.")}
             </Paragraph>
 
             <Notice.Info className={Margins.bottom16}>

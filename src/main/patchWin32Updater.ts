@@ -35,7 +35,7 @@ function isNewer($new: string, old: string) {
 // dist/desktop/patcher.js). This is exactly what the injector's index.js
 // require()'d to get us running in the first place, regardless of how
 // YouCord was installed (dev-inject asar, the PS1/Inno installer, or
-// Equilotl) â€” so it's the only value that's guaranteed to be correct.
+// Equilotl) — so it's the only value that's guaranteed to be correct.
 declare const __filename: string;
 const OUR_PATCHER_PATH = __filename;
 
@@ -67,7 +67,7 @@ function patchLatest() {
         }));
 
         // Absolute path to our real patcher bundle (see OUR_PATCHER_PATH above),
-        // with a try/catch fallback to vanilla Discord if anything goes wrong â€”
+        // with a try/catch fallback to vanilla Discord if anything goes wrong —
         // so a failed repatch can never crash the new Discord version or leave
         // it stuck relaunching into a broken/duplicate state.
         const indexJs = [

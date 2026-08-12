@@ -66,7 +66,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({ theme, enabledThemeLinks, 
             return;
         }
 
-        // Add to enabledThemeLinks only â€” Themes.ts merges both arrays automatically.
+        // Add to enabledThemeLinks only — Themes.ts merges both arrays automatically.
         // We intentionally do NOT add to themeLinks here to avoid duplicates.
         const nextEnabled = [...enabledThemeLinks, themeUrl];
         setEnabledThemeLinks(nextEnabled);

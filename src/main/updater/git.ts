@@ -4,4 +4,4 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// Intentionnellement vide â€” YouCord ne supporte pas le mode git updater.
+// Intentionnellement vide — YouCord ne supporte pas le mode git updater.

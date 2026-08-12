@@ -15,7 +15,7 @@ const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
 const DS_KEY = "followme-target-v1";
 
-// â”€â”€ Etat global â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Etat global ──────────────────────────────────────────────────────────────
 let targetId: string | null = null;
 let targetName: string = "";
 
@@ -74,7 +74,7 @@ function followMe(userId: string) {
 
     notifyAll();
     persist().catch(() => { });
-    Toasts.show({ message: `Following Me: ${targetName} ðŸƒâ€â™‚ï¸`, type: Toasts.Type.SUCCESS, id: Toasts.genId() });
+    Toasts.show({ message: `Following Me: ${targetName} 🏃‍♂️`, type: Toasts.Type.SUCCESS, id: Toasts.genId() });
 }
 
 function unfollowMe() {
@@ -85,7 +85,7 @@ function unfollowMe() {
     Toasts.show({ message: `Stopped forcing ${name} to follow`, type: Toasts.Type.MESSAGE, id: Toasts.genId() });
 }
 
-// â”€â”€ Icone â”€â”€
+// ── Icone ──
 function FollowMeIcon({ filled = false }: { filled?: boolean; }) {
     return (
         <svg width="20" height="20" viewBox="0 0 24 24">
@@ -97,7 +97,7 @@ function FollowMeIcon({ filled = false }: { filled?: boolean; }) {
     );
 }
 
-// â”€â”€ HeaderBar Button â”€â”€
+// ── HeaderBar Button ──
 function FollowMeHeaderButton() {
     const tid = useFollowMeId();
     if (!tid) return null;
@@ -115,7 +115,7 @@ function FollowMeHeaderButton() {
     );
 }
 
-// â”€â”€ Context Menu â”€â”€
+// ── Context Menu ──
 const ctxPatch: NavContextMenuPatchCallback = (children, props) => {
     if (!children || !Array.isArray(children)) return;
     try {
@@ -137,7 +137,7 @@ const ctxPatch: NavContextMenuPatchCallback = (children, props) => {
     }
 };
 
-// â”€â”€ Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Plugin ───────────────────────────────────────────────────────────────────
 export default definePlugin({
     name: "FollowMe",
     enabledByDefault: true,

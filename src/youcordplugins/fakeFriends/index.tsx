@@ -13,15 +13,15 @@ import { ChannelStore, FluxDispatcher, GuildMemberStore, Menu, React, Relationsh
 
 const DS_KEY = "FakeFriends_state";
 
-// fakeState is in memory only â€” does NOT persist across restarts
+// fakeState is in memory only — does NOT persist across restarts
 const fakeState = new Map<string, "pending" | "accepted">();
 
 async function persistState() {
-    // No persistence â€” fakeState reset on restart intentionally
+    // No persistence — fakeState reset on restart intentionally
 }
 
 async function loadState() {
-    // No loading at startup â€” fakeState starts empty
+    // No loading at startup — fakeState starts empty
 }
 
 const FAKE_DM_PHRASES = [
@@ -36,7 +36,7 @@ const FAKE_DM_PHRASES = [
     "hey, cool nickname", "hi, do you stream?", "yo, we follow each other?",
 ];
 
-// â”€â”€ Patch RelationshipStore â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Patch RelationshipStore ────────────────────────────────────────────────────
 let origGetRelType: Function | null = null;
 let origIsFriend: Function | null = null;
 let origGetFriendIDs: Function | null = null;
@@ -89,7 +89,7 @@ function unpatchStore() {
     if (origGetMutable) { store.getMutableRelationships = origGetMutable; origGetMutable = null; }
 }
 
-// â”€â”€ Patch acceptFriend â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Patch acceptFriend ─────────────────────────────────────────────────────────
 let origAccept: Function | null = null;
 
 function patchAcceptFriend() {
@@ -121,7 +121,7 @@ function unpatchAcceptFriend() {
     } catch { }
 }
 
-// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Helpers ────────────────────────────────────────────────────────────────────
 function makeUserPayload(user: any) {
     const bot = isBot(user);
     return {
@@ -177,7 +177,7 @@ async function addPendingRequest(user: any) {
     });
 }
 
-// â”€â”€ Reapplying fakeStates at startup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Reapplying fakeStates at startup ──────────────────────────────────
 // After reload, we redispatch all saved states
 async function reapplyFakeStates() {
     for (const [userId, state] of fakeState) {
@@ -206,7 +206,7 @@ async function reapplyFakeStates() {
     }
 }
 
-// â”€â”€ Fake DM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Fake DM ────────────────────────────────────────────────────────────────────
 
 function getChannelClass(): any {
     try {
@@ -423,7 +423,7 @@ async function doFakeFriendRequest(userId: string) {
     await addPendingRequest(user);
 }
 
-// â”€â”€ Modal React pour saisir un nombre â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Modal React pour saisir un nombre ─────────────────────────────────────────────
 function askCount(title: string, max: number): Promise<number | null> {
     return new Promise(resolve => {
         const resolveRef = { current: resolve, done: false };
@@ -517,7 +517,7 @@ function askCount(title: string, max: number): Promise<number | null> {
     });
 }
 
-// â”€â”€ Candidats d'un serveur â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Candidats d'un serveur ────────────────────────────────────────────────────
 async function fetchAllGuildMembers(guildId: string): Promise<void> {
     const queries = [
         ..."abcdefghijklmnopqrstuvwxyz0123456789".split(""),
@@ -559,7 +559,7 @@ function getGuildCandidates(guildId: string): string[] {
     });
 }
 
-// â”€â”€ Fake Friend Request avec saisie du nombre â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Fake Friend Request avec saisie du nombre ─────────────────────────────────
 async function floodGuild(guildId: string) {
     Toasts.show({ message: "Chargement des membres...", type: Toasts.Type.MESSAGE, id: "ff-loading" });
     await fetchAllGuildMembers(guildId);
@@ -592,7 +592,7 @@ async function floodGuild(guildId: string) {
     Toasts.show({ message: `${sent} fake friend request${sent > 1 ? "s" : ""} sent!`, type: Toasts.Type.SUCCESS, id: Toasts.genId() });
 }
 
-// â”€â”€ Remove fake requests pour un serveur â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Remove fake requests pour un serveur ──────────────────────────────────────
 async function removeFakeFriendsForGuild(guildId: string) {
     const memberIds = new Set<string>(GuildMemberStore.getMemberIds(guildId) as string[]);
     const toRemove = [...fakeState.keys()].filter(id => memberIds.has(id));
@@ -612,7 +612,7 @@ async function removeFakeFriendsForGuild(guildId: string) {
     Toasts.show({ message: `${toRemove.length} fake request${toRemove.length > 1 ? "s" : ""} removed!`, type: Toasts.Type.SUCCESS, id: Toasts.genId() });
 }
 
-// â”€â”€ Fake Message Request â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Fake Message Request ─────────────────────────────────────────────────────
 async function fakeMessageRequestGuild(guildId: string) {
     const candidates = getGuildCandidates(guildId);
     if (!candidates.length) {
@@ -782,7 +782,7 @@ async function sendIncomingMessageRequest(user: any) {
     });
 }
 
-// â”€â”€ Context menus â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Context menus ──────────────────────────────────────────────────────────────
 const userContextPatch: NavContextMenuPatchCallback = (children, props) => {
     if (!children || !Array.isArray(children)) return;
     try {
@@ -850,7 +850,7 @@ const guildContextPatch: NavContextMenuPatchCallback = (children, props) => {
                 action={() => floodGuild(guildId)} />
         ];
 
-        // Bouton "Remove fake friend requests" â€” visible seulement si des fakes existent pour ce serveur
+        // Bouton "Remove fake friend requests" — visible seulement si des fakes existent pour ce serveur
         if (fakeCount > 0) {
             items.push(
                 <Menu.MenuItem
@@ -872,7 +872,7 @@ const guildContextPatch: NavContextMenuPatchCallback = (children, props) => {
     }
 };
 
-// â”€â”€ Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Plugin ─────────────────────────────────────────────────────────────────────
 export default definePlugin({
     name: "FakeFriends",
     enabledByDefault: true,
@@ -900,7 +900,7 @@ export default definePlugin({
         removeContextMenuPatch("user-context", userContextPatch);
         removeContextMenuPatch("guild-context", guildContextPatch);
         unpatchAcceptFriend();
-        // On ne clear pas fakeState au stop â€” persistant intentionnellement
+        // On ne clear pas fakeState au stop — persistant intentionnellement
         // Pour reset : clic Reset dans le plugin ou "Remove fake friend requests"
         unpatchStore();
         unpatchChannelStore();

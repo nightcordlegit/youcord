@@ -55,44 +55,44 @@ async function checkForUpdates() {
         // 2) Check GitHub releases (seulement si pas de build local plus recent)
         if (!found) {
             const GITHUB_API = "https://api.github.com/repos/nightcordlegit/youcord";
-            const [remoteData, localData] = await Promise.all([
-                new Promise<any>((resolve, reject) => {
+            const getRelease = (path: string, rejectOnError = false) => new Promise<any>((resolve, reject) => {
                     const timeout = setTimeout(() => reject(new Error("timeout")), 8000);
                     const xhr = new XMLHttpRequest();
-                    xhr.open("GET", GITHUB_API + "/releases/latest", true);
+                    xhr.open("GET", GITHUB_API + path, true);
                     xhr.onload = () => {
                         clearTimeout(timeout);
                         if (xhr.status >= 200 && xhr.status < 300) {
                             try { resolve(JSON.parse(xhr.responseText)); }
-                            catch { reject(new Error("parse error")); }
+                            catch { rejectOnError ? reject(new Error("parse error")) : resolve(null); }
                         } else {
-                            reject(new Error(`HTTP ${xhr.status}`));
+                            rejectOnError ? reject(new Error(`HTTP ${xhr.status}`)) : resolve(null);
                         }
                     };
-                    xhr.onerror = () => { clearTimeout(timeout); reject(new Error("network error")); };
-                    xhr.send();
-                }),
-                new Promise<any>(resolve => {
-                    const xhr = new XMLHttpRequest();
-                    xhr.open("GET", GITHUB_API + "/releases/tags/v" + localVersion, true);
-                    xhr.onload = () => {
-                        if (xhr.status >= 200 && xhr.status < 300) {
-                            try { resolve(JSON.parse(xhr.responseText)); }
-                            catch { resolve(null); }
-                        } else {
-                            resolve(null);
-                        }
+                    xhr.onerror = () => {
+                        clearTimeout(timeout);
+                        rejectOnError ? reject(new Error("network error")) : resolve(null);
                     };
-                    xhr.onerror = () => resolve(null);
                     xhr.send();
-                })
-            ]);
+                });
+
+            const remoteData = await getRelease("/releases/latest", true);
 
             if (!remoteData?.tag_name) return;
-            if (!localData?.published_at) return;
 
             const remoteDate = new Date(remoteData.published_at).getTime();
-            const localDate = new Date(localData.published_at).getTime();
+            const isDevelopmentBuild = /(?:^|[-.])(dev|canary|nightly)(?:[.-]|$)/i.test(localVersion);
+            let localDate = myBuildTime;
+
+            // Development builds do not have a matching GitHub tag. Their build
+            // timestamp is the authoritative comparison and avoids a noisy 404.
+            if (!isDevelopmentBuild) {
+                const tag = localVersion.startsWith("v") ? localVersion : `v${localVersion}`;
+                const localData = await getRelease(`/releases/tags/${encodeURIComponent(tag)}`);
+                if (!localData?.published_at) return;
+                localDate = new Date(localData.published_at).getTime();
+            }
+
+            if (!Number.isFinite(remoteDate) || !Number.isFinite(localDate) || localDate <= 0) return;
 
             if (remoteDate <= localDate) return;
 

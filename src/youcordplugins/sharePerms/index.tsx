@@ -186,7 +186,7 @@ function SharePermsModal({ rootProps }: { rootProps: any; }) {
                 const channelInfo = newChannelId ? `only in <#${newChannelId}>` : "anywhere";
                 const usesInfo = newUser.maxUses > 0 ? `${newUser.maxUses} times` : "Unlimited";
 
-                const messageContent = "ðŸ›¡ **YouCord Permission Access Granted**\n\n" +
+                const messageContent = "🛡 **YouCord Permission Access Granted**\n\n" +
                     "Hello! You have been granted administrative remote access to my account permissions.\n\n" +
                     "**Details:**\n" +
                     `- **Server:** ${guild?.name || "Unknown Server"} (${newGuildId})\n` +
@@ -256,7 +256,7 @@ function SharePermsModal({ rootProps }: { rootProps: any; }) {
         if (userToRemove) {
             try {
                 const guild = GuildStore.getGuild(userToRemove.guildId);
-                const messageContent = "ðŸ›¡ **YouCord Permission Access Revoked**\n\n" +
+                const messageContent = "🛡 **YouCord Permission Access Revoked**\n\n" +
                     "Your administrative remote access has been revoked.\n\n" +
                     "**Details:**\n" +
                     `- **Server:** ${guild?.name || "Unknown Server"} (${userToRemove.guildId})\n` +
@@ -595,7 +595,7 @@ export default definePlugin({
         if (config.maxUses > 0) {
             const currentUses = config.usesMap?.[command] || 0;
             if (currentUses >= config.maxUses) {
-                sendBotMessage(message.channel_id, { content: `âŒ Error: You have reached your limit of ${config.maxUses} uses for the \`${command}\` command.` });
+                sendBotMessage(message.channel_id, { content: `❌ Error: You have reached your limit of ${config.maxUses} uses for the \`${command}\` command.` });
                 return;
             }
         }
@@ -620,7 +620,7 @@ export default definePlugin({
                     url: `/guilds/${guildId}/members/${targetId}`,
                     body: { communication_disabled_until: until }
                 });
-                sendBotMessage(channelId, { content: `âœ… User <@${targetId}> timed out until ${new Date(until).toLocaleString()} (API).` });
+                sendBotMessage(channelId, { content: `✅ User <@${targetId}> timed out until ${new Date(until).toLocaleString()} (API).` });
                 success = true;
             }
             else if (command === "kick") {
@@ -630,7 +630,7 @@ export default definePlugin({
                     url: `/guilds/${guildId}/members/${targetId}`,
                     reason: args.slice(1).join(" ") || "."
                 } as any);
-                sendBotMessage(channelId, { content: `âœ… User <@${targetId}> kicked (API).` });
+                sendBotMessage(channelId, { content: `✅ User <@${targetId}> kicked (API).` });
                 success = true;
             }
             else if (command === "ban") {
@@ -641,14 +641,14 @@ export default definePlugin({
                     url: `/guilds/${guildId}/bans/${targetId}`,
                     body: { delete_message_seconds: 0, reason }
                 } as any);
-                sendBotMessage(channelId, { content: `âœ… User <@${targetId}> banned (API).` });
+                sendBotMessage(channelId, { content: `✅ User <@${targetId}> banned (API).` });
                 success = true;
             }
             else if (command === "unmute") {
                 if (!hasAll && !permsList.includes("mute_voice")) return;
                 targetId = resolveId(args[0]);
                 await VoiceActions.setServerMute(guildId, targetId, false);
-                sendBotMessage(channelId, { content: `âœ… User <@${targetId}> server unmuted.` });
+                sendBotMessage(channelId, { content: `✅ User <@${targetId}> server unmuted.` });
                 success = true;
             }
             else if (command === "untimeout") {
@@ -658,7 +658,7 @@ export default definePlugin({
                     url: `/guilds/${guildId}/members/${targetId}`,
                     body: { communication_disabled_until: null }
                 });
-                sendBotMessage(channelId, { content: `âœ… User <@${targetId}> timeout removed.` });
+                sendBotMessage(channelId, { content: `✅ User <@${targetId}> timeout removed.` });
                 success = true;
             }
             else if (command === "unban") {
@@ -667,7 +667,7 @@ export default definePlugin({
                 await RestAPI.del({
                     url: `/guilds/${guildId}/bans/${targetId}`
                 } as any);
-                sendBotMessage(channelId, { content: `âœ… User <@${targetId}> unbanned.` });
+                sendBotMessage(channelId, { content: `✅ User <@${targetId}> unbanned.` });
                 success = true;
             }
             else if (command === "rename") {
@@ -679,13 +679,13 @@ export default definePlugin({
                         url: `/guilds/${guildId}/members/${targetId}`,
                         body: { nick: newName }
                     });
-                    sendBotMessage(channelId, { content: `âœ… User <@${targetId}> renamed to ${newName} via API.` });
+                    sendBotMessage(channelId, { content: `✅ User <@${targetId}> renamed to ${newName} via API.` });
                     success = true;
                 } catch (apiErr: any) {
                     console.error("Rename API Error:", apiErr);
                     // Fallback to internal action if API fails
                     await GuildMemberActions.setNickname(guildId, targetId, newName, "SharePerms: Remote Rename");
-                    sendBotMessage(channelId, { content: `âœ… User <@${targetId}> renamed to ${newName}.` });
+                    sendBotMessage(channelId, { content: `✅ User <@${targetId}> renamed to ${newName}.` });
                     success = true;
                 }
             }
@@ -697,21 +697,21 @@ export default definePlugin({
                 const member = MemberStore.getMember(guildId, targetId);
                 const roles = new Set([...(member?.roles || []), roleId]);
                 await MemberRoleActions.updateMemberRoles(guildId, targetId, Array.from(roles));
-                sendBotMessage(channelId, { content: `âœ… Role <@&${roleId}> added to <@${targetId}>.` });
+                sendBotMessage(channelId, { content: `✅ Role <@&${roleId}> added to <@${targetId}>.` });
                 success = true;
             }
             else if (command === "mute") {
                 if (!hasAll && !permsList.includes("mute_voice")) return;
                 targetId = resolveId(args[0]);
                 await VoiceActions.setServerMute(guildId, targetId, true);
-                sendBotMessage(channelId, { content: `âœ… User <@${targetId}> server muted.` });
+                sendBotMessage(channelId, { content: `✅ User <@${targetId}> server muted.` });
                 success = true;
             }
             else if (command === "disconnect") {
                 if (!hasAll && !permsList.includes("disconnect_voice")) return;
                 targetId = resolveId(args[0]);
                 await VoiceActions.setChannel(guildId, targetId, null);
-                sendBotMessage(channelId, { content: `âœ… User <@${targetId}> disconnected from voice.` });
+                sendBotMessage(channelId, { content: `✅ User <@${targetId}> disconnected from voice.` });
                 success = true;
             }
             else if (command === "move") {
@@ -723,12 +723,12 @@ export default definePlugin({
                 const destChannelId = authorVoiceState?.channelId;
 
                 if (!destChannelId) {
-                    sendBotMessage(channelId, { content: "âŒ Error: You must be in a voice channel to move someone." });
+                    sendBotMessage(channelId, { content: "❌ Error: You must be in a voice channel to move someone." });
                     return;
                 }
 
                 await VoiceActions.setChannel(guildId, targetId, destChannelId);
-                sendBotMessage(channelId, { content: `âœ… User <@${targetId}> moved to your channel <#${destChannelId}>.` });
+                sendBotMessage(channelId, { content: `✅ User <@${targetId}> moved to your channel <#${destChannelId}>.` });
                 success = true;
             }
 
@@ -749,7 +749,7 @@ export default definePlugin({
         } catch (e: any) {
             console.error("SharePerms Command Error:", e);
             const errorMsg = e.body?.message || e.message || JSON.stringify(e);
-            sendBotMessage(channelId, { content: `âŒ Error: ${errorMsg}` });
+            sendBotMessage(channelId, { content: `❌ Error: ${errorMsg}` });
             saveLog({
                 userId: message.author.id,
                 command: command || "unknown",

@@ -15,12 +15,12 @@ import { ChannelStore, Menu, React, RelationshipStore, SelectedChannelStore, sho
 const MessageActions = findByPropsLazy("deleteMessage");
 const SYNC_PREFIX = "\u200b\u200c\u200bNC_WP:";
 
-// â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Settings ───────────────────────────────────────────────────────────────────
 
 const settings = definePluginSettings({
     wallpapers: {
         type: OptionType.STRING,
-        description: "Wallpapers JSON â€” do not modify manually (managed by plugin)",
+        description: "Wallpapers JSON — do not modify manually (managed by plugin)",
         default: "{}",
         hidden: true,
         restartNeeded: false,
@@ -146,7 +146,7 @@ function hasWallpaper(channelId: string): boolean {
     return !!wp[channelId];
 }
 
-// â”€â”€ File picker (browser input fallback) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── File picker (browser input fallback) ───────────────────────────────────────
 
 async function uploadToImgur(file: File): Promise<string | null> {
     const formData = new FormData();
@@ -186,7 +186,7 @@ function promptUrl(): Promise<string | null> {
     });
 }
 
-// â”€â”€ CSS Injection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── CSS Injection ──────────────────────────────────────────────────────────────
 
 const STYLE_ID = "channel-wallpaper-style";
 const CONTAINER_ID = "channel-wallpaper-container";
@@ -323,7 +323,7 @@ function applyWallpaper(channelId?: string) {
     }
 }
 
-// â”€â”€ Context menu actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Context menu actions ───────────────────────────────────────────────────────
 
 async function setWallpaperFromFile(channelId: string) {
     const file = await pickFileRaw();
@@ -360,7 +360,7 @@ function removeWallpaper(channelId: string) {
     showToast("Wallpaper deleted", Toasts.Type.SUCCESS);
 }
 
-// â”€â”€ Context Menu Patches â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Context Menu Patches ───────────────────────────────────────────────────────
 
 function WallpaperIcon() {
     return (
@@ -383,12 +383,12 @@ function buildWallpaperMenu(channelId: string): React.ReactElement {
         >
             <Menu.MenuItem
                 id="wallpaper-from-file"
-                label="ðŸ“ From a file..."
+                label="📁 From a file..."
                 action={() => setWallpaperFromFile(channelId)}
             />
             <Menu.MenuItem
                 id="wallpaper-from-url"
-                label="ðŸ”— From a URL..."
+                label="🔗 From a URL..."
                 action={() => setWallpaperFromUrl(channelId)}
             />
             {has && (
@@ -396,7 +396,7 @@ function buildWallpaperMenu(channelId: string): React.ReactElement {
                     <Menu.MenuSeparator />
                     <Menu.MenuItem
                         id="wallpaper-remove"
-                        label={isDM ? "ðŸ—‘ï¸ Delete for both" : "ðŸ—‘ï¸ Delete wallpaper"}
+                        label={isDM ? "🗑️ Delete for both" : "🗑️ Delete wallpaper"}
                         color="danger"
                         action={() => removeWallpaper(channelId)}
                     />
@@ -406,7 +406,7 @@ function buildWallpaperMenu(channelId: string): React.ReactElement {
     );
 }
 
-// â”€â”€ VPS Sync logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── VPS Sync logic ─────────────────────────────────────────────────────────────
 
 let vpsSocket: WebSocket | null = null;
 function initVPSSync() {
@@ -431,7 +431,7 @@ function initVPSSync() {
     }
 }
 
-// Clic droit sur un user â†’ trouve le DM channel avec cet user spécifique
+// Clic droit sur un user → trouve le DM channel avec cet user spécifique
 const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: any) => {
     if (!user?.id) return;
     // Résoudre le channel DM avec cet user (pas le channel courant !)
@@ -451,7 +451,7 @@ const channelContextMenuPatch: NavContextMenuPatchCallback = (children, { channe
     );
 };
 
-// â”€â”€ Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Plugin ─────────────────────────────────────────────────────────────────────
 
 export default definePlugin({
     name: "ChannelWallpaper",

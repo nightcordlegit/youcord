@@ -67,13 +67,13 @@ export function removeProfileBadge(badge: ProfileBadge) {
  * You probably don't need to use this.
  */
 export function _getBadges(args: BadgeUserArgs) {
-    // â”€â”€ Stealth Mode Bypass â”€â”€
+    // ── Stealth Mode Bypass ──
     try {
         const { isStealthModeEnabled } = require("./HeaderBar");
         if (isStealthModeEnabled()) return [];
     } catch { }
 
-    // â”€â”€ Hidden badge sources (per-profile, synced via cloud) â”€â”€
+    // ── Hidden badge sources (per-profile, synced via cloud) ──
     const hiddenSources = getHiddenBadgeSources(args.userId);
     const isHidden = (source: string) => hiddenSources.includes(source as any);
 

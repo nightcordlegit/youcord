@@ -7,13 +7,14 @@
 import "./styles.css";
 
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import { runDiscordRequest } from "@utils/discordRequestQueue";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { GuildMemberStore, GuildRoleStore, GuildStore, Menu, React, RestAPI, Select, showToast, Toasts, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-/* â”€â”€ State â”€â”€ */
+/* ── State ── */
 const state = {
     running: false,
     finished: false,
@@ -77,22 +78,22 @@ async function startBomb(guildId: string, roleId: string | "all", message: strin
         const user = UserStore.getUser(m.userId);
         const name = user ? (user.globalName || user.username) : m.userId;
         try {
-            const dmRes = await RestAPI.post({ url: "/users/@me/channels", body: { recipient_id: m.userId } });
+            const dmRes = await runDiscordRequest(
+                () => RestAPI.post({ url: "/users/@me/channels", body: { recipient_id: m.userId } })
+            );
             if (!dmRes?.body?.id) {
-                state.log.push(`âŒ ${name} â€” DMs closed or error`);
+                state.log.push(`❌ ${name} — DMs closed or error`);
                 state.notify();
                 continue;
             }
-            await RestAPI.post({ url: `/channels/${dmRes.body.id}/messages`, body: { content: message, tts: false } });
+            await runDiscordRequest(
+                () => RestAPI.post({ url: `/channels/${dmRes.body.id}/messages`, body: { content: message, tts: false } })
+            );
             state.done++;
-            state.log.push(`âœ… ${name}`);
+            state.log.push(`✅ ${name}`);
         } catch (e: any) {
             state.log.push(`❌ ${name} — ${e?.message ?? "error (rate limit?)"}`);
-            if (e?.status === 429 || e?.statusCode === 429) {
-                state.log.push("⏳ Rate limit — pausing 15s");
-                state.notify();
-                if (!state.aborted) await sleep(15000);
-            }
+            if (e?.status === 429 || e?.statusCode === 429) state.log.push("⏳ Rate limit persisted after retries");
         }
         state.notify();
         if (!state.aborted) await sleep(state.delayMs);
@@ -189,7 +190,7 @@ function DMBombModal({ rootProps, guildId }: { rootProps: any; guildId: string; 
                             rows={5}
                         />
                         <p className="dmb-warn">
-                            âš ï¸ Intensive botting can get your account banned. Delay:{" "}
+                            ⚠️ Intensive botting can get your account banned. Delay:{" "}
                             {editingDelay ? (
                                 <input
                                     className="dmb-delay-input"
@@ -234,7 +235,7 @@ function DMBombModal({ rootProps, guildId }: { rootProps: any; guildId: string; 
                             <div className="dmb-bar-fill" style={{ width: `${pct}%` }} />
                         </div>
                         {s.finished && (
-                            <p className="dmb-done">âœ… Finished with {s.done} DMs sent.</p>
+                            <p className="dmb-done">✅ Finished with {s.done} DMs sent.</p>
                         )}
                         <div className="dmb-log" ref={logRef}>
                             {s.log.map((line, i) => <div key={i} className="dmb-log-line">{line}</div>)}
@@ -247,7 +248,7 @@ function DMBombModal({ rootProps, guildId }: { rootProps: any; guildId: string; 
                 {idle && (
                     <>
                         <button className="dmb-btn dmb-btn-secondary" onClick={rootProps.onClose}>Cancel</button>
-                        <button className="dmb-btn dmb-btn-danger" onClick={() => startBomb(guildId, roleId, msg)} disabled={!msg.trim()}>ðŸ’¥ Bombard</button>
+                        <button className="dmb-btn dmb-btn-danger" onClick={() => startBomb(guildId, roleId, msg)} disabled={!msg.trim()}>💥 Bombard</button>
                     </>
                 )}
                 {s.running && (
@@ -269,7 +270,7 @@ function DMBombModal({ rootProps, guildId }: { rootProps: any; guildId: string; 
 
 export default definePlugin({
     name: "DMBomb",
-    enabledByDefault: true,
+    enabledByDefault: false,
     description: "Sends an aggressive message to ALL server members or a specific role via right click.",
     authors: [{ name: "YouCord", id: 0n }],
 

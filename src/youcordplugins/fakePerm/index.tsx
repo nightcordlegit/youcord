@@ -136,7 +136,7 @@ function Btn({ label, onClick, primary = false }: { label: string; onClick: () =
     return <button onClick={onClick} style={{ background: primary ? "var(--brand-experiment)" : "none", border: "none", borderRadius: primary ? 3 : 0, color: primary ? "#fff" : "var(--text-normal)", cursor: "pointer", padding: "8px 16px", fontWeight: primary ? 600 : 400 }}>{label}</button>;
 }
 
-// â”€â”€â”€ Common Styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Common Styles ───────────────────────────────────────────────────────────
 
 const modalTitle: React.CSSProperties = { fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 600, lineHeight: "24px", color: "#ffffff", margin: 0, padding: 0 };
 const footerStyle: React.CSSProperties = { display: "flex", gap: "24px", padding: "16px" };
@@ -144,7 +144,7 @@ function footerBtn(bg: string): React.CSSProperties { return { flex: 1, fontFami
 function textareaStyle(height = "100px"): React.CSSProperties { return { fontFamily: "var(--font-primary)", width: "100%", height, background: "#383a40", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "8px", padding: "10px 12px", color: "#ffffff", fontSize: "16px", fontWeight: 400, lineHeight: "22px", outline: "none", resize: "none", boxSizing: "border-box", overflowY: "auto", scrollbarWidth: "thin" } as React.CSSProperties; }
 function sectionLabel(mb = "8px"): React.CSSProperties { return { fontFamily: "var(--font-primary)", fontSize: "16px", fontWeight: 600, color: "#ffffff", marginBottom: mb }; }
 
-// â”€â”€â”€ Modals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Modals ───────────────────────────────────────────────────────────────────
 
 function RenameModal({ rootProps, user, guildId }: { rootProps: any; user: any; guildId: string | null; }) {
     const member = getMember(guildId, user.id);
@@ -154,7 +154,7 @@ function RenameModal({ rootProps, user, guildId }: { rootProps: any; user: any; 
         if (trimmed) fakeNicks.set(user.id, trimmed);
         else fakeNicks.delete(user.id);
         notifyMemberListChange();
-        toast(`Nickname changed â†’ ${trimmed || "(reset)"}`);
+        toast(`Nickname changed → ${trimmed || "(reset)"}`);
         rootProps.onClose();
     }
     return (
@@ -344,7 +344,7 @@ function AddRoleModal({ rootProps, user, guildId }: { rootProps: any; user: any;
                     {filtered.map(role => {
                         const color = role.color ? `#${role.color.toString(16).padStart(6, "0")}` : "#80848e";
                         return (
-                            <div key={role.id} onClick={() => { toast(`Role ${role.name} â€” simulation`); rootProps.onClose(); }} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 12px", cursor: "pointer", opacity: memberRoleIds.includes(role.id) ? 0.5 : 1 }} onMouseEnter={e => (e.currentTarget.style.background = "var(--background-modifier-hover)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                            <div key={role.id} onClick={() => { toast(`Role ${role.name} — simulation`); rootProps.onClose(); }} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 12px", cursor: "pointer", opacity: memberRoleIds.includes(role.id) ? 0.5 : 1 }} onMouseEnter={e => (e.currentTarget.style.background = "var(--background-modifier-hover)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
                                 <div style={{ width: 12, height: 12, borderRadius: "50%", background: color, flexShrink: 0 }} />
                                 <span style={{ color: "var(--text-normal, #dcddde)", fontSize: 14 }}>{role.name}</span>
                             </div>
@@ -356,7 +356,7 @@ function AddRoleModal({ rootProps, user, guildId }: { rootProps: any; user: any;
     );
 }
 
-// â”€â”€â”€ Context menu patches â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Context menu patches ─────────────────────────────────────────────────────
 
 function findGroupWithItem(children: any[], itemIds: string[]): number {
     for (let i = 0; i < children.length; i++) {
@@ -450,7 +450,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: any) 
                         } catch { }
                         allChannels.sort((a, b) => a.position - b.position);
                         if (allChannels.length === 0) return <Menu.MenuItem key="fp-move-empty" id="fp-move-empty" label="No voice channels" disabled />;
-                        return allChannels.map(ch => <Menu.MenuItem key={`fp-move-${ch.id}`} id={`fp-move-${ch.id}`} label={`ðŸ”Š ${ch.name}`} action={() => toast(`Moved to #${ch.name} â€” simulation`)} />);
+                        return allChannels.map(ch => <Menu.MenuItem key={`fp-move-${ch.id}`} id={`fp-move-${ch.id}`} label={`🔊 ${ch.name}`} action={() => toast(`Moved to #${ch.name} — simulation`)} />);
                     })()}
                 </Menu.MenuItem>
                 <Menu.MenuCheckboxItem key="fp-mute" id="fp-mute" label="Server Mute" color="danger" checked={mutedUsers.get(user.id) === true} action={() => { const next = !mutedUsers.get(user.id); mutedUsers.set(user.id, next); notifyBadgeChange(); }} />
@@ -470,7 +470,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: any) 
     }
 };
 
-// â”€â”€â”€ Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Plugin ───────────────────────────────────────────────────────────────────
 
 export default definePlugin({
     name: "FakePerm",
@@ -556,7 +556,7 @@ export default definePlugin({
                     deletedMessages.clear();
                     notifyBadgeChange();
                 }
-                toast(isEnabled ? "FakePerm enabled âœ“" : "FakePerm disabled âœ“");
+                toast(isEnabled ? "FakePerm enabled ✓" : "FakePerm disabled ✓");
             }
         }
     },
@@ -595,7 +595,7 @@ export default definePlugin({
             isEnabled = false;
         }
 
-        // Patches are ALWAYS registered â€” they check isEnabled at runtime
+        // Patches are ALWAYS registered — they check isEnabled at runtime
         addContextMenuPatch("user-context", userContextPatch);
         addContextMenuPatch("message", messageContextPatch);
 

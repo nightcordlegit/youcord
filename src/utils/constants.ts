@@ -814,7 +814,7 @@ export const EquicordDevs = Object.freeze({
         id: 703634705152606318n
     },
     Tolgchu: {
-        name: "âœ¨Tolgchuâœ¨",
+        name: "✨Tolgchu✨",
         id: 329671025312923648n
     },
     DaBluLite: {
@@ -1099,7 +1099,7 @@ export const EquicordDevs = Object.freeze({
         id: 707309693449535599n
     },
     seth: {
-        name: "Sâ‚¬th",
+        name: "S€th",
         id: 1273447359417942128n
     },
     SteelTech: {

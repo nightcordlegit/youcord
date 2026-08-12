@@ -80,7 +80,7 @@ export default definePlugin({
             // nick null or empty = already reset (by us or the admin), nothing to do
             if (!nick) return;
 
-            // Someone forced a nick on us â€” reset immediately
+            // Someone forced a nick on us — reset immediately
             setTimeout(() => resetNick(guildId, nick, currentUser.id), 300);
         }
     },

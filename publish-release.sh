@@ -1,5 +1,5 @@
 ﻿#!/usr/bin/env bash
-# â”€â”€â”€ YouCord â€” Publier une nouvelle release sur Gitea â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── YouCord — Publier une nouvelle release sur Gitea ──────────────────────
 # Usage : ./publish-release.sh 1.18.1 "Description des changements"
 # Necessite : pnpm, node, dotnet SDK, curl, zip, git
 #
@@ -19,12 +19,12 @@ fi
 
 [[ -z "$NOTES" ]] && NOTES="YouCord $VERSION"
 
-# â”€â”€ Config Gitea â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Config Gitea ──────────────────────────────────────────────────────────────
 GITEA_URL="https://source.youcord.fr"
 GITEA_REPO="youcord/youcord"
 GITEA_API="$GITEA_URL/api/v1"
 
-# â”€â”€ Lecture du token depuis le fichier local (non versionne) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Lecture du token depuis le fichier local (non versionne) ──────────────────
 TOKEN_FILE="$HOME/.gitea_token"
 if [[ ! -f "$TOKEN_FILE" ]]; then
     echo "[ERREUR] Fichier de token introuvable : $TOKEN_FILE"
@@ -40,7 +40,7 @@ if [[ -z "$GITEA_TOKEN" ]]; then
     exit 1
 fi
 
-# â”€â”€ Chemins de sortie â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Chemins de sortie ─────────────────────────────────────────────────────────
 DIST_DIR="dist/desktop"
 OUT_DIR="release/installer"
 DIST_ZIP="$OUT_DIR/youcord-dist.zip"
@@ -49,12 +49,12 @@ VERSION_JSON="$OUT_DIR/version.json"
 DESKTOP_ASAR="dist/desktop.asar"
 
 echo ""
-echo " â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—"
-echo " â•‘    YOUCORD â€” Publication release v$VERSION"
-echo " â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•"
+echo " ╔═══════════════════════════════════════════════════╗"
+echo " â•‘    YOUCORD — Publication release v$VERSION"
+echo " ╚═══════════════════════════════════════════════════╝"
 echo ""
 
-# â”€â”€ 1. Mise Ã  jour des versions dans les fichiers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── 1. Mise à jour des versions dans les fichiers ─────────────────────────────
 echo " [1/8] Mise a jour de la version vers $VERSION..."
 
 node -e "
@@ -66,7 +66,7 @@ fs.writeFileSync('package.json', JSON.stringify(pkg, null, 4) + '\n', 'utf8');
 
 echo " [1/8] Version mise a jour."
 
-# â”€â”€ 2. Envoi du code source sur Gitea â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── 2. Envoi du code source sur Gitea ─────────────────────────────────────────
 echo ""
 echo " [2/8] Committer et pusher le code source..."
 
@@ -85,7 +85,7 @@ fi
 
 echo " [2/8] Code source synchronise avec Gitea."
 
-# â”€â”€ 3. Build JS (avec obfuscation automatique) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── 3. Build JS (avec obfuscation automatique) ────────────────────────────────
 echo ""
 echo " [3/8] Build + obfuscation en cours..."
 
@@ -99,7 +99,7 @@ fi
 
 echo " [3/8] Build + obfuscation termines !"
 
-# â”€â”€ 4. Preparer les assets supplementaires â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── 4. Preparer les assets supplementaires ────────────────────────────────────
 echo ""
 echo " [4/8] Copie des assets (ffmpeg, node, modules...) vers $DIST_DIR..."
 
@@ -107,7 +107,7 @@ node scripts/build/collect-assets.mjs
 
 echo " [4/8] Assets copies."
 
-# â”€â”€ 5. Compiler YouCord-Installer.exe â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── 5. Compiler YouCord-Installer.exe ──────────────────────────────────────
 echo ""
 echo " [5/8] Compilation de YouCord-Installer.exe..."
 
@@ -132,7 +132,7 @@ fi
 INSTALLER_SIZE=$(stat -c%s "$INSTALLER_EXE" 2>/dev/null || stat -f%z "$INSTALLER_EXE")
 echo " [5/8] YouCord-Installer.exe cree ($INSTALLER_SIZE octets)"
 
-# â”€â”€ 6. CrÃ©er youcord-dist.zip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── 6. Créer youcord-dist.zip ──────────────────────────────────────────────
 echo ""
 echo " [6/8] Creation de youcord-dist.zip..."
 
@@ -161,7 +161,7 @@ fi
 DIST_ZIP_SIZE=$(stat -c%s "$DIST_ZIP" 2>/dev/null || stat -f%z "$DIST_ZIP")
 echo " [6/8] youcord-dist.zip cree ($DIST_ZIP_SIZE octets)"
 
-# â”€â”€ 7. Mettre Ã  jour version.json â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── 7. Mettre à jour version.json ─────────────────────────────────────────────
 echo ""
 echo " [7/8] Mise a jour de version.json..."
 
@@ -194,7 +194,7 @@ else
     git push origin "$TAG_NAME"
 fi
 
-# â”€â”€ 8. Publier sur Gitea Releases â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── 8. Publier sur Gitea Releases ─────────────────────────────────────────────
 echo ""
 echo " [8/8] Creation de la release v$VERSION sur Gitea..."
 
@@ -206,7 +206,7 @@ RELEASE_ID=$(printf '%s' "$EXISTING_RELEASE_RESPONSE" | node -e "let d=''; proce
 if [[ -n "$RELEASE_ID" ]]; then
     echo " Release Gitea deja presente (ID: $RELEASE_ID)"
 else
-    # 8a. CrÃ©er la release via API Gitea
+    # 8a. Créer la release via API Gitea
     RELEASE_RESPONSE=$(curl -s -X POST "$GITEA_API/repos/$GITEA_REPO/releases" \
         -H "Authorization: token $GITEA_TOKEN" \
         -H "Content-Type: application/json" \
@@ -264,17 +264,17 @@ upload_asset "$DIST_ZIP"      "youcord-dist.zip"      "application/zip"
 upload_asset "$DESKTOP_ASAR"  "desktop.asar"            "application/octet-stream"
 upload_asset "$VERSION_JSON"  "version.json"            "application/json"
 
-# â”€â”€ Done â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Done ───────────────────────────────────────────────────────────────────────
 echo ""
-echo " â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—"
+echo " ╔═══════════════════════════════════════════════════════════════════════╗"
 echo " â•‘  YouCord v$VERSION publie avec succes sur Gitea !"
 echo " â•‘"
 echo " â•‘  URL : $GITEA_URL/$GITEA_REPO/releases/tag/v$VERSION"
 echo " â•‘"
 echo " â•‘  Fichiers publies :"
-echo " â•‘    YouCord-Installer.exe    â€” installeur .exe avec GUI"
-echo " â•‘    youcord-dist.zip         â€” JS obfusques (pour l'injec.)"
-echo " â•‘    desktop.asar               â€” asar Discord patcher"
-echo " â•‘    version.json               â€” metadonnees de version"
-echo " â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•"
+echo " â•‘    YouCord-Installer.exe    — installeur .exe avec GUI"
+echo " â•‘    youcord-dist.zip         — JS obfusques (pour l'injec.)"
+echo " â•‘    desktop.asar               — asar Discord patcher"
+echo " â•‘    version.json               — metadonnees de version"
+echo " ╚═══════════════════════════════════════════════════════════════════════╝"
 echo ""

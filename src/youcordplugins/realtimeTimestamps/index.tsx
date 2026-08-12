@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 import { moment, useEffect, useReducer } from "@webpack/common";
 
-// â”€â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Settings ────────────────────────────────────────────────────────────────
 
 const settings = definePluginSettings({
     format: {
@@ -32,9 +32,9 @@ const settings = definePluginSettings({
     },
 });
 
-// â”€â”€â”€ Global tick â”€ one shared setInterval for all timestamp components â”€â”€â”€â”€â”€â”€â”€
+// ─── Global tick ─ one shared setInterval for all timestamp components ───────
 // This avoids creating one setInterval per rendered message (50+ messages = 50+
-// intervals â†’ 50+ React re-renders per second â†’ Discord freeze).
+// intervals → 50+ React re-renders per second → Discord freeze).
 
 const tickListeners = new Set<() => void>();
 let globalTickInterval: ReturnType<typeof setInterval> | null = null;
@@ -56,7 +56,7 @@ function stopGlobalTick() {
     }
 }
 
-// â”€â”€â”€ React Hook (only valid inside a React component) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── React Hook (only valid inside a React component) ────────────────────────
 function useSecondTick() {
     const [, tick] = useReducer((n: number) => n + 1, 0);
     useEffect(() => {
@@ -69,17 +69,17 @@ function useSecondTick() {
     }, []);
 }
 
-// â”€â”€â”€ Timestamp render functions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Timestamp render functions ──────────────────────────────────────────────
 // REAL FIX (confirmed against the stock CustomTimestamps plugin, which patches
 // these exact same Vencord match sites and works fine): the previous "BUGFIX"
-// diagnosis was wrong. There is no Hook-rule violation â€” these patch sites sit
+// diagnosis was wrong. There is no Hook-rule violation — these patch sites sit
 // directly inside the host component's render body, so calling a Hook here is
 // perfectly valid (CustomTimestamps' renderTimestamp does the same thing).
 //
 // The actual crash was caused by returning a *React element* (Fragment) where
 // Discord's own MessageTimestamp component expects a plain *string*. That same
 // variable is reused later in the same component for things like AM/PM format
-// detection via .match(...) and the edited-message a11y label â€” calling
+// detection via .match(...) and the edited-message a11y label — calling
 // .match() on a React element throws "e.match is not a function" on every
 // message render. Returning a plain string (like CustomTimestamps does) keeps
 // those other internal usages intact while still updating live every second
@@ -107,7 +107,7 @@ function RenderTooltipText(date: Date) {
         : moment(date).format("LLLL");
 }
 
-// â”€â”€â”€ Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Plugin ───────────────────────────────────────────────────────────────────
 
 export default definePlugin({
     name: "RealtimeTimestamps",
@@ -117,7 +117,7 @@ export default definePlugin({
     enabledByDefault: true,
     settings,
 
-    // Called directly by patches â€” must return a plain string, not a React
+    // Called directly by patches — must return a plain string, not a React
     // element, since these substitute for values Discord later treats as text
     // (and in some cases re-parses with .match()).
     renderCozy(date: Date) {
@@ -139,7 +139,7 @@ export default definePlugin({
     },
 
     patches: [
-        // â”€â”€â”€ Main Timestamp component (cozy + compact messages + hover tooltip) â”€
+        // ─── Main Timestamp component (cozy + compact messages + hover tooltip) ─
         {
             find: "#{intl::MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL}",
             replacement: [
@@ -161,7 +161,7 @@ export default definePlugin({
             ],
         },
 
-        // â”€â”€â”€ Timestamp markdown <t:unix:t> â€” hover tooltip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ─── Timestamp markdown <t:unix:t> — hover tooltip ────────────────────
         {
             find: /.full,.{0,15}children:/,
             replacement: {

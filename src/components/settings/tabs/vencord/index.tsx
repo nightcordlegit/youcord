@@ -176,7 +176,7 @@ function StealthModeSection() {
             <Heading className={Margins.top20}>{t("Stealth Mode")}</Heading>
             <Paragraph className={Margins.bottom16}>
                 {enabled
-                    ? "Stealth mode is enabled â€â€ all YouCord visual elements are hidden. Shortcut: Ctrl+Shift+H"
+                    ? "Stealth mode is enabled — all YouCord visual elements are hidden. Shortcut: Ctrl+Shift+H"
                     : t("Hides all YouCord visual elements without disabling plugins. Shortcut: Ctrl+Shift+H")}
             </Paragraph>
             <Button

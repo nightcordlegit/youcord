@@ -12,7 +12,7 @@ import { Provider, SyncedLyric } from "@youcordplugins/musicControls/spotify/lyr
 interface GoogleData {
     src: string;
     sentences: {
-        // ðŸ³ï¸â€âš§ï¸
+        // 🏳️‍⚧️
         trans: string;
         orig: string;
         src_translit?: string;

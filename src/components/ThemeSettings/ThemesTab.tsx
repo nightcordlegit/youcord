@@ -206,7 +206,7 @@ function UserCSSThemeCard({ theme, enabled, onChange, onDelete, onSettingsReset 
                 <Flex flexDirection="row" gap="0.4em" style={{ alignItems: "center" }}>
                     {!!theme.homepageURL && <Link href={theme.homepageURL}>Homepage</Link>}
                     {!!(theme.homepageURL && theme.supportURL) && (
-                        <span style={{ color: "var(--text-muted)" }}>â€Â¢</span>
+                        <span style={{ color: "var(--text-muted)" }}>•</span>
                     )}
                     {!!theme.supportURL && <Link href={theme.supportURL}>Support</Link>}
                 </Flex>
@@ -342,7 +342,7 @@ function OtherThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton, 
                     )}
                     {!!theme.website && <Link href={theme.website}>Website</Link>}
                     {!!(theme.website && theme.invite) && (
-                        <span style={{ color: "var(--text-muted)" }}>â€Â¢</span>
+                        <span style={{ color: "var(--text-muted)" }}>•</span>
                     )}
                     {!!theme.invite && (
                         <Link

@@ -36,7 +36,7 @@
   "build": {
     "appId": "app.youcord.installer",
     "productName": "YouCord",
-    "copyright": "Copyright Â© 2026 YouCord",
+    "copyright": "Copyright © 2026 YouCord",
     "directories": {
       "output": "../release/installer"
     },

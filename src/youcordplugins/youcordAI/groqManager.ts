@@ -82,6 +82,6 @@ export async function hasAnyAIKey(): Promise<boolean> {
 }
 
 // Main chat entry point — delegates to registry (unchanged signature)
-export async function groqChat(opts: { messages: GroqChatMessage[]; temperature?: number; maxTokens?: number; forceModel?: string; maxRetries?: number; }): Promise<string> {
+export async function groqChat(opts: ChatCallOptions & { messages: GroqChatMessage[]; }): Promise<string> {
     return registryGroqChat(opts);
 }

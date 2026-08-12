@@ -19,7 +19,7 @@ const FluxDispatcher = findByPropsLazy("dispatch", "subscribe");
 const DS_KEY = "followuser-v2";
 const INACTIVITY_MS = 30 * 60 * 1000; // 30 minutes
 
-// â”€â”€ Etat global â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Etat global ───────────────────────────────────────────────────────────────
 let followedId: string | null = null;
 let followedName: string = "";
 let followedChannel: string | null = null;
@@ -69,13 +69,13 @@ function joinChannel(channelId: string) {
     } catch { }
 }
 
-// â”€â”€ Timer d'inactivite : unfollow auto apres 30min sans utilisation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Timer d'inactivite : unfollow auto apres 30min sans utilisation ───────────
 function resetInactivityTimer() {
     if (inactivityTimer) clearTimeout(inactivityTimer);
     lastActivity = Date.now();
     inactivityTimer = setTimeout(() => {
         if (followedId) {
-            Toasts.show({ message: `Follow inactif 30min â€” arret du suivi de ${followedName}`, type: Toasts.Type.FAILURE, id: Toasts.genId() });
+            Toasts.show({ message: `Follow inactif 30min — arret du suivi de ${followedName}`, type: Toasts.Type.FAILURE, id: Toasts.genId() });
             unfollow();
         }
     }, INACTIVITY_MS);
@@ -85,7 +85,7 @@ function clearInactivityTimer() {
     if (inactivityTimer) { clearTimeout(inactivityTimer); inactivityTimer = null; }
 }
 
-// â”€â”€ Listener voix â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Listener voix ─────────────────────────────────────────────────────────────
 function onVoiceStateUpdates(data: any) {
     if (!followedId) return;
     const states: any[] = Array.isArray(data?.voiceStates) ? data.voiceStates
@@ -110,7 +110,7 @@ function startFlux() {
 }
 function stopFlux() { fluxUnsub?.(); fluxUnsub = null; }
 
-// â”€â”€ Follow / Unfollow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Follow / Unfollow ─────────────────────────────────────────────────────────
 export async function follow(userId: string) {
     const user = UserStore?.getUser?.(userId);
     const name = user?.globalName ?? user?.username ?? userId;
@@ -153,7 +153,7 @@ function joinFollowed() {
     resetInactivityTimer();
 }
 
-// â”€â”€ Icone coeur â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Icone coeur ───────────────────────────────────────────────────────────────
 function HeartIcon({ filled = false }: { filled?: boolean; }) {
     return (
         <svg width="18" height="18" viewBox="0 0 24 24">
@@ -166,7 +166,7 @@ function HeartIcon({ filled = false }: { filled?: boolean; }) {
     );
 }
 
-// â”€â”€ Bouton HeaderBar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Bouton HeaderBar ──────────────────────────────────────────────────────────
 // Clic gauche = rejoindre son vocal
 // Clic droit  = unfollow
 function FollowHeaderButton() {
@@ -187,14 +187,14 @@ function FollowHeaderButton() {
     return (
         <HeaderBarButton
             icon={() => <HeartIcon filled={true} />}
-            tooltip={`${followedName} â€” Clic: rejoindre vocal | Clic droit: unfollow`}
+            tooltip={`${followedName} — Clic: rejoindre vocal | Clic droit: unfollow`}
             onClick={handleClick}
             onContextMenu={handleClick}
         />
     );
 }
 
-// â”€â”€ Context menu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Context menu ──────────────────────────────────────────────────────────────
 const ctxPatch: NavContextMenuPatchCallback = (children, props) => {
     const userId: string | undefined = props?.user?.id;
     if (!userId) return;
@@ -209,11 +209,11 @@ const ctxPatch: NavContextMenuPatchCallback = (children, props) => {
     );
 };
 
-// â”€â”€ Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Plugin ────────────────────────────────────────────────────────────────────
 export default definePlugin({
     name: "FollowUser",
     enabledByDefault: true,
-    description: "Suit un user en vocal. Clic droit â†’ Follow User. Coeur blanc = suivi actif (clic gauche = rejoindre, clic droit = unfollow). Auto-unfollow apres 30min d'inactivite.",
+    description: "Suit un user en vocal. Clic droit → Follow User. Coeur blanc = suivi actif (clic gauche = rejoindre, clic droit = unfollow). Auto-unfollow apres 30min d'inactivite.",
     authors: [{ name: "YouCord", id: 0n }],
 
     headerBarButton: {

@@ -42,6 +42,7 @@ interface ScTrack {
     artist: string;
     artworkUrl: string;
     streamUrl: string;
+    streamUrls?: string[];
     durationMs: number;
 }
 
@@ -102,26 +103,12 @@ function parseTracks(data: any): ScTrack[] {
     const tracks: ScTrack[] = [];
     for (const item of data.collection) {
         if (item.kind !== "track") continue;
-        let streamUrl = "";
         const transcodings = item.media?.transcodings ?? [];
-
-        // Priorité 1 : progressive (MP3 direct)
-        for (const tc of transcodings) {
-            if (tc.format?.protocol === "progressive" && tc.url) {
-                streamUrl = tc.url;
-                break;
-            }
-        }
-
-        // Priorité 2 : hls (m3u8 - mieux supporté par les navigateurs modernes)
-        if (!streamUrl) {
-            for (const tc of transcodings) {
-                if (tc.format?.protocol === "hls" && tc.url) {
-                    streamUrl = tc.url;
-                    break;
-                }
-            }
-        }
+        const streamUrls = transcodings
+            .filter((tc: any) => tc?.url && (tc.format?.protocol === "progressive" || tc.format?.protocol === "hls"))
+            .sort((a: any, b: any) => Number(b.format?.protocol === "progressive") - Number(a.format?.protocol === "progressive"))
+            .map((tc: any) => tc.url as string);
+        const streamUrl = streamUrls[0] ?? "";
 
         if (!streamUrl) continue;
         let artworkUrl = item.artwork_url || item.user?.avatar_url || "";
@@ -135,6 +122,7 @@ function parseTracks(data: any): ScTrack[] {
             artist: item.user?.username ?? "Unknown artist",
             artworkUrl,
             streamUrl,
+            streamUrls,
             durationMs: item.duration ?? 0,
         });
     }
@@ -147,21 +135,15 @@ async function searchTracks(query: string, clientId: string): Promise<ScTrack[]>
     return parseTracks(JSON.parse(json));
 }
 
-async function getStreamUrl(streamUrl: string, clientId: string): Promise<string> {
-    if (!streamUrl) throw new Error("Stream URL not found");
-
-    // Si c'est déjà  une URL de stream finale ou HLS directe
-    if (streamUrl.includes("cf-hls-media") || streamUrl.includes("cf-media")) {
-        return streamUrl;
+async function getStreamUrl(streamUrls: string[], clientId: string): Promise<string> {
+    for (const streamUrl of [...new Set(streamUrls.filter(Boolean))]) {
+        if (streamUrl.includes("cf-hls-media") || streamUrl.includes("cf-media")) return streamUrl;
+        try {
+            const url = await Native.resolveStreamUrl(streamUrl, clientId);
+            if (url) return url;
+        } catch { }
     }
-
-    try {
-        const url = await Native.resolveStreamUrl(streamUrl, clientId);
-        if (!url) throw new Error("Stream URL not found (check region or Go+ status)");
-        return url;
-    } catch (e: any) {
-        throw new Error(e?.message || "Stream URL not found");
-    }
+    throw new Error("Ce titre n'est pas disponible dans votre région ou nécessite SoundCloud Go+");
 }
 
 async function refreshTrackData(track: ScTrack, clientId: string): Promise<ScTrack> {
@@ -170,30 +152,16 @@ async function refreshTrackData(track: ScTrack, clientId: string): Promise<ScTra
         if (!json) return track;
         const data = JSON.parse(json);
 
-        let streamUrl = "";
         const transcodings = data.media?.transcodings ?? [];
-
-        // Priorité 1 : progressive (MP3 direct) - le plus stable
-        for (const tc of transcodings) {
-            if (tc.format?.protocol === "progressive" && tc.url) {
-                streamUrl = tc.url;
-                break;
-            }
-        }
-
-        // Priorité 2 : hls (fallback)
-        if (!streamUrl) {
-            for (const tc of transcodings) {
-                if (tc.format?.protocol === "hls" && tc.url) {
-                    streamUrl = tc.url;
-                    break;
-                }
-            }
-        }
+        const streamUrls = transcodings
+            .filter((tc: any) => tc?.url && (tc.format?.protocol === "progressive" || tc.format?.protocol === "hls"))
+            .sort((a: any, b: any) => Number(b.format?.protocol === "progressive") - Number(a.format?.protocol === "progressive"))
+            .map((tc: any) => tc.url as string);
+        const streamUrl = streamUrls[0] ?? "";
 
         if (streamUrl) {
             console.log(`[SoundCord] Track ${track.id} refreshed successfully.`);
-            return { ...track, streamUrl };
+            return { ...track, streamUrl, streamUrls };
         }
     } catch (e) {
         console.error(`[SoundCord] Failed to refresh track ${track.id}:`, e);
@@ -338,7 +306,20 @@ async function playerPlayTrack(track: ScTrack, fromFavIdx = -1) {
         const freshTrack = await refreshTrackData(track, s.clientId);
         s.playing = freshTrack;
 
-        const mp3Url = await getStreamUrl(freshTrack.streamUrl, s.clientId);
+        let streamCandidates = freshTrack.streamUrls ?? [freshTrack.streamUrl];
+        let mp3Url: string;
+        try {
+            mp3Url = await getStreamUrl(streamCandidates, s.clientId);
+        } catch (firstError) {
+            // A stale id can still work for search while failing on transcoding.
+            const refreshedClientId = await refreshClientId();
+            if (!refreshedClientId) throw firstError;
+            s.clientId = refreshedClientId;
+            const retriedTrack = await refreshTrackData(freshTrack, refreshedClientId);
+            s.playing = retriedTrack;
+            streamCandidates = retriedTrack.streamUrls ?? [retriedTrack.streamUrl];
+            mp3Url = await getStreamUrl(streamCandidates, refreshedClientId);
+        }
         const audio = new Audio();
 
         // Nettoyage de l'ancienne instance

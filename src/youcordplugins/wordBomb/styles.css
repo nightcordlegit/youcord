@@ -1,0 +1,202 @@
+.yc-wb-modal {
+    will-change: translate;
+}
+
+.yc-wb-header {
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 12px;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+
+.yc-wb-header:active {
+    cursor: grabbing;
+}
+
+.yc-wb-heading {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.yc-wb-heading h2 {
+    margin: 0;
+    color: var(--text-default, #f2f3f5);
+    font-size: 20px;
+}
+
+.yc-wb-heading-icon {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    color: var(--brand-500);
+    background: color-mix(in srgb, var(--brand-500) 16%, transparent);
+    border-radius: 12px;
+    place-items: center;
+}
+
+.yc-wb-subtitle,
+.yc-wb-status {
+    color: var(--text-muted, #b5bac1);
+    font-size: 12px;
+}
+
+.yc-wb-content {
+    padding: 8px 24px 24px;
+}
+
+.yc-wb-panel {
+    padding: 14px;
+    background: var(--background-base-low, var(--background-secondary, #2b2d31));
+    border: 1px solid var(--border-subtle, rgb(255 255 255 / 8%));
+    border-radius: 10px;
+}
+
+.yc-wb-panel-topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: var(--text-muted, #b5bac1);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.yc-wb-link-button {
+    padding: 0;
+    color: var(--text-link, #00a8fc);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    text-transform: none;
+}
+
+.yc-wb-alphabet {
+    display: grid;
+    grid-template-columns: repeat(13, minmax(0, 1fr));
+    gap: 5px;
+}
+
+.yc-wb-alphabet span {
+    padding: 5px 0;
+    color: var(--brand-360, #949cf7);
+    background: var(--background-modifier-hover, rgb(78 80 88 / 30%));
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.yc-wb-alphabet span.yc-wb-used {
+    color: var(--text-muted, #b5bac1);
+    opacity: 0.38;
+    text-decoration: line-through;
+}
+
+.yc-wb-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 140px;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.yc-wb-input,
+.yc-wb-select {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    padding: 0 12px;
+    color: var(--text-default, #f2f3f5);
+    color-scheme: dark;
+    background: var(--input-background, var(--background-base-lowest, #1e1f22));
+    border: 1px solid var(--input-border, rgb(255 255 255 / 10%));
+    border-radius: 8px;
+    outline: none;
+}
+
+.yc-wb-input:focus,
+.yc-wb-select:focus {
+    border-color: var(--brand-500, #5865f2);
+}
+
+.yc-wb-input::placeholder {
+    color: var(--text-muted, #b5bac1);
+    opacity: 1;
+}
+
+.yc-wb-select option {
+    color: var(--text-default, #f2f3f5);
+    background: var(--background-base-lowest, #1e1f22);
+}
+
+.yc-wb-status {
+    min-height: 18px;
+    margin: 10px 2px 6px;
+}
+
+.yc-wb-results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    max-height: 360px;
+    padding-right: 4px;
+    overflow-y: auto;
+}
+
+.yc-wb-word {
+    display: flex;
+    min-width: 0;
+    padding: 10px 12px;
+    color: var(--text-default, #f2f3f5);
+    background: var(--background-base-low, var(--background-secondary, #2b2d31));
+    border: 1px solid var(--border-subtle, rgb(255 255 255 / 8%));
+    border-radius: 8px;
+    cursor: pointer;
+    flex-direction: column;
+    text-align: left;
+}
+
+.yc-wb-word:hover {
+    background: var(--background-modifier-hover, rgb(78 80 88 / 30%));
+    border-color: var(--brand-500, #5865f2);
+}
+
+.yc-wb-word span {
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.yc-wb-word small {
+    margin-top: 3px;
+    color: var(--text-muted, #b5bac1);
+    font-size: 11px;
+}
+
+.yc-wb-empty {
+    grid-column: 1 / -1;
+    padding: 32px;
+    color: var(--text-muted, #b5bac1);
+    background: var(--background-base-low, var(--background-secondary, #2b2d31));
+    border-radius: 8px;
+    text-align: center;
+}
+
+@media (width <= 560px) {
+    .yc-wb-controls,
+    .yc-wb-results {
+        grid-template-columns: 1fr;
+    }
+
+    .yc-wb-alphabet {
+        grid-template-columns: repeat(9, minmax(0, 1fr));
+    }
+}

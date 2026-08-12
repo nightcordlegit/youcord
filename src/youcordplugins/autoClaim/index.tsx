@@ -11,12 +11,12 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, RestAPI } from "@webpack/common";
 
-// Must be at module level â€” findByPropsLazy returns a lazy proxy that resolves on first access
+// Must be at module level — findByPropsLazy returns a lazy proxy that resolves on first access
 const AuthStore = findByPropsLazy("getToken", "getSessionId");
 
 const logger = new Logger("AutoClaim");
 
-// â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Settings ────────────────────────────────────────────────────────────────
 
 const settings = definePluginSettings({
     enableClaimTicket: {
@@ -48,7 +48,7 @@ const settings = definePluginSettings({
     },
     safeMode: {
         type: OptionType.BOOLEAN,
-        description: t("Safe Mode: wait 3â€“4 seconds before claiming (less suspicious, recommended for shared servers)."),
+        description: t("Safe Mode: wait 3–4 seconds before claiming (less suspicious, recommended for shared servers)."),
         default: false,
         restartNeeded: false,
     },
@@ -59,7 +59,7 @@ const settings = definePluginSettings({
     },
 });
 
-// â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── State ─────────────────────────────────────────────────────────────────────
 
 let lastClaimTimestamp = 0;
 
@@ -76,7 +76,7 @@ const knownTicketChannels = new Set<string>();
  */
 const processedMessages = new Set<string>();
 
-// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function isTicketChannel(channelId: string): boolean {
     if (knownTicketChannels.has(channelId)) return true;
@@ -101,7 +101,7 @@ function getFlatButtons(message: any): any[] {
     return flat;
 }
 
-/** Discord-style snowflake nonce: (timestamp âˆ’ discord_epoch) << 22 */
+/** Discord-style snowflake nonce: (timestamp − discord_epoch) << 22 */
 function generateNonce(): string {
     const DISCORD_EPOCH = 1420070400000n;
     return String((BigInt(Date.now()) - DISCORD_EPOCH) << 22n);
@@ -111,7 +111,7 @@ function delay(ms: number) {
     return new Promise<void>(r => setTimeout(r, ms));
 }
 
-// â”€â”€ Core logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Core logic ────────────────────────────────────────────────────────────────
 
 async function handleMessage(message: any) {
     if (!message || message.optimistic) return;
@@ -139,14 +139,14 @@ async function handleMessage(message: any) {
         processedMessages.delete(first);
     }
 
-    // Safe mode: random delay 3â€“4 s. Otherwise: minimal 50 ms for ChannelStore hydration.
+    // Safe mode: random delay 3–4 s. Otherwise: minimal 50 ms for ChannelStore hydration.
     const waitMs = s.safeMode
         ? 3000 + Math.floor(Math.random() * 1000)
         : 50;
     await delay(waitMs);
 
     if (!isTicketChannel(message.channel_id)) {
-        logger.info(`[AutoClaim] Channel ${message.channel_id} not in category ${categoryId} â€” skipping.`);
+        logger.info(`[AutoClaim] Channel ${message.channel_id} not in category ${categoryId} — skipping.`);
         processedMessages.delete(msgKey);
         return;
     }
@@ -155,7 +155,7 @@ async function handleMessage(message: any) {
     const now = Date.now();
     const cooldownMs = (s.claimCooldown ?? 0) * 1000;
     if (cooldownMs > 0 && now - lastClaimTimestamp < cooldownMs) {
-        logger.info("[AutoClaim] Cooldown active â€” skipping.");
+        logger.info("[AutoClaim] Cooldown active — skipping.");
         return;
     }
 
@@ -193,14 +193,14 @@ async function handleMessage(message: any) {
         await RestAPI.post({ url: "/interactions", body });
 
         lastClaimTimestamp = Date.now();
-        logger.info("[AutoClaim] âœ… Claimed successfully.");
+        logger.info("[AutoClaim] ✅ Claimed successfully.");
     } catch (e: any) {
-        logger.error("[AutoClaim] âŒ Failed:", e?.body ?? e?.message ?? e);
+        logger.error("[AutoClaim] ❌ Failed:", e?.body ?? e?.message ?? e);
         processedMessages.delete(msgKey); // allow retry on next update
     }
 }
 
-// â”€â”€ Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Plugin ────────────────────────────────────────────────────────────────────
 
 export default definePlugin({
     name: "AutoClaim",
@@ -217,7 +217,7 @@ export default definePlugin({
             const categoryId = s.claimCategoryId?.trim();
             if (!categoryId) return;
             if (channel?.parent_id === categoryId) {
-                logger.info(`[AutoClaim] ðŸŽ« New ticket channel: #${channel.name} (${channel.id})`);
+                logger.info(`[AutoClaim] 🎫 New ticket channel: #${channel.name} (${channel.id})`);
                 knownTicketChannels.add(channel.id);
             }
         },

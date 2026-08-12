@@ -16,7 +16,7 @@ import { handle } from "./utils/ipcWrappers";
 import { makeLinksOpenExternally } from "./utils/makeLinksOpenExternally";
 import { loadView } from "./vesktopStatic";
 
-// YouCord native defaults â€” no external prefs file, always on
+// YouCord native defaults — no external prefs file, always on
 const YOUCORD_PREFS = { defaultPlugins: true, autoUpdate: true } as const;
 
 export const installerPrefs = YOUCORD_PREFS;
@@ -28,9 +28,16 @@ let updaterWindow: BrowserWindow | null = null;
 async function isNewerByDate(remoteVersion: string): Promise<boolean> {
     try {
         const localVersion = app.getVersion();
+
+        // Development builds have no release tag on GitHub. Do not issue a
+        // guaranteed 404 or offer to replace a local development build.
+        if (/(?:^|[-.])(dev|canary|nightly)(?:[.-]|$)/i.test(localVersion)) return false;
+
+        const remoteTag = remoteVersion.startsWith("v") ? remoteVersion : `v${remoteVersion}`;
+        const localTag = localVersion.startsWith("v") ? localVersion : `v${localVersion}`;
         const [remoteRes, localRes] = await Promise.all([
-            net.fetch(`https://api.github.com/repos/nightcordlegit/youcord/releases/tags/v${remoteVersion}`),
-            net.fetch(`https://api.github.com/repos/nightcordlegit/youcord/releases/tags/v${localVersion}`)
+            net.fetch(`https://api.github.com/repos/nightcordlegit/youcord/releases/tags/${encodeURIComponent(remoteTag)}`),
+            net.fetch(`https://api.github.com/repos/nightcordlegit/youcord/releases/tags/${encodeURIComponent(localTag)}`)
         ]);
         const [remoteData, localData] = await Promise.all([
             remoteRes.ok ? remoteRes.json() : null,

@@ -14,7 +14,7 @@ export const settings = definePluginSettings({
     alwaysPingOnReply: {
         type: OptionType.BOOLEAN,
         description: "Always get pinged when someone replies to your messages",
-        default: false,
+        default: true,
     },
     replyPingWhitelist: {
         type: OptionType.STRING,
@@ -31,6 +31,7 @@ export const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ReplyPingControl",
+    enabledByDefault: true,
     description: "Control whether to always or never get pinged on message replies, with whitelist and blacklist features",
     tags: ["Chat", "Notifications"],
     authors: [Devs.ant0n, EquicordDevs.MrDiamond, EquicordDevs.keircn],
@@ -55,22 +56,25 @@ export default definePlugin({
         const authorId = message.author.id;
 
         if (replyPingBlacklist && replyPingBlacklist.split(",").some(id => id.trim() === authorId)) {
-            message.mentions = message.mentions.filter(mention => mention.id !== user.id);
+            message.mentions = (message.mentions ?? []).filter(mention => mention.id !== user.id);
             return;
         }
 
         const isWhitelisted = replyPingWhitelist && replyPingWhitelist.split(",").some(id => id.trim() === authorId);
 
         if (isWhitelisted || alwaysPingOnReply) {
+            message.mentions ??= [];
             if (!message.mentions.some(mention => mention.id === user.id)) {
                 message.mentions.push(user as any);
             }
         } else {
-            message.mentions = message.mentions.filter(mention => mention.id !== user.id);
+            message.mentions = (message.mentions ?? []).filter(mention => mention.id !== user.id);
         }
     },
 
     getRepliedMessage(message: MessageJSON) {
+        const referencedMessage = (message as MessageJSON & { referenced_message?: MessageJSON; }).referenced_message;
+        if (referencedMessage) return referencedMessage;
         const ref = message.message_reference;
         return ref && MessageStore.getMessage(ref.channel_id, ref.message_id);
     },

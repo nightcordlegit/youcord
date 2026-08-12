@@ -258,7 +258,7 @@ namespace YouCordInstaller
                 var pkgPath = System.IO.Path.Combine(appDir, "package.json");
                 if (!Directory.Exists(appDir) || !File.Exists(pkgPath)) return false;
                 var content = File.ReadAllText(pkgPath);
-                // Already YouCord â†’ not a third-party mod
+                // Already YouCord → not a third-party mod
                 if (content.Contains("\"youcord\"")) return false;
                 return content.Contains("vencord", StringComparison.OrdinalIgnoreCase)
                     || content.Contains("equicord", StringComparison.OrdinalIgnoreCase)

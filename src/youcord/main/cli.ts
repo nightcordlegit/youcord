@@ -71,12 +71,12 @@ const extraOptions = {
     "enable-features": {
         type: "string",
         description: "Enable specific Chromium features",
-        argumentName: "feature1,feature2,â€¦"
+        argumentName: "feature1,feature2,…"
     },
     "disable-features": {
         type: "string",
         description: "Disable specific Chromium features",
-        argumentName: "feature1,feature2,â€¦"
+        argumentName: "feature1,feature2,…"
     },
     "ozone-platform": {
         hidden: process.platform !== "linux",

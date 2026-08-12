@@ -48,7 +48,7 @@ interface CachedMessage {
     savedAt: number; // timestamp for cache cleanup
 }
 
-// In-memory cache â€” mirror of IndexedDB for fast access
+// In-memory cache — mirror of IndexedDB for fast access
 let memCache: Record<string, CachedMessage> = {};
 let dbLoaded = false;
 

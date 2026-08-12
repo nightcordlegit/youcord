@@ -126,6 +126,8 @@ interface Message {
 }
 
 const DS_KEY = "youcord-ai-history";
+const MAX_IMAGE_COUNT = 5;
+const MAX_ATTACHMENT_BYTES = 18 * 1024 * 1024;
 
 // Discord Actions
 
@@ -366,6 +368,8 @@ function YouCordAIChat({ rootProps, panelMode, initialMessage }: { rootProps?: a
     const [input, setInput] = useState(initialMessage ?? "");
     const [loading, setLoading] = useState(false);
     const [attachments, setAttachments] = useState<Attachment[]>([]);
+    const [attachmentError, setAttachmentError] = useState("");
+    const [draggingFiles, setDraggingFiles] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -399,8 +403,22 @@ function YouCordAIChat({ rootProps, panelMode, initialMessage }: { rootProps?: a
 
     async function addFiles(files: FileList | File[]) {
         const arr = Array.from(files);
+        if (arr.length === 0) return;
+        const nextImageCount = attachments.filter(att => att.mimeType.startsWith("image/")).length
+            + arr.filter(file => file.type.startsWith("image/")).length;
+        if (nextImageCount > MAX_IMAGE_COUNT) {
+            setAttachmentError(`Maximum ${MAX_IMAGE_COUNT} images par message.`);
+            return;
+        }
+        const totalBytes = attachments.reduce((sum, attachment) => sum + attachment.size, 0)
+            + arr.reduce((sum, file) => sum + file.size, 0);
+        if (totalBytes > MAX_ATTACHMENT_BYTES) {
+            setAttachmentError("Les pièces jointes dépassent 18 Mo. Réduis la taille ou le nombre d’images.");
+            return;
+        }
+        setAttachmentError("");
         const results = await Promise.all(arr.map(readFile));
-        setAttachments(prev => [...prev, ...results].slice(0, 5)); // max 5
+        setAttachments(prev => [...prev, ...results]);
     }
 
     function removeAttachment(id: string) {
@@ -429,6 +447,7 @@ function YouCordAIChat({ rootProps, panelMode, initialMessage }: { rootProps?: a
         setInput("");
         const attsSnapshot = [...attachments];
         setAttachments([]);
+        setAttachmentError("");
 
         const userMsg: Message = { id: Date.now().toString(), role: "user", content: text, timestamp: Date.now(), attachments: attsSnapshot.length > 0 ? attsSnapshot : undefined };
         const pendingId = (Date.now() + 1).toString();
@@ -665,7 +684,19 @@ Rules:
             </div>
 
             {/* ── Input ── */}
-            <div className="nai-input-zone">
+            <div
+                className={`nai-input-zone${draggingFiles ? " nai-input-zone--dragging" : ""}`}
+                onDragEnter={event => { event.preventDefault(); setDraggingFiles(true); }}
+                onDragOver={event => { event.preventDefault(); setDraggingFiles(true); }}
+                onDragLeave={event => {
+                    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDraggingFiles(false);
+                }}
+                onDrop={event => {
+                    event.preventDefault();
+                    setDraggingFiles(false);
+                    if (event.dataTransfer.files.length > 0) void addFiles(event.dataTransfer.files);
+                }}
+            >
                 {/* Preview des attachments */}
                 {attachments.length > 0 && (
                     <div className="nai-att-preview">
@@ -686,6 +717,7 @@ Rules:
                         ))}
                     </div>
                 )}
+                {attachmentError && <div className="nai-att-error">{attachmentError}</div>}
                 <div className={`nai-input-box${loading || !hasKey ? " nai-input-box--disabled" : ""}`}>
                     {/* Input file caché */}
                     <input
@@ -701,11 +733,14 @@ Rules:
                         className="nai-attach-btn"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={loading || !hasKey}
-                        title={t("Attach a file")}
+                        title={t("Ajouter une image ou un fichier")}
                     >
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                            <rect x="3" y="3" width="18" height="18" rx="3" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <path d="m21 15-5-5L5 21" />
                         </svg>
+                        <span className="nai-attach-label">Image</span>
                     </button>
                     <textarea
                         ref={inputRef}

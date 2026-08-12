@@ -67,7 +67,7 @@ export function ContributeModal(props: ModalProps) {
             <ModalHeader {...{ separator: false, style: { paddingTop: "24px", paddingBottom: "8px" } } as any}>
                 <Flex direction={(Flex as any).Direction.VERTICAL} align={(Flex as any).Align.CENTER} style={{ width: "100%" }}>
                     <Heading {...{ level: 2, variant: "heading-xl/bold" } as any} style={{ color: "#fff", textShadow: "0 0 10px rgba(88, 101, 242, 0.5)" }}>
-                        Support YouCord ❤ï¸
+                        Support YouCord ❤️
                     </Heading>
                 </Flex>
             </ModalHeader>

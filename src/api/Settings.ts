@@ -178,7 +178,7 @@ const DefaultSettings: Settings = {
 const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;
 mergeDefaults(settings, DefaultSettings);
 
-// YouCord native defaults â€” defaultPlugins is always enabled, no external prefs file
+// YouCord native defaults — defaultPlugins is always enabled, no external prefs file
 const YOUCORD_PREFS = { defaultPlugins: true, autoUpdate: true } as const;
 
 // Force enabledByDefault plugins to be enabled, even if they were previously saved as disabled.

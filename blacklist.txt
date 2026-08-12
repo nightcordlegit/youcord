@@ -1,6 +1,5 @@
 macOsButtons
 cursorMacOS
-wordBomb
 multiInstance
 soundcloudPlayer
 youtubePlayer

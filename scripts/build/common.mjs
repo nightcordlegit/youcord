@@ -375,12 +375,12 @@ export const globPlugins = kind => ({
             }
             code += `export default {${pluginsCode}};export const PluginMeta={${metaCode}};export const ExcludedPlugins={${excludedCode}};`;
 
-            // â”€â”€â”€ External User Plugins (~/Documents/YouCord/userplugins/) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // ─── External User Plugins (~/Documents/YouCord/userplugins/) ───────────
             // Scan and auto-create the external userplugins directory.
             const externalUserPluginsDir = join(homedir(), "Documents", "YouCord", "userplugins");
             try {
                 await mkdir(externalUserPluginsDir, { recursive: true });
-            } catch { /* already exists or permission error â€” silently skip */ }
+            } catch { /* already exists or permission error — silently skip */ }
 
             let externalPluginsCode = "";
             let externalPluginsMapCode = "\n";

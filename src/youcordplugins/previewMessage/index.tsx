@@ -192,7 +192,7 @@ function hide(delay = 80) {
     hideTimer = setTimeout(() => renderFn?.(null), delay);
 }
 
-// ── DOM Scanning ───────────────────────────────────────────────────────────
+// ── Delegated DM hover handling ────────────────────────────────────────────
 
 function getChannelId(el: Element): string | null {
     // DM items link to /channels/@me/<channelId>
@@ -213,39 +213,22 @@ function shouldShow(channelId: string): boolean {
     return true;
 }
 
-function attachHandlers(el: HTMLElement) {
-    if (el.dataset.pmHooked) return;
-    el.dataset.pmHooked = "1";
-
-    el.addEventListener("mouseenter", () => {
-        const channelId = getChannelId(el);
-        if (!channelId) return;
-        if (!shouldShow(channelId)) return;
-        show(channelId, el.getBoundingClientRect());
-    });
-
-    el.addEventListener("mouseleave", () => hide());
+function getDmRow(target: EventTarget | null): HTMLElement | null {
+    const row = target instanceof Element ? target.closest<HTMLElement>("li") : null;
+    return row && getChannelId(row) ? row : null;
 }
 
-function scan(root: Document | Element = document) {
-    root.querySelectorAll<HTMLElement>("li").forEach(li => {
-        if (getChannelId(li)) attachHandlers(li);
-    });
+function _onDmMouseOver(event: MouseEvent) {
+    const row = getDmRow(event.target);
+    if (!row || (event.relatedTarget instanceof Node && row.contains(event.relatedTarget))) return;
+    const channelId = getChannelId(row);
+    if (channelId && shouldShow(channelId)) show(channelId, row.getBoundingClientRect());
 }
 
-// ── MutationObserver ───────────────────────────────────────────────────────
-
-let observer: MutationObserver | null = null;
-
-function startObserver() {
-    observer = new MutationObserver(muts => {
-        if (document.visibilityState === "hidden") return;
-        for (const m of muts)
-            for (const node of m.addedNodes)
-                if (node instanceof HTMLElement) scan(node);
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-    scan(document);
+function _onDmMouseOut(event: MouseEvent) {
+    const row = getDmRow(event.target);
+    if (!row || (event.relatedTarget instanceof Node && row.contains(event.relatedTarget))) return;
+    hide();
 }
 
 // ── Document-level handlers (named so they can be removed in stop) ─────────
@@ -274,25 +257,22 @@ export default definePlugin({
     enabledByDefault: true,
 
     start() {
-        startObserver();
-
-        // Stay open when hovering the tooltip itself
+        // Event delegation replaces one MutationObserver plus two listeners on
+        // every DM row. Discord can recycle the list without any rescanning.
+        document.addEventListener("mouseover", _onDmMouseOver, true);
+        document.addEventListener("mouseout", _onDmMouseOut, true);
         document.addEventListener("mouseenter", _onDocMouseEnter, true);
         document.addEventListener("mouseleave", _onDocMouseLeave, true);
     },
 
     stop() {
-        observer?.disconnect(); observer = null;
         if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
         renderFn?.(null);
         container?.remove(); container = null; renderFn = null;
 
-        // Remove named document listeners (was missing — caused listener leaks)
+        document.removeEventListener("mouseover", _onDmMouseOver, true);
+        document.removeEventListener("mouseout", _onDmMouseOut, true);
         document.removeEventListener("mouseenter", _onDocMouseEnter, true);
         document.removeEventListener("mouseleave", _onDocMouseLeave, true);
-
-        document.querySelectorAll<HTMLElement>("[data-pm-hooked]").forEach(el => {
-            delete el.dataset.pmHooked;
-        });
     },
 });

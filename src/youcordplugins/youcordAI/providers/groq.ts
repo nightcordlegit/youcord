@@ -80,7 +80,7 @@ export class GroqProvider implements ChatProvider {
     }
 
     async chat(messages: GroqChatMessage[], opts: ChatCallOptions): Promise<string> {
-        const { temperature = 0.7, maxTokens = 1000, forceModel, maxRetries = 3 } = opts;
+        const { temperature = 0.7, maxTokens = 1000, forceModel, maxRetries = 3, reasoningEffort } = opts;
 
         const apiKey = await this.getApiKey();
         if (!apiKey) {
@@ -102,6 +102,7 @@ export class GroqProvider implements ChatProvider {
                     model,
                     temperature,
                     max_tokens: maxTokens,
+                    ...(reasoningEffort ? { reasoning_effort: reasoningEffort } : {}),
                     messages,
                 }),
                 signal: controller.signal,

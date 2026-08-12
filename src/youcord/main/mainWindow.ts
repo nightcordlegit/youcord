@@ -435,7 +435,7 @@ function createMainWindow() {
 
     initWindowBoundsListeners(win);
 
-    // Ne pas écouter enter-html-full-screen ici â€” c'est géré dans patcher.ts via
+    // Ne pas écouter enter-html-full-screen ici — c'est géré dans patcher.ts via
     // les handlers enter/leave-html-full-screen sur la BrowserWindow patchée.
     // On écoute seulement leave-html-full-screen comme filet de sécurité pour s'assurer
     // que le fullscreen natif est bien quitté si Discord sort du mode HTML FS.
@@ -525,13 +525,13 @@ export async function createWindows() {
             // pendant son initialisation (~500ms après le chargement de la page) pour
             // synchroniser son état fullscreen interne. Si on appelle maximize() juste
             // après show(), on se retrouve dans cette séquence :
-            //   1. maximize() â†’ état "maximized" mais pas fullscreen
+            //   1. maximize() → état "maximized" mais pas fullscreen
             //   2. Discord émet DISCORD_WINDOW_TOGGLE_FULLSCREEN
-            //   3. Notre handler : isFullScreen()=false â†’ setFullScreen(true)
+            //   3. Notre handler : isFullScreen()=false → setFullScreen(true)
             //   4. L'OS met la fenêtre en fullscreen natif
-            //   5. L'overlay fullscreen OS capture tous les inputs â†’ app figée
+            //   5. L'overlay fullscreen OS capture tous les inputs → app figée
             //   6. Les animations continuent car le renderer tourne normalement
-            //   7. F11 sort du fullscreen â†’ inputs restaurés
+            //   7. F11 sort du fullscreen → inputs restaurés
             //
             // Solution en deux volets :
             // A) Dans patcher.ts : le handler DISCORD_WINDOW_TOGGLE_FULLSCREEN ignore
@@ -540,7 +540,7 @@ export async function createWindows() {
             //    actif AVANT que Discord émette son signal fullscreen IPC.
             //
             // Même fix pour les thèmes : quand un thème est appliqué, Discord recharge
-            // partiellement et réémet le signal fullscreen â†’ même blocage â†’ même fix.
+            // partiellement et réémet le signal fullscreen → même blocage → même fix.
             const shouldMaximize = State.store.maximized === true
                 && !isDeckGameMode
                 && !State.store.windowBounds;

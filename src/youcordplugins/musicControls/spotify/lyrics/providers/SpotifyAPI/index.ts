@@ -51,7 +51,7 @@ export async function getLyricsSpotify(trackId: string, customBaseUrl?: string):
                 const trimmedText = line.words.trim();
                 return {
                     time: Number(line.startTimeMs) / 1000,
-                    text: (trimmedText === "" || trimmedText === "â™ª") ? null : trimmedText
+                    text: (trimmedText === "" || trimmedText === "♪") ? null : trimmedText
                 };
             })
         }

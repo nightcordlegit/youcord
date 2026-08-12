@@ -1,6 +1,6 @@
 ﻿# ==============================================================================
-#  YouCord â€” Script d'injection Post-Installation
-#  UtilisÃ© par l'installateur Inno Setup pour injecter YouCord dans Discord.
+#  YouCord — Script d'injection Post-Installation
+#  Utilisé par l'installateur Inno Setup pour injecter YouCord dans Discord.
 # ==============================================================================
 
 param(
@@ -15,7 +15,7 @@ if (-not (Test-Path $DiscordPath)) {
     exit 0
 }
 
-# Trouver la version la plus rÃ©cente (app-*)
+# Trouver la version la plus récente (app-*)
 $LatestApp = Get-ChildItem $DiscordPath -Filter "app-*" | Sort-Object Name -Descending | Select-Object -First 1
 if (-not $LatestApp) {
     exit 0
@@ -24,12 +24,12 @@ if (-not $LatestApp) {
 $CoreDir = Join-Path $LatestApp.FullName "resources"
 $InjectDir = Join-Path $CoreDir "app"
 
-# 2. CrÃ©er l'injection
+# 2. Créer l'injection
 if (-not (Test-Path $InjectDir)) {
     New-Item -ItemType Directory -Path $InjectDir -Force | Out-Null
 }
 
-# GÃ©nÃ©rer le package.json d'injection
+# Générer le package.json d'injection
 $PackageJson = @{
     name = "discord"
     main = "index.js"
@@ -37,7 +37,7 @@ $PackageJson = @{
 
 Set-Content -Path (Join-Path $InjectDir "package.json") -Value $PackageJson
 
-# GÃ©nÃ©rer le index.js d'injection
+# Générer le index.js d'injection
 # On pointe vers le patcher.js dans le dossier d'installation de YouCord
 $YouCordPatcher = Join-Path $AppDir "dist\desktop\patcher.js"
 $YouCordPatcher = $YouCordPatcher.Replace("\", "\\")

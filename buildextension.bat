@@ -27,7 +27,7 @@ call pnpm buildWeb
 echo.
 echo ========================================================
 echo TERMINE ! L'extension est prete dans :
-echo   dist\browser\firefox-unpacked  (extension non packagÃ©e)
+echo   dist\browser\firefox-unpacked  (extension non packagée)
 echo   dist\extension-firefox.zip     (zip pour publication)
 echo ========================================================
 pause

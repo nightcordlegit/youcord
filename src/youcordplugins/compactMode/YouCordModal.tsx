@@ -11,7 +11,7 @@ import { ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@util
 import { React, useState } from "@webpack/common";
 import IconsTab from "@youcordplugins/iconViewer/components/IconsTab";
 
-// â”€â”€ Tab definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Tab definitions ──────────────────────────────────────────────────────────
 
 interface TabDef {
     id: string;
@@ -83,7 +83,7 @@ const TABS: TabDef[] = [
     },
 ];
 
-// â”€â”€ Modal inner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Modal inner ───────────────────────────────────────────────────────────────
 
 function YouCordModalInner({ onClose }: { onClose: () => void; }) {
     const [hovered, setHovered] = useState<string | null>(null);
@@ -147,7 +147,7 @@ function YouCordModalInner({ onClose }: { onClose: () => void; }) {
                 </div>
             </div>
 
-            {/* Right side â€” content */}
+            {/* Right side — content */}
             <div className="nc-modal-content">
                 <div className="nc-modal-content-header">
                     <span className="nc-modal-content-title">
@@ -203,7 +203,7 @@ function YouCordModalInner({ onClose }: { onClose: () => void; }) {
     );
 }
 
-// â”€â”€ Modal wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Modal wrapper ─────────────────────────────────────────────────────────────
 
 function YouCordModal({ modalProps }: { modalProps: ModalProps; }) {
     return (

@@ -197,7 +197,7 @@ function stopCacheCleaner() {
 let origRAF: typeof requestAnimationFrame | null = null;
 let origCancelRAF: typeof cancelAnimationFrame | null = null;
 let bgFpsActive = false;
-const rafMap = new Map<number, ReturnType<typeof setTimeout>>();
+const rafMap = new Map<number, { timer: ReturnType<typeof setTimeout>; callback: FrameRequestCallback; }>();
 let rafSeq = 0;
 
 function bgFrameIntervalMs(): number {
@@ -253,14 +253,14 @@ function installRafThrottle() {
             lastT = performance.now();
             cb(performance.now());
         }, delay);
-        rafMap.set(id, tId);
+        rafMap.set(id, { timer: tId, callback: cb });
         return id;
     };
 
     window.cancelAnimationFrame = function (id: number) {
-        const tId = rafMap.get(id);
-        if (tId !== undefined) {
-            clearTimeout(tId);
+        const pending = rafMap.get(id);
+        if (pending !== undefined) {
+            clearTimeout(pending.timer);
             rafMap.delete(id);
         } else if (origCancelRAF) {
             origCancelRAF(id);
@@ -270,12 +270,16 @@ function installRafThrottle() {
 
 function uninstallRafThrottle() {
     if (!origRAF) return;
+    const pendingCallbacks = Array.from(rafMap.values());
+    for (const pending of pendingCallbacks) clearTimeout(pending.timer);
+    rafMap.clear();
     window.requestAnimationFrame = origRAF;
     if (origCancelRAF) window.cancelAnimationFrame = origCancelRAF;
     origRAF = null;
     origCancelRAF = null;
-    for (const tId of rafMap.values()) clearTimeout(tId);
-    rafMap.clear();
+    // Never discard callbacks queued while Discord was in the background.
+    // Dropping them can leave transitions and layout state permanently stuck.
+    for (const pending of pendingCallbacks) queueMicrotask(() => pending.callback(performance.now()));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -341,7 +345,7 @@ const settings = definePluginSettings({
     disableSpringAnimations: {
         type: OptionType.BOOLEAN,
         description: "Disable spring animations in the UI (buttons, modals, transitions)",
-        default: true,
+        default: false,
         disabled: () => isPluginEnabled("DisableAnimations"),
         onChange(val: boolean) {
             if (!started) return;
@@ -352,14 +356,14 @@ const settings = definePluginSettings({
     disableTypingDots: {
         type: OptionType.BOOLEAN,
         description: "Hide the \"X is typing...\" dots on screen (visual only)",
-        default: true,
+        default: false,
         disabled: () => isPluginEnabled("NoTypingAnimation"),
         restartNeeded: true
     },
     noGifAvatars: {
         type: OptionType.BOOLEAN,
         description: "Block animated GIF avatars in lists and messages (via CSS)",
-        default: true,
+        default: false,
         onChange() { if (started) injectCss(); }
     },
     noAnimatedEmoji: {
@@ -395,7 +399,7 @@ const settings = definePluginSettings({
     reduceBlurEffects: {
         type: OptionType.BOOLEAN,
         description: "Disable expensive blur effects (backdrop-filter) for better performance",
-        default: true,
+        default: false,
         onChange() { if (started) injectCss(); }
     },
     disableHoverTransitions: {
@@ -444,7 +448,7 @@ export default definePlugin({
     authors: [{ name: ">Snayz", id: 1361345963175968779n }],
     tags: ["Utility", "Appearance", "Performance"],
     searchTerms: ["performance", "optimization", "lag", "fps", "ram", "memory", "low-end", "fluide", "rapide", "latence"],
-    enabledByDefault: false,
+    enabledByDefault: true,
     settings,
 
     patches: [

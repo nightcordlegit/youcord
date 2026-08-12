@@ -58,7 +58,7 @@ export async function getLyricsLrclib(track: Track): Promise<LyricsData | null> 
                 const trimmedText = text.trim();
                 return {
                     time: lyricTimeToSeconds(lrcTime),
-                    text: (trimmedText === "" || trimmedText === "â™ª") ? null : trimmedText
+                    text: (trimmedText === "" || trimmedText === "♪") ? null : trimmedText
                 };
             })
         }

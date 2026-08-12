@@ -124,5 +124,5 @@ function createYouCordMenuItems(): MenuItemConstructorOptions[] {
 }
 
 export function patchTrayMenu(): void {
-    // No longer patching tray menu â€” YouCord manages its own tray in patcher.ts
+    // No longer patching tray menu — YouCord manages its own tray in patcher.ts
 }

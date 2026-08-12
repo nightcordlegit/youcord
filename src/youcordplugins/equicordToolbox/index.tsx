@@ -38,7 +38,7 @@ export default definePlugin({
 
     settings,
 
-    // Bouton disabled â€” rendu null
+    // Bouton disabled — rendu null
     headerBarButton: {
         icon: Icon,
         render: () => null,

@@ -70,7 +70,7 @@ function LockIcon(props: any) {
     );
 }
 
-// â”€â”€â”€ Crypto helpers (ported verbatim, pure Web Crypto, no BD dependency) â”€â”€â”€
+// ─── Crypto helpers (ported verbatim, pure Web Crypto, no BD dependency) ───
 
 const b64binb = (s: string) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const str2binb = (s: string) => new TextEncoder().encode(s);
@@ -99,7 +99,7 @@ async function hashCheck(code: string, salt: string, iterations: number, expecte
     return (await pbkdf2(code, salt, iterations)) === expected;
 }
 
-// â”€â”€â”€ Persisted data (separate from settings, stored in IndexedDB) â”€â”€â”€
+// ─── Persisted data (separate from settings, stored in IndexedDB) ───
 
 interface PLData {
     hash?: string;
@@ -110,7 +110,7 @@ interface PLData {
     locked?: boolean;
 }
 
-// â”€â”€â”€ Settings â”€â”€â”€
+// ─── Settings ───
 
 const settings = definePluginSettings({
     codeType: {
@@ -189,7 +189,7 @@ function codeLength() {
     }
 }
 
-// â”€â”€â”€ Lock screen overlay component â”€â”€â”€
+// ─── Lock screen overlay component ───
 
 type LockType = "default" | "settings" | "editor";
 
@@ -304,7 +304,7 @@ function PasscodeLocker({ type, button, onDone }: LockerProps) {
 
     // close() is GUARANTEED to call onDone, no matter what happens with styling/animation.
     // Any failure inside the animation steps is caught and logged, but never blocks
-    // the unmount â€” this is what previously could leave the full-screen overlay
+    // the unmount — this is what previously could leave the full-screen overlay
     // stuck forever, eating all clicks/keystrokes.
     const close = (success: boolean) => {
         try {
@@ -363,7 +363,7 @@ function PasscodeLocker({ type, button, onDone }: LockerProps) {
 
     // `accept` takes an optional explicit code to validate. This matters because
     // `append()` below calls accept() synchronously (via setTimeout) right after
-    // computing the new full code string â€” if accept() fell back to reading the
+    // computing the new full code string — if accept() fell back to reading the
     // `code` state closed over from the same render, it would see the code as it
     // was *before* the digit that was just typed, i.e. one character short. That
     // was a real, silent bug: the very last digit typed was never actually checked,
@@ -415,7 +415,7 @@ function PasscodeLocker({ type, button, onDone }: LockerProps) {
         const interval = setInterval(checkDelay, 1000);
         checkDelay();
 
-        // entrance animation â€” wrapped defensively so a styling/layout error never
+        // entrance animation — wrapped defensively so a styling/layout error never
         // leaves the overlay stuck mid-animation (which would block all clicks/keys).
         let tick: ReturnType<typeof setInterval> | undefined;
         let finished = false;
@@ -567,7 +567,7 @@ function PasscodeLocker({ type, button, onDone }: LockerProps) {
     );
 }
 
-// â”€â”€â”€ Plugin-level lock orchestration â”€â”€â”€
+// ─── Plugin-level lock orchestration ───
 
 let isLocked = false;
 let root: ReturnType<typeof createRoot> | null = null;
@@ -603,7 +603,7 @@ function openLocker(type: LockType, button: HTMLElement | null, onSuccess?: (new
 
     // Watchdog: an overlay should never realistically stay open for 45s without
     // the user interacting successfully or cancelling. If it does, something broke
-    // (e.g. an uncaught error prevented onDone from firing) â€” auto-recover instead
+    // (e.g. an uncaught error prevented onDone from firing) — auto-recover instead
     // of leaving the user permanently locked out of every button/shortcut.
     clearTimeout(watchdogTimeout);
     if (type !== "default") {
@@ -676,7 +676,7 @@ function lock(button: HTMLElement | null = document.body) {
         // Only commit the locked state once the overlay actually rendered
         // without throwing. Setting this *before* the attempt is what could
         // previously leave isLocked stuck at true forever if openLocker failed
-        // (e.g. a webpack module not ready yet at startup) â€” silently disabling
+        // (e.g. a webpack module not ready yet at startup) — silently disabling
         // every lock entry point (header button, settings button, keybind) for
         // the rest of the session.
         isLocked = true;
@@ -686,7 +686,7 @@ function lock(button: HTMLElement | null = document.body) {
         console.error("[PasscodeLock] lock() failed to open the overlay", e);
         isLocked = false;
         forceReset("lock() threw while opening the overlay");
-        showToast("PasscodeLock failed to open â€” check the console for details.", Toasts.Type.FAILURE);
+        showToast("PasscodeLock failed to open — check the console for details.", Toasts.Type.FAILURE);
     }
 }
 
@@ -807,7 +807,7 @@ export default definePlugin({
         // Only auto-lock on startup if a passcode has actually been configured.
         // Without this check, enabling the plugin for the very first time (before
         // ever setting a passcode) would immediately lock Discord because
-        // lockOnStartup defaults to true â€” trapping the user behind a lock screen
+        // lockOnStartup defaults to true — trapping the user behind a lock screen
         // with no passcode they ever chose.
         if (data.hash && (settings.store.lockOnStartup || data.locked)) {
             setTimeout(() => {

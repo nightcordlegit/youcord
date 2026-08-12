@@ -50,7 +50,7 @@ if (location.protocol !== "data:") {
         require(process.env.DISCORD_PRELOAD!);
 
         // Remplace "Discord" par "YouCord" dans le titre de la fenêtre (document.title)
-        // Discord change le titre dynamiquement depuis le renderer â€” on intercepte ça ici
+        // Discord change le titre dynamiquement depuis le renderer — on intercepte ça ici
         webFrame.executeJavaScript(`
             (function() {
                 function patchTitle(t) {

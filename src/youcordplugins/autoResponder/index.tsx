@@ -38,7 +38,7 @@ const LANGUAGES: Record<string, {
     mission: string;
 }> = {
     fr: {
-        label: "FranÃ§ais",
+        label: "Français",
         system: "Tu es un AutoResponder ultra-personnalisable pour Discord.",
         selfLabel: "MOI",
         otherLabel: "L'AMI",
@@ -48,16 +48,16 @@ const LANGUAGES: Record<string, {
             blacklist: "LISTE NOIRE",
             history: "HISTORIQUE",
             latestMessage: "DERNIER MESSAGE",
-            rules: "RÃˆGLES DE COMPORTEMENT (CRUCIAL)",
+            rules: "RÈGLES DE COMPORTEMENT (CRUCIAL)",
             mission: "MISSION",
         },
         rules: [
-            "RÃ‰PONSES COURTES : Fais des rÃ©ponses concises (1 ou 2 phrases max). Ne fais pas de longs paragraphes.",
-            "DISCRÃ‰TION DES INFOS : N'utilise mes infos personnelles que si c'est pertinent.",
-            "STYLE Ã‰CRIT NATUREL : Supprime toute trace d'hÃ©sitation orale.",
+            "RÉPONSES COURTES : Fais des réponses concises (1 ou 2 phrases max). Ne fais pas de longs paragraphes.",
+            "DISCRÉTION DES INFOS : N'utilise mes infos personnelles que si c'est pertinent.",
+            "STYLE ÉCRIT NATUREL : Supprime toute trace d'hésitation orale.",
             "HUMAIN : Parle comme un pote sur Discord.",
         ],
-        mission: "RÃ©ponds de maniÃ¨re naturelle. NE RENVOIE QUE LE TEXTE DE TA RÃ‰PONSE.",
+        mission: "Réponds de manière naturelle. NE RENVOIE QUE LE TEXTE DE TA RÉPONSE.",
     },
     en: {
         label: "English",
@@ -82,34 +82,34 @@ const LANGUAGES: Record<string, {
         mission: "Reply naturally. ONLY RETURN THE TEXT OF YOUR REPLY.",
     },
     es: {
-        label: "EspaÃ±ol",
+        label: "Español",
         system: "Eres un AutoResponder altamente personalizable para Discord.",
         selfLabel: "YO",
         otherLabel: "ELLOS",
         sections: {
-            myInfo: "MI INFORMACIÃ“N PERSONAL",
+            myInfo: "MI INFORMACIÓN PERSONAL",
             myInstructions: "MIS INSTRUCCIONES",
             blacklist: "LISTA NEGRA",
             history: "HISTORIAL",
-            latestMessage: "ÃšLTIMO MENSAJE",
+            latestMessage: "ÚLTIMO MENSAJE",
             rules: "REGLAS DE COMPORTAMIENTO (CRUCIAL)",
-            mission: "MISIÃ“N",
+            mission: "MISIÓN",
         },
         rules: [
-            "RESPUESTAS CORTAS: Responde de forma concisa (1-2 frases mÃ¡x.). Sin pÃ¡rrafos largos.",
-            "DISCRECIÃ“N: Solo usa mi informaciÃ³n personal si es relevante.",
-            "ESTILO NATURAL: Elimina cualquier rastro de duda o hesitaciÃ³n oral.",
+            "RESPUESTAS CORTAS: Responde de forma concisa (1-2 frases máx.). Sin párrafos largos.",
+            "DISCRECIÓN: Solo usa mi información personal si es relevante.",
+            "ESTILO NATURAL: Elimina cualquier rastro de duda o hesitación oral.",
             "HUMANO: Habla como un amigo en Discord.",
         ],
         mission: "Responde de forma natural. SOLO DEVUELVE EL TEXTO DE TU RESPUESTA.",
     },
     de: {
         label: "Deutsch",
-        system: "Du bist ein hochgradig anpassbarer AutoResponder fÃ¼r Discord.",
+        system: "Du bist ein hochgradig anpassbarer AutoResponder für Discord.",
         selfLabel: "ICH",
         otherLabel: "SIE",
         sections: {
-            myInfo: "MEINE PERSÃ–NLICHEN DATEN",
+            myInfo: "MEINE PERSÖNLICHEN DATEN",
             myInstructions: "MEINE ANWEISUNGEN",
             blacklist: "SPERRLISTE",
             history: "VERLAUF",
@@ -118,12 +118,12 @@ const LANGUAGES: Record<string, {
             mission: "AUFGABE",
         },
         rules: [
-            "KURZE ANTWORTEN: Halte Antworten kurz (max. 1-2 SÃ¤tze). Keine langen AbsÃ¤tze.",
-            "DISKRETION: Verwende persÃ¶nliche Infos nur, wenn relevant.",
-            "NATÃœRLICHER STIL: Keine zÃ¶gernden AusdrÃ¼cke.",
+            "KURZE ANTWORTEN: Halte Antworten kurz (max. 1-2 Sätze). Keine langen Absätze.",
+            "DISKRETION: Verwende persönliche Infos nur, wenn relevant.",
+            "NATÜRLICHER STIL: Keine zögernden Ausdrücke.",
             "MENSCHLICH: Rede wie ein Freund auf Discord.",
         ],
-        mission: "Antworte natÃ¼rlich. GIB NUR DEN TEXT DEINER ANTWORT ZURÃœCK.",
+        mission: "Antworte natürlich. GIB NUR DEN TEXT DEINER ANTWORT ZURÜCK.",
     },
     it: {
         label: "Italiano",
@@ -148,26 +148,26 @@ const LANGUAGES: Record<string, {
         mission: "Rispondi in modo naturale. RESTITUISCI SOLO IL TESTO DELLA TUA RISPOSTA.",
     },
     pt: {
-        label: "PortuguÃªs",
-        system: "VocÃª Ã© um AutoResponder altamente personalizÃ¡vel para o Discord.",
+        label: "Português",
+        system: "Você é um AutoResponder altamente personalizável para o Discord.",
         selfLabel: "EU",
         otherLabel: "ELES",
         sections: {
-            myInfo: "MINHAS INFORMAÃ‡Ã•ES PESSOAIS",
-            myInstructions: "MINHAS INSTRUÃ‡Ã•ES",
+            myInfo: "MINHAS INFORMAÇÕES PESSOAIS",
+            myInstructions: "MINHAS INSTRUÇÕES",
             blacklist: "LISTA NEGRA",
-            history: "HISTÃ“RICO",
-            latestMessage: "ÃšLTIMA MENSAGEM",
+            history: "HISTÓRICO",
+            latestMessage: "ÚLTIMA MENSAGEM",
             rules: "REGRAS DE COMPORTAMENTO (CRUCIAIS)",
-            mission: "MISSÃƒO",
+            mission: "MISSÃO",
         },
         rules: [
-            "RESPOSTAS CURTAS: Respostas concisas (mÃ¡x. 1-2 frases). Sem parÃ¡grafos longos.",
-            "DISCRIÃ‡ÃƒO: Use minhas informaÃ§Ãµes pessoais sÃ³ quando relevante.",
-            "ESTILO NATURAL: Elimine qualquer traÃ§o de hesitaÃ§Ã£o oral.",
+            "RESPOSTAS CURTAS: Respostas concisas (máx. 1-2 frases). Sem parágrafos longos.",
+            "DISCRIÇÃO: Use minhas informações pessoais só quando relevante.",
+            "ESTILO NATURAL: Elimine qualquer traço de hesitação oral.",
             "HUMANO: Fale como um amigo no Discord.",
         ],
-        mission: "Responda naturalmente. SÃ“ RETORNE O TEXTO DA SUA RESPOSTA.",
+        mission: "Responda naturalmente. SÓ RETORNE O TEXTO DA SUA RESPOSTA.",
     },
     nl: {
         label: "Nederlands",
@@ -193,7 +193,7 @@ const LANGUAGES: Record<string, {
     },
     pl: {
         label: "Polski",
-        system: "JesteÅ› wysoce konfigurowalnym AutoResponderem dla Discorda.",
+        system: "Jesteś wysoce konfigurowalnym AutoResponderem dla Discorda.",
         selfLabel: "JA",
         otherLabel: "ONI",
         sections: {
@@ -201,61 +201,61 @@ const LANGUAGES: Record<string, {
             myInstructions: "MOJE INSTRUKCJE",
             blacklist: "CZARNA LISTA",
             history: "HISTORIA",
-            latestMessage: "OSTATNIA WIADOMOÅšÄ†",
+            latestMessage: "OSTATNIA WIADOMOŚĆ",
             rules: "ZASADY ZACHOWANIA (KRYTYCZNE)",
             mission: "MISJA",
         },
         rules: [
-            "KRÃ“TKIE ODPOWIEDZI: Odpowiadaj zwiÄ™Åºle (maks. 1-2 zdania). Bez dÅ‚ugich akapitÃ³w.",
-            "DYSKRECJA: UÅ¼ywaj moich danych osobowych tylko gdy to istotne.",
-            "NATURALNY STYL: UsuÅ„ wszelkie Å›lady ustnego wahania.",
-            "LUDZKI: MÃ³w jak znajomy na Discordzie.",
+            "KRÓTKIE ODPOWIEDZI: Odpowiadaj zwięźle (maks. 1-2 zdania). Bez długich akapitów.",
+            "DYSKRECJA: Używaj moich danych osobowych tylko gdy to istotne.",
+            "NATURALNY STYL: Usuń wszelkie ślady ustnego wahania.",
+            "LUDZKI: Mów jak znajomy na Discordzie.",
         ],
-        mission: "Odpowiedz naturalnie. ZWRÃ“Ä† TYLKO TEKST SWOJEJ ODPOWIEDZI.",
+        mission: "Odpowiedz naturalnie. ZWRÓĆ TYLKO TEKST SWOJEJ ODPOWIEDZI.",
     },
     ja: {
-        label: "æ—¥æœ¬èªž",
-        system: "ã‚ãªãŸã¯Discordã®ãŸã‚ã®é«˜åº¦ã«ã‚«ã‚¹ã‚¿ãƒžã‚¤ã‚ºå¯èƒ½ãªAutoResponderã§ã™ã€‚",
-        selfLabel: "ç§",
-        otherLabel: "å‘ã",
+        label: "日本語",
+        system: "あなたはDiscordのための高度にカスタマイズ可能なAutoResponderです。",
+        selfLabel: "私",
+        otherLabel: "向き",
         sections: {
-            myInfo: "å€‹äººæƒ…å ±",
-            myInstructions: "ã‚¤ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚·ãƒ§ãƒ³",
-            blacklist: "ãƒ–ãƒ©ãƒƒã‚¯ãƒªã‚¹ãƒˆ",
-            history: "éŽåŽ»ã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸",
-            latestMessage: "æœ€æ–°ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸",
-            rules: "è¡Œå‹•ãƒ«ãƒ¼ãƒ«（é‡è¦）",
-            mission: "ä»»å‹™",
+            myInfo: "個人情報",
+            myInstructions: "インストラクション",
+            blacklist: "ブラックリスト",
+            history: "過去のメッセージ",
+            latestMessage: "最新メッセージ",
+            rules: "行動ルール（重要）",
+            mission: "任務",
         },
         rules: [
-            "çŸ­ãå›žç­”ï¼š1-2æ–‡ã§ç°¡æ½”ã«。é•·æ–‡ã¯ä¸è¦。",
-            "æƒ…å ±ã®é©åˆ‡ãªä½¿ç”¨ï¼šå€‹äººæƒ…å ±ã¯å¿…è¦ãªã¨ãã®ã¿ä½¿ç”¨。",
-            "è‡ªç„¶ãªè¡¨ç¾ï¼šå£èªžã®æŠœçµ¶ãƒ»é”™ã„ã‚’æ¶ˆã™。",
-            "äººé–“ã‚‰ã—ãï¼šDiscordã§ã®å‹é”ã¨ã—ã¦è©±ã™。",
+            "短く回答：1-2文で簡潔に。長文は不要。",
+            "情報の適切な使用：個人情報は必要なときのみ使用。",
+            "自然な表現：口語の抜絶・错いを消す。",
+            "人間らしく：Discordでの友達として話す。",
         ],
-        mission: "è‡ªç„¶ã«å¿œç­”ã—ã¦ãã ã•ã„。å¿œç­”æ–‡ã®ã¿ã‚’è¿”ã—ã¦ãã ã•ã„ã€‚",
+        mission: "自然に応答してください。応答文のみを返してください。",
     },
     zh: {
-        label: "ä¸­æ–‡",
-        system: "ä½ æ˜¯ä¸€ä¸ªé«˜åº¦å¯è‡ªå®šä¹‰çš„Discordè‡ªåŠ¨å›žå¤å™¨ã€‚",
-        selfLabel: "æˆ‘",
-        otherLabel: "ä»–ä»¬",
+        label: "中文",
+        system: "你是一个高度可自定义的Discord自动回复器。",
+        selfLabel: "我",
+        otherLabel: "他们",
         sections: {
-            myInfo: "æˆ‘çš„ä¸ªäººä¿¡æ¯",
-            myInstructions: "æˆ‘çš„æŒ‡ä»¤",
-            blacklist: "é»‘åå•",
-            history: "åŽ†å²è®°å½•",
-            latestMessage: "æœ€æ–°æ¶ˆæ¯",
-            rules: "è¡Œä¸ºè§„åˆ™（å…³é”®）",
-            mission: "ä»»åŠ¡",
+            myInfo: "我的个人信息",
+            myInstructions: "我的指令",
+            blacklist: "黑名单",
+            history: "历史记录",
+            latestMessage: "最新消息",
+            rules: "行为规则（关键）",
+            mission: "任务",
         },
         rules: [
-            "çŸ­ç­”å¤ï¼šå›žå¤ç®€æ´（æœ€å¤š1-2å¥）。ä¸è¦é•¿æ®µè½ã€‚",
-            "ä¿¡æ¯é…Œå®¡ï¼šåªåœ¨ç›¸å…³æ—¶ä½¿ç”¨æˆ‘çš„ä¸ªäººä¿¡æ¯ã€‚",
-            "è‡ªç„¶é£Žæ ¼ï¼šåŽ»é™¤ä¸€åˆ‡å£å¤´çŠ¹è±«çš„ç—•è¿¹ã€‚",
-            "äººæ€§åŒ–ï¼šåƒDiscordä¸Šçš„æœ‹å‹ä¸€æ ·è¯´è¯ã€‚",
+            "短答复：回复简洁（最多1-2句）。不要长段落。",
+            "信息酌审：只在相关时使用我的个人信息。",
+            "自然风格：去除一切口头犹豫的痕迹。",
+            "人性化：像Discord上的朋友一样说话。",
         ],
-        mission: "è‡ªç„¶åœ°å›žå¤。åªè¿”å›žä½ çš„å›žå¤æ–‡æœ¬ã€‚",
+        mission: "自然地回复。只返回你的回复文本。",
     },
 };
 
@@ -279,7 +279,7 @@ const settings = definePluginSettings({
                 gap: "12px",
                 color: "#FFFFFF"
             }}>
-                <span style={{ fontSize: "24px" }}>âš ï¸</span>
+                <span style={{ fontSize: "24px" }}>⚠️</span>
                 <div>
                     <div style={{ fontWeight: "bold", color: "var(--status-warning)" }}>API Key Required</div>
                     <div style={{ fontSize: "13px", marginTop: "4px" }}>
@@ -407,7 +407,7 @@ async function handleMessage(message: any) {
 
         const rulesText = lang.rules.map((r, i) => `${i + 1}. ${r}`).join("\n");
 
-        const prompt = `Tu es l'utilisateur (${lang.selfLabel}). RÃ©ponds au dernier message de ${lang.otherLabel}.
+        const prompt = `Tu es l'utilisateur (${lang.selfLabel}). Réponds au dernier message de ${lang.otherLabel}.
         
 ${lang.sections.myInfo} :
 ${settings.store.personalInfo}
@@ -438,7 +438,7 @@ ${lang.mission}`;
             maxTokens: 500
         });
 
-        if (reply && !reply.startsWith("âŒ")) {
+        if (reply && !reply.startsWith("❌")) {
             // Délai réaliste : base fixe + temps proportionnel à la longueur du message
             const baseDelay = Math.floor(Math.random() * (settings.store.delayMax - settings.store.delayMin + 1) + settings.store.delayMin);
             const extraDelay = reply.length > 100 ? 2 : 0; // +2s si message long

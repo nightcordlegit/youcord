@@ -7,55 +7,46 @@
 import "./styles.css";
 
 import { HeaderBarButton } from "@api/HeaderBar";
-import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
+import { runDiscordRequest } from "@utils/discordRequestQueue";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { React, useEffect, useRef, useState } from "@webpack/common";
 
-const API_BASE = "https://discord.com/api/v9";
+const API_BASE = "https://discord.com/api/v10";
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 async function botFetch(token: string, url: string, options: RequestInit = {}): Promise<any> {
-    const res = await fetch(url, {
-        ...options,
-        headers: {
-            ...options.headers,
-            "Authorization": `Bot ${token}`,
-            "Content-Type": "application/json",
-        },
-    });
-    if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        const err: any = new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`);
-        err.status = res.status;
-        const retryAfter = res.headers.get?.("retry-after");
-        err.retryAfter = retryAfter ? Number(retryAfter) : undefined;
-        throw err;
-    }
-    if (res.status === 204) return null;
-    return res.json();
+    return runDiscordRequest(async () => {
+        const res = await fetch(url, {
+            ...options,
+            headers: {
+                ...options.headers,
+                "Authorization": `Bot ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+        if (!res.ok) {
+            const text = await res.text().catch(() => "");
+            const err: any = new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`);
+            err.status = res.status;
+            const retryAfter = res.headers.get?.("retry-after");
+            err.retryAfter = retryAfter ? Number(retryAfter) : undefined;
+            throw err;
+        }
+        if (res.status === 204) return null;
+        return res.json();
+    }, { minDelayMs: 1500 });
 }
 
 async function fetchGuildMembers(token: string, guildId: string) {
     const members: any[] = [];
     let after = "0";
     while (true) {
-        let batch: any[];
-        try {
-            batch = await botFetch(
-                token,
-                `${API_BASE}/guilds/${guildId}/members?limit=1000&after=${after}`
-            );
-        } catch (e: any) {
-            if (e?.status === 429) {
-                const pause = Math.max(10, e.retryAfter ?? 15);
-                if (state.aborted) break;
-                await sleep(pause * 1000);
-                continue;
-            }
-            throw e;
-        }
+        const batch: any[] = await botFetch(
+            token,
+            `${API_BASE}/guilds/${guildId}/members?limit=1000&after=${after}`
+        );
         if (!Array.isArray(batch) || batch.length === 0) break;
         members.push(...batch);
         if (batch.length < 1000) break;
@@ -73,7 +64,7 @@ const state = {
     total: 0,
     log: [] as string[],
     aborted: false,
-    delayMs: 1000,
+    delayMs: 1500,
     listeners: new Set<() => void>(),
     notify() { this.listeners.forEach(fn => fn()); },
     subscribe(fn: () => void) { this.listeners.add(fn); },
@@ -189,9 +180,10 @@ function BotIcon(props: any) {
 function MassDMBotModal({ rootProps }: { rootProps: any }) {
     const s = useObservableState();
     const [tokenInput, setTokenInput] = useState("");
-    const [tokens, setTokens] = useState<string[]>(() => {
-        try { return JSON.parse(settings.store.botTokens || "[]"); } catch { return []; }
-    });
+    // Bot tokens are deliberately session-only. Persisting credentials in the
+    // plain-text plugin settings file makes them available to every local
+    // process and backup that can read that file.
+    const [tokens, setTokens] = useState<string[]>([]);
     const [selectedToken, setSelectedToken] = useState(tokens[0] || "");
     const [guilds, setGuilds] = useState<any[]>([]);
     const [selectedGuildIds, setSelectedGuildIds] = useState<Set<string>>(new Set());
@@ -212,7 +204,6 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
 
     const saveTokens = (newTokens: string[]) => {
         setTokens(newTokens);
-        settings.store.botTokens = JSON.stringify(newTokens);
     };
 
     const addToken = () => {
@@ -455,12 +446,12 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
                                         className="mdb-delay-input"
                                         type="number"
                                         step="0.5"
-                                        min="1"
+                                    min="1.5"
                                         max="60"
                                         value={delayInput}
                                         onChange={e => setDelayInput(e.currentTarget.value)}
                                         onBlur={() => {
-                                            const val = Math.max(1, Math.min(60, parseFloat(delayInput) || 1));
+                                            const val = Math.max(1.5, Math.min(60, parseFloat(delayInput) || 1.5));
                                             state.delayMs = Math.round(val * 1000);
                                             setDelayInput(String(val));
                                             setEditingDelay(false);
@@ -484,7 +475,7 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
 
                         {selectedGuildIds.size > 0 && message.trim() && (
                             <div className="mdb-summary">
-                                Send to {selectedGuildIds.size} guild{selectedGuildIds.size > 1 ? "s" : ""} via {tokens.length} bot{tokens.length > 1 ? "s" : ""}
+                                Send to {selectedGuildIds.size} guild{selectedGuildIds.size > 1 ? "s" : ""} via the selected bot
                             </div>
                         )}
                     </>
@@ -543,21 +534,11 @@ function MassDMBotModal({ rootProps }: { rootProps: any }) {
     );
 }
 
-const settings = definePluginSettings({
-    botTokens: {
-        type: OptionType.STRING,
-        description: "Bot tokens (JSON array, e.g. [\"token1\",\"token2\"])",
-        default: "[]",
-    },
-});
-
 export default definePlugin({
     name: "MassDMBot",
-    enabledByDefault: true,
+    enabledByDefault: false,
     description: "Send DMs to guild members using bot tokens.",
     authors: [{ name: "YouCord", id: 0n }],
-    settings,
-
     headerBarButton: {
         icon: BotIcon,
         render: () => (

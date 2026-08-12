@@ -29,7 +29,7 @@ interface VoiceChannel {
     searchIndex: string;
 }
 
-// Scan cache â€” avoids rescanning if done recently
+// Scan cache — avoids rescanning if done recently
 let scanCache: VoiceChannel[] | null = null;
 let scanCacheAt = 0;
 const SCAN_TTL = 10000; // 10s de cache
@@ -65,7 +65,7 @@ async function scan(): Promise<VoiceChannel[]> {
 
                     const allChannels = GuildChannelStore.getChannels?.(guildId) ?? {};
 
-                    // Collect ALL items from ALL keys â€” don't assume the key names
+                    // Collect ALL items from ALL keys — don't assume the key names
                     const seen = new Set<string>();
                     for (const key of Object.keys(allChannels)) {
                         const arr = allChannels[key];
@@ -214,7 +214,7 @@ function VoiceSearchModal({ rootProps, channels }: { rootProps: any; channels: V
                                     <span className="vcs-icon">
                                         {ch.canAccess
                                             ? (ch.channelType === 13 ? <StageIcon /> : <VoiceIcon />)
-                                            : <span style={{ opacity: 0.5, fontSize: 13 }}>ðŸ”’</span>
+                                            : <span style={{ opacity: 0.5, fontSize: 13 }}>🔒</span>
                                         }
                                     </span>
                                     <div className="vcs-info">
@@ -253,7 +253,7 @@ function VoiceSearchModal({ rootProps, channels }: { rootProps: any; channels: V
                             ))}
                             {displayList!.length > 80 && !query && (
                                 <div className="vcs-empty" style={{ fontSize: 11, opacity: 0.5 }}>
-                                    {displayList!.length - 80} {t("more channels â€” use search")}
+                                    {displayList!.length - 80} {t("more channels — use search")}
                                 </div>
                             )}
                         </div>

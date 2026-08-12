@@ -11,8 +11,8 @@ import { Settings } from "../settings";
 import { createOrFocusPopup, setupPopout } from "./popout";
 import { execSteamURL, isDeckGameMode, steamOpenURL } from "./steamOS";
 
-// â”€â”€ Overlay popout flood protection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// When Discord's OOP overlay crashes (always in YouCord â€” we're not discord.exe),
+// ── Overlay popout flood protection ──────────────────────────────────────────
+// When Discord's OOP overlay crashes (always in YouCord — we're not discord.exe),
 // it enters a retry loop that rapidly fires window.open("/popout") dozens of times,
 // opening https://discord.com/popout in the user's browser.
 // We block overlay-specific popouts entirely and rate-limit the rest.
@@ -34,7 +34,7 @@ function isPopoutRateLimited(): boolean {
         popoutTimestamps.shift();
     }
     if (popoutTimestamps.length >= POPOUT_RATE_LIMIT_MAX) {
-        console.warn("[YouCord] Popout rate-limited â€” too many popout requests (overlay crash loop?)");
+        console.warn("[YouCord] Popout rate-limited — too many popout requests (overlay crash loop?)");
         return true;
     }
     popoutTimestamps.push(now);
@@ -96,7 +96,7 @@ export function makeLinksOpenExternally(win: BrowserWindow) {
 
         const isDiscordPopout = pathname === "/popout" && DISCORD_HOSTNAMES.includes(hostname);
         if (isDiscordPopout || (frameName.startsWith("DISCORD_") && pathname === "/popout" && DISCORD_HOSTNAMES.includes(hostname))) {
-            // â”€â”€ Block overlay popouts entirely â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // ── Block overlay popouts entirely ─────────────────────────────
             // The game overlay can never work in YouCord (wrong process name),
             // so silently deny these instead of letting them flood.
             if (OVERLAY_FRAME_NAMES.has(frameName)) {
@@ -129,7 +129,7 @@ export function makeLinksOpenExternally(win: BrowserWindow) {
         if (frameName === "authorize" && searchParams.get("loading") === "true") return { action: "deny" };
 
         // Allow captcha popups to open inside Electron (hCaptcha / reCaptcha)
-        // Discord opens them via window.open() â€” they must stay in-process or the
+        // Discord opens them via window.open() — they must stay in-process or the
         // captcha iframe can never communicate back to Discord.
         if (
             hostname.includes("hcaptcha.com") ||
@@ -198,7 +198,7 @@ export function makeLinksOpenExternally(win: BrowserWindow) {
         }
 
         if (isPopout) {
-            // Block overlay windows from being set up â€” they'll crash anyway
+            // Block overlay windows from being set up — they'll crash anyway
             if (OVERLAY_FRAME_NAMES.has(frameName)) {
                 childWin.close();
                 return;
@@ -207,7 +207,7 @@ export function makeLinksOpenExternally(win: BrowserWindow) {
             const key = stablePopoutKey(frameName);
             setupPopout(childWin, key);
         } else {
-            // Fenêtre non-popout / non-captcha : c'est une redirection externe (about:blank â†’ lien).
+            // Fenêtre non-popout / non-captcha : c'est une redirection externe (about:blank → lien).
             // On cache la fenêtre immédiatement pour éviter le flash blanc, puis on ferme
             // dès que la navigation vers le vrai lien se déclenche.
             childWin.hide();

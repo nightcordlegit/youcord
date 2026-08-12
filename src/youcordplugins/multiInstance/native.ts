@@ -127,7 +127,7 @@ function createTokenPreload(token: string): string {
         // Pré-remplit aussi
         try { localStorage.setItem("token", JSON.stringify(TOKEN)); } catch(_) {}
 
-        console.log("[YouCordMI] Token preload active âœ“");
+        console.log("[YouCordMI] Token preload active ✓");
     } catch(e) {
         console.warn("[YouCordMI] Preload error:", e);
     }
@@ -186,7 +186,7 @@ export async function openInstanceWindow(
         // En donnant un ID different a chaque fenetre, elles ne se regroupent pas
         const uniqueAppId = `youcord.instance.${userId}.${Date.now()}`;
 
-        // Icone : rotation 1â†’2â†’3â†’4â†’5â†’1â†’... depuis multi-instance-icons/
+        // Icone : rotation 1→2→3→4→5→1→... depuis multi-instance-icons/
         let currentIconPath = "";
         const iconDir = getDetachedIconDir();
         currentIconPath = join(iconDir, `${iconCounter}.ico`);

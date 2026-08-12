@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// â”€â”€â”€ Environment detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Environment detection ────────────────────────────────────────────────────
 // Works in Electron (Discord desktop) AND browser extensions (Chrome/Firefox)
 
 const IS_ELECTRON = typeof process !== "undefined" && process.versions?.electron;
@@ -20,7 +20,7 @@ if (IS_ELECTRON) {
     } catch { }
 }
 
-// â”€â”€â”€ Unified fetch (Electron net OR browser fetch) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Unified fetch (Electron net OR browser fetch) ────────────────────────────
 
 async function netGet(url: string, headers?: Record<string, string>): Promise<string> {
     const defaultHeaders: Record<string, string> = {
@@ -43,10 +43,10 @@ async function netGet(url: string, headers?: Record<string, string>): Promise<st
     return resp.text();
 }
 
-// â”€â”€â”€ Fetch dynamique du client_id SoundCloud â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Fetch dynamique du client_id SoundCloud ─────────────────────────────────
 // Même logique que sc_fetch_client_id / sc_parse_js_for_clientid en C :
-//   Étape 1 : GET soundcloud.com â†’ extraire les <script src="...">
-//   Étape 2 : GET le dernier bundle JS â†’ chercher client_id:"XXXXXXXX"
+//   Étape 1 : GET soundcloud.com → extraire les <script src="...">
+//   Étape 2 : GET le dernier bundle JS → chercher client_id:"XXXXXXXX"
 
 export async function fetchSoundCloudClientId(_?: any): Promise<string | null> {
     try {
@@ -95,7 +95,7 @@ export async function fetchSoundCloudClientId(_?: any): Promise<string | null> {
     }
 }
 
-// â”€â”€â”€ Recherche de pistes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Recherche de pistes ──────────────────────────────────────────────────────
 
 export async function searchSoundCloud(
     _: any,
@@ -111,7 +111,7 @@ export async function searchSoundCloud(
     }
 }
 
-// â”€â”€â”€ Résolution de l'URL de stream â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Résolution de l'URL de stream ───────────────────────────────────────────
 
 export async function resolveStreamUrl(_: any, url: string, clientId: string): Promise<string | null> {
     try {
@@ -162,7 +162,7 @@ export async function resolveTrack(
     }
 }
 
-// â”€â”€â”€ Listening Together â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Listening Together ─────────────────────────────────────────────────────────────────
 // Electron : intercept navigation events on BrowserWindow
 // Browser extension : intercept clicks on <a> tags pointing to youcord.fr/listen
 

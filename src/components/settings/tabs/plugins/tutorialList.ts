@@ -114,7 +114,7 @@ export function getTutorialVideoName(pluginName: string): string | undefined {
 
 /**
  * Synchronously populates the cache from the static list and calls onProgress.
- * No network requests â€” instant, no CORS issues.
+ * No network requests — instant, no CORS issues.
  */
 export function loadTutorials(_pluginNames: string[], onProgress: (found: Set<string>) => void) {
     onProgress(new Set(TUTORIAL_PLUGIN_NAMES));

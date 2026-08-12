@@ -1,9 +1,9 @@
 ﻿/*
- * YouCord â€” Local injector for Discord Desktop
+ * YouCord — Local injector for Discord Desktop
  * Injecte YouCord dans une installation Discord existante en :
- * 1. Trouvant le rÃ©pertoire resources de Discord
- * 2. Renommant app.asar â†’ _app.asar (backup)
- * 3. CrÃ©ant un dossier app/ avec un loader qui require le patcher.js de YouCord
+ * 1. Trouvant le répertoire resources de Discord
+ * 2. Renommant app.asar → _app.asar (backup)
+ * 3. Créant un dossier app/ avec un loader qui require le patcher.js de YouCord
  *
  * Usage: pnpm inject   (ou: node scripts/inject.mjs)
  *
@@ -19,9 +19,9 @@ import { fileURLToPath } from "url";
 const BASE_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DIST_DIR = join(BASE_DIR, "dist", "desktop");
 
-// â”€â”€ Locate Discord installations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Locate Discord installations ─────────────────────────────────────────────
 /**
- * Retourne tous les rÃ©pertoires resources Discord trouvÃ©s sur la machine.
+ * Retourne tous les répertoires resources Discord trouvés sur la machine.
  * @returns {string[]}
  */
 function findAllDiscordResources() {
@@ -68,50 +68,50 @@ function findAllDiscordResources() {
     });
 }
 
-// â”€â”€ Check dist/ exists â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Check dist/ exists ───────────────────────────────────────────────────────
 function checkBuild() {
     const patcherPath = join(DIST_DIR, "patcher.js");
     if (!existsSync(patcherPath)) {
         console.error("\x1b[31m[YouCord] dist/desktop/patcher.js introuvable !\x1b[0m");
-        console.error("\x1b[33m           Lancez 'pnpm build' d'abord, puis rÃ©essayez.\x1b[0m");
+        console.error("\x1b[33m           Lancez 'pnpm build' d'abord, puis réessayez.\x1b[0m");
         process.exit(1);
     }
 }
 
-// â”€â”€ Inject â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Inject ───────────────────────────────────────────────────────────────────
 function inject(resourcesDir) {
     const appAsarPath = join(resourcesDir, "app.asar");
     const backupPath = join(resourcesDir, "_app.asar");
     const appDirPath = join(resourcesDir, "app");
 
-    // VÃ©rifier si dÃ©jÃ  injectÃ©
+    // Vérifier si déjà injecté
     if (existsSync(appDirPath) && existsSync(join(appDirPath, "index.js"))) {
         try {
             const indexContent = readFileSync(join(appDirPath, "index.js"), "utf-8");
             if (indexContent.includes("YouCord Injector") || indexContent.includes("YouCord")) {
-                console.log("\x1b[33m[YouCord] DÃ©jÃ  injectÃ© ! Utilisez 'pnpm uninject' d'abord pour rÃ©injecter.\x1b[0m");
+                console.log("\x1b[33m[YouCord] Déjà injecté ! Utilisez 'pnpm uninject' d'abord pour réinjecter.\x1b[0m");
                 return false;
             }
         } catch { }
     }
 
-    // Ã‰tape 1 : Backup app.asar â†’ _app.asar
+    // Étape 1 : Backup app.asar → _app.asar
     if (existsSync(appAsarPath) && !existsSync(backupPath)) {
         let isDir = false;
         try { isDir = statSync(appAsarPath).isDirectory(); } catch { }
         if (isDir) {
-            console.warn("\x1b[33m[YouCord] app.asar est un dossier â€” un autre mod est peut-Ãªtre installÃ©.\x1b[0m");
+            console.warn("\x1b[33m[YouCord] app.asar est un dossier — un autre mod est peut-être installé.\x1b[0m");
             console.warn("\x1b[33m            Abandon. Utilisez 'pnpm uninject' pour nettoyer d'abord.\x1b[0m");
             return false;
         }
-        console.log("[YouCord] Sauvegarde app.asar â†’ _app.asar...");
+        console.log("[YouCord] Sauvegarde app.asar → _app.asar...");
         renameSync(appAsarPath, backupPath);
     } else if (!existsSync(backupPath)) {
-        console.error("\x1b[31m[YouCord] Aucun app.asar ou _app.asar trouvÃ© dans resources !\x1b[0m");
+        console.error("\x1b[31m[YouCord] Aucun app.asar ou _app.asar trouvé dans resources !\x1b[0m");
         return false;
     }
 
-    // Ã‰tape 2 : Supprimer l'ancien app.asar s'il existe (pourrait Ãªtre un dossier d'une injection prÃ©cÃ©dente)
+    // Étape 2 : Supprimer l'ancien app.asar s'il existe (pourrait être un dossier d'une injection précédente)
     if (existsSync(appAsarPath)) {
         try {
             rmSync(appAsarPath, { recursive: true, force: true });
@@ -121,7 +121,7 @@ function inject(resourcesDir) {
         }
     }
 
-    // Ã‰tape 3 : CrÃ©er le dossier app/ avec le loader
+    // Étape 3 : Créer le dossier app/ avec le loader
     mkdirSync(appDirPath, { recursive: true });
 
     writeFileSync(join(appDirPath, "package.json"), JSON.stringify({
@@ -132,36 +132,36 @@ function inject(resourcesDir) {
     // Le loader require simplement le patcher YouCord depuis dist/
     const patcherPath = join(DIST_DIR, "patcher.js").replace(/\\/g, "\\\\");
     writeFileSync(join(appDirPath, "index.js"),
-        `// YouCord Injector â€” auto-generated, do not edit\n"use strict";\nrequire("${patcherPath}");\n`
+        `// YouCord Injector — auto-generated, do not edit\n"use strict";\nrequire("${patcherPath}");\n`
     );
 
-    console.log(`\x1b[32m[YouCord] InjectÃ© avec succÃ¨s dans : ${resourcesDir}\x1b[0m`);
-    console.log(`\x1b[32m[YouCord] RÃ©pertoire YouCord dist : ${DIST_DIR}\x1b[0m`);
-    console.log("\x1b[36m[YouCord] RedÃ©marrez Discord pour appliquer les changements.\x1b[0m");
+    console.log(`\x1b[32m[YouCord] Injecté avec succès dans : ${resourcesDir}\x1b[0m`);
+    console.log(`\x1b[32m[YouCord] Répertoire YouCord dist : ${DIST_DIR}\x1b[0m`);
+    console.log("\x1b[36m[YouCord] Redémarrez Discord pour appliquer les changements.\x1b[0m");
     return true;
 }
 
-// â”€â”€ Main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Main ─────────────────────────────────────────────────────────────────────
 checkBuild();
 
 const allResources = findAllDiscordResources();
 if (allResources.length === 0) {
-    console.error("\x1b[31m[YouCord] Aucune installation Discord trouvÃ©e !\x1b[0m");
-    console.error("\x1b[33m           Assurez-vous que Discord (Stable, PTB ou Canary) est installÃ©.\x1b[0m");
+    console.error("\x1b[31m[YouCord] Aucune installation Discord trouvée !\x1b[0m");
+    console.error("\x1b[33m           Assurez-vous que Discord (Stable, PTB ou Canary) est installé.\x1b[0m");
     process.exit(1);
 }
 
 if (allResources.length === 1) {
-    // Un seul Discord trouvÃ© : injection directe
-    console.log(`[YouCord] Discord trouvÃ© : ${allResources[0]}`);
+    // Un seul Discord trouvé : injection directe
+    console.log(`[YouCord] Discord trouvé : ${allResources[0]}`);
     inject(allResources[0]);
 } else {
-    // Plusieurs Discord trouvÃ©s : injecter dans tous
-    console.log(`[YouCord] ${allResources.length} installations Discord trouvÃ©es :`);
+    // Plusieurs Discord trouvés : injecter dans tous
+    console.log(`[YouCord] ${allResources.length} installations Discord trouvées :`);
     let injectedCount = 0;
     for (const res of allResources) {
-        console.log(`\n  â†’ ${res}`);
+        console.log(`\n  → ${res}`);
         if (inject(res)) injectedCount++;
     }
-    console.log(`\n\x1b[32m[YouCord] ${injectedCount}/${allResources.length} injection(s) rÃ©ussie(s).\x1b[0m`);
+    console.log(`\n\x1b[32m[YouCord] ${injectedCount}/${allResources.length} injection(s) réussie(s).\x1b[0m`);
 }

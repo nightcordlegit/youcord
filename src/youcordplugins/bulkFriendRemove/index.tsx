@@ -7,6 +7,7 @@
 import "./styles.css";
 
 import { HeaderBarButton } from "@api/HeaderBar";
+import { runDiscordRequest } from "@utils/discordRequestQueue";
 import { ModalCloseButton,ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
@@ -119,14 +120,13 @@ function BulkFriendRemoveModal({ rootProps }: { rootProps: any; }) {
             const f = selected[i];
             setFriends(p => p.map(x => x.id === f.id ? { ...x, removing: true } : x));
             try {
-                await removeFriend(f.id);
+                await runDiscordRequest(() => removeFriend(f.id));
                 setFriends(p => p.filter(x => x.id !== f.id));
             } catch (e) {
                 console.warn("[BulkFriendRemove] Failed:", f.id, e);
                 setFriends(p => p.map(x => x.id === f.id ? { ...x, removing: false, selected: false } : x));
             }
             setProgress({ done: i + 1, total: selected.length });
-            await new Promise(r => setTimeout(r, 600 + Math.random() * 400));
         }
         setRemoving(false);
     }
@@ -209,7 +209,7 @@ function BulkFriendRemoveButton() {
 
 export default definePlugin({
     name: "BulkFriendRemove",
-    enabledByDefault: true,
+    enabledByDefault: false,
     description: "Delete multiple friends at once.",
     authors: [{ name: "YouCord", id: 0n }],
     headerBarButton: { icon: BulkRemoveIcon, render: BulkFriendRemoveButton, priority: 5 },

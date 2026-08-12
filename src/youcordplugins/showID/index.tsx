@@ -12,7 +12,7 @@ import { React, useState } from "@webpack/common";
 
 const Section = findComponentByCodeLazy("headingVariant:", '"section"', "headingIcon:");
 
-// â”€â”€ Icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Icons ──────────────────────────────────────────────────────────────────
 
 const CopyIcon = () => (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}>
@@ -27,7 +27,7 @@ const CheckIcon = () => (
     </svg>
 );
 
-// â”€â”€ Copy Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Copy Button ────────────────────────────────────────────────────────────
 
 function CopyButton({ text }: { text: string; }) {
     const [copied, setCopied] = useState(false);
@@ -76,7 +76,7 @@ function CopyButton({ text }: { text: string; }) {
     );
 }
 
-// â”€â”€ ID Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── ID Section ─────────────────────────────────────────────────────────────
 
 const UserIDSection = ErrorBoundary.wrap(({ userId }: { userId: string; }) => (
     <div style={{ display: "flex", alignItems: "center" }}>

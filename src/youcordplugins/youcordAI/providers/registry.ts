@@ -141,7 +141,7 @@ function enqueue<T>(fn: () => Promise<T>): Promise<T> {
     return result;
 }
 
-export async function groqChat(opts: { messages: GroqChatMessage[]; temperature?: number; maxTokens?: number; forceModel?: string; maxRetries?: number; }): Promise<string> {
+export async function groqChat(opts: ChatCallOptions & { messages: GroqChatMessage[]; }): Promise<string> {
     const { messages, ...rest } = opts;
     if (!rest || typeof rest !== "object") throw new Error("Invalid options object");
     if (!Array.isArray(messages)) throw new Error("Messages must be an array");

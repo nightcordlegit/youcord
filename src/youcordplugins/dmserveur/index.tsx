@@ -13,6 +13,7 @@ import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { Switch } from "@components/Switch";
 import { showApiKeyWarning } from "@utils/apiKeyWarning";
+import { runDiscordRequest } from "@utils/discordRequestQueue";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -1155,8 +1156,8 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: () => t("When should Dmserveur respond?"),
         options: [
-            { label: () => t("Only when mentioned (@Dmserveur)"), value: "mention_only" },
-            { label: () => t("All messages in selected channels"), value: "all_messages", default: true },
+            { label: () => t("Only when mentioned (@Dmserveur)"), value: "mention_only", default: true },
+            { label: () => t("All messages in selected channels"), value: "all_messages" },
         ],
         restartNeeded: false,
         hidden: true,
@@ -1164,7 +1165,7 @@ const settings = definePluginSettings({
     mentionUser: {
         type: OptionType.BOOLEAN,
         description: () => t("Mention (ping) the user when replying"),
-        default: true,
+        default: false,
         restartNeeded: false,
         hidden: true,
     },
@@ -1277,7 +1278,7 @@ const settings = definePluginSettings({
     learnAbbreviations: {
         type: OptionType.BOOLEAN,
         description: () => t("Learn abbreviations from conversations and use them"),
-        default: true,
+        default: false,
         restartNeeded: false,
         hidden: true,
     },
@@ -1386,6 +1387,11 @@ async function handleMessage(message: any) {
         return;
     }
 
+    // Reserve the channel cooldown and global quota before any asynchronous
+    // AI work. Otherwise multiple simultaneous MESSAGE_CREATE events all pass
+    // the check and schedule a burst of replies.
+    markReplied(message.channel_id);
+
     console.log("[Dmserveur] Handling message from", message.author.username, "in", guild.name, "#" + channel.name);
 
     try {
@@ -1471,7 +1477,7 @@ Réponds à ce dernier message en tenant compte du contexte ci-dessus. Avant d'e
                 { role: "user", content: userPrompt }
             ],
             temperature: settings.store.personality === "angry" ? 0.9 : settings.store.personality === "sarcastic" || settings.store.personality === "witty" ? 0.8 : 0.7,
-            maxTokens: 1000,
+            maxTokens: 180,
         });
 
         if (!reply || reply.length === 0) {
@@ -1507,7 +1513,7 @@ Réponds à ce dernier message en tenant compte du contexte ci-dessus. Avant d'e
                         { role: "user", content: completeReply }
                     ],
                     temperature: 0.5,
-                    maxTokens: 200,
+                    maxTokens: 80,
                 });
                 if (continuation && continuation.trim()) {
                     completeReply = `${completeReply}${/\s$/.test(completeReply) ? "" : " "}${continuation.trim()}`;
@@ -1532,7 +1538,7 @@ Réponds à ce dernier message en tenant compte du contexte ci-dessus. Avant d'e
         const replyTimer = setTimeout(async () => {
             pendingReplyTimers.delete(replyTimer);
             try {
-                await RestAPI.post({
+                await runDiscordRequest(() => RestAPI.post({
                     url: `/channels/${message.channel_id}/messages`,
                     body: {
                         content: finalContent,
@@ -1543,7 +1549,9 @@ Réponds à ce dernier message en tenant compte du contexte ci-dessus. Avant d'e
                         },
                         allowed_mentions: shouldMention
                             ? {
-                                parse: ["users", "roles", "everyone"],
+                                parse: [],
+                                users: [message.author.id],
+                                roles: [],
                                 replied_user: true,
                             }
                             : {
@@ -1551,8 +1559,7 @@ Réponds à ce dernier message en tenant compte du contexte ci-dessus. Avant d'e
                                 replied_user: false,
                             },
                     },
-                });
-                markReplied(message.channel_id);
+                }));
             } catch (e) {
                 console.error("[Dmserveur] Failed to send message:", e);
             }
@@ -1594,7 +1601,7 @@ export default definePlugin({
     name: "Dmserveur",
     description: "AI that talks naturally in your community servers. Multiple personalities, learns abbreviations, configurable response triggers and rate limits.",
     authors: [{ name: "YouCord", id: 0n }],
-    enabledByDefault: true,
+    enabledByDefault: false,
     settings,
     headerBarButton: {
         icon: DmServeurIcon,

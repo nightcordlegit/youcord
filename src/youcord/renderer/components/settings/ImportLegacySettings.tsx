@@ -76,10 +76,10 @@ export function ImportLegacySettingsButton({ settings }: { settings: any; }) {
             }
 
             setStatus("success");
-            setMessage(`âœ… Settings ${sourceLabel} importés avec succès ! Redémarre YouCord pour appliquer.`);
+            setMessage(`✅ Settings ${sourceLabel} importés avec succès ! Redémarre YouCord pour appliquer.`);
         } catch (err: any) {
             setStatus("error");
-            setMessage(`âŒ Erreur : ${err?.message ?? String(err)}`);
+            setMessage(`❌ Erreur : ${err?.message ?? String(err)}`);
         }
     }
 
@@ -122,7 +122,7 @@ export function ImportLegacySettingsButton({ settings }: { settings: any; }) {
                     marginBottom: "12px"
                 }}
             >
-                <div style={{ fontSize: "32px", marginBottom: "8px" }}>ðŸ“‚</div>
+                <div style={{ fontSize: "32px", marginBottom: "8px" }}>📂</div>
                 <BaseText size="sm" style={{ opacity: 0.6 }}>
                     {dragging
                         ? "Relâche pour importer..."

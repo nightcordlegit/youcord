@@ -1,14 +1,14 @@
 ﻿CC=gcc
-# GStreamer est optionnel â€” dÃ©tectÃ© automatiquement
+# GStreamer est optionnel — détecté automatiquement
 GST_OK     := $(shell pkg-config --exists gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0 2>/dev/null && echo yes || echo no)
 ifeq ($(GST_OK),yes)
   GST_CFLAGS := $(shell pkg-config --cflags gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0) -DHAVE_GSTREAMER
   GST_LIBS   := $(shell pkg-config --libs   gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0)
-  $(info GStreamer dÃ©tectÃ© â€” dÃ©codage vidÃ©o activÃ©)
+  $(info GStreamer détecté — décodage vidéo activé)
 else
   GST_CFLAGS :=
   GST_LIBS   :=
-  $(info GStreamer non trouvÃ© â€” dÃ©codage vidÃ©o dÃ©sactivÃ©)
+  $(info GStreamer non trouvé — décodage vidéo désactivé)
 endif
 
 FLAGS=`pkg-config --cflags gtk+-3.0 libsoup-2.4 rtaudio json-glib-1.0 opus libsodium libsecret-1` $(GST_CFLAGS)
@@ -16,7 +16,7 @@ LIBS=`pkg-config --libs gtk+-3.0 libsoup-2.4 rtaudio json-glib-1.0 opus libsodiu
 PREFIX=/usr
 BUILD_DIR=build
 SRCS = $(shell find ./src/*.c | grep -v updater.c)
-# Ressource Windows (icÃ´ne)
+# Ressource Windows (icône)
 RC_OBJ = $(BUILD_DIR)/youcord_rc.o
 OBJS = $(patsubst %.c, $(BUILD_DIR)/%.o, $(SRCS))
 OPTS=-O3
@@ -47,7 +47,7 @@ $(BUILD_DIR)/resources.c: resources.xml $(BUILD_DIR)/assets/gschemas.compiled
 $(BUILD_DIR)/resources.o: $(BUILD_DIR)/resources.c
 	$(CC) -c -o $@ $^ $(FLAGS) $(OPTS)
 
-# Compiler les ressources Windows (.rc â†’ .o)
+# Compiler les ressources Windows (.rc → .o)
 $(BUILD_DIR)/youcord_rc.o: youcord.rc assets/youcord.ico
 	mkdir -p $(BUILD_DIR)
 	windres youcord.rc -o $@
@@ -60,7 +60,7 @@ $(BUILD_DIR)/youcord: $(OBJS) $(BUILD_DIR)/resources.o $(RC_OBJ) $(BUILD_DIR)/th
 	$(CC) -o $@ $(OBJS) $(BUILD_DIR)/resources.o $(RC_OBJ) $(LIBS) -liphlpapi -lcrypt32 $(OPTS) -mwindows
 
 
-# â”€â”€ Updater â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Updater ──────────────────────────────────────────────────────────────
 $(BUILD_DIR)/updater.exe: src/updater.c
 	$(CC) -o $@ $< `pkg-config --cflags --libs gtk+-3.0 libsoup-2.4 json-glib-1.0` -lm $(OPTS) -mwindows
 

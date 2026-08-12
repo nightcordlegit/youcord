@@ -21,7 +21,7 @@ const settings = definePluginSettings({
     },
 });
 
-// â”€â”€ Popover state (plain DOM, no React needed for a single floating button) â”€â”€
+// ── Popover state (plain DOM, no React needed for a single floating button) ──
 
 let popoverEl: HTMLDivElement | null = null;
 let repositionTarget: Range | null = null;

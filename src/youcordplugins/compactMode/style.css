@@ -53,9 +53,9 @@
     color: var(--white-500, #fff);
 }
 
-/* â”€â”€ YouCord Quick Settings Popout â”€â”€ */
+/* ── YouCord Quick Settings Popout ── */
 
-/* Force ALL child elements to use white text â€” defeats any theme override */
+/* Force ALL child elements to use white text — defeats any theme override */
 .nc-settings-popout,
 .nc-settings-popout * {
     color: #fff !important;
@@ -87,7 +87,7 @@
     font-size: 10px;
     font-weight: 700;
 
-    /* Slightly muted â€” override the blanket rule with a more specific selector */
+    /* Slightly muted — override the blanket rule with a more specific selector */
     color: rgb(255 255 255 / 55%) !important;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -192,9 +192,9 @@
     transform: scale(1.12) !important;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ══════════════════════════════════════════════════════════════════
    YOUCORD FULL SETTINGS MODAL
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ══════════════════════════════════════════════════════════════════ */
 
 /* Override Discord modal sizing */
 .nc-modal-wrapper {
@@ -216,7 +216,7 @@
     border-radius: 12px;
 }
 
-/* â”€â”€ Sidebar â”€â”€ */
+/* ── Sidebar ── */
 .nc-modal-sidebar {
     width: 210px;
     flex-shrink: 0;
@@ -303,7 +303,7 @@
     text-overflow: ellipsis;
 }
 
-/* â”€â”€ Content area â”€â”€ */
+/* ── Content area ── */
 .nc-modal-content {
     flex: 1;
     min-width: 0;
@@ -465,3 +465,30 @@
     color: #fff !important;
 }
 
+/* Keep Discord's message action toolbar under the cursor. Some overlays and
+   compact layouts leave a few transparent pixels between the message and the
+   toolbar, which makes the hover state disappear before it can be clicked. */
+[class*="message_"] [class*="buttons_"] {
+    z-index: 20 !important;
+    pointer-events: auto !important;
+}
+
+[class*="message_"] [class*="buttonsInner_"] {
+    position: relative;
+    pointer-events: auto !important;
+}
+
+[class*="message_"] [class*="buttonsInner_"]::before {
+    position: absolute;
+    z-index: 0;
+    inset: -7px -5px;
+    content: "";
+    background: transparent;
+    pointer-events: auto;
+}
+
+[class*="message_"] [class*="buttonsInner_"] > * {
+    position: relative;
+    z-index: 1;
+    pointer-events: auto !important;
+}

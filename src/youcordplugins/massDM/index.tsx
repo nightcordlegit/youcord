@@ -9,6 +9,7 @@ import "./styles.css";
 import { HeaderBarButton } from "@api/HeaderBar";
 import { Button } from "@components/Button";
 import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
+import { runDiscordRequest } from "@utils/discordRequestQueue";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
@@ -20,7 +21,7 @@ import { t } from "../autoTranslateYouCord";
 const RelationshipStore = findStoreLazy("RelationshipStore");
 const UserStore = findStoreLazy("UserStore");
 
-const DEFAULT_DELAY_MS = 800;
+const DEFAULT_DELAY_MS = 1200;
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 /* ── Observable state shared between modal instances ── */
@@ -85,24 +86,24 @@ async function startSending(message: string, excludedIds: Set<string> = new Set(
         const personalizedMessage = message.replace(/@user/g, `<@${id}>`);
 
         try {
-            const dmRes = await RestAPI.post({ url: "/users/@me/channels", body: { recipient_id: id } });
+            const dmRes = await runDiscordRequest(
+                () => RestAPI.post({ url: "/users/@me/channels", body: { recipient_id: id } })
+            );
             if (!dmRes?.body?.id) {
                 state.failed++;
                 state.log.push(`❌ ${name}`);
                 state.notify();
                 continue;
             }
-            await RestAPI.post({ url: `/channels/${dmRes.body.id}/messages`, body: { content: personalizedMessage, tts: false } });
+            await runDiscordRequest(
+                () => RestAPI.post({ url: `/channels/${dmRes.body.id}/messages`, body: { content: personalizedMessage, tts: false } })
+            );
             state.done++;
             state.log.push(`✅ ${name}`);
         } catch (e: any) {
             state.failed++;
             state.log.push(`❌ ${name}`);
-            if (e?.status === 429 || e?.statusCode === 429) {
-                state.log.push("⏳ Rate limit — pausing 15s");
-                state.notify();
-                if (!state.aborted) await sleep(15000);
-            }
+            if (e?.status === 429 || e?.statusCode === 429) state.log.push("⏳ Rate limit persisted after retries");
         }
         state.notify();
         if (!state.aborted) await sleep(state.delayMs);
@@ -366,7 +367,7 @@ function MassDMButton() {
 /* ── Plugin definition ── */
 export default definePlugin({
     name: "MassDM",
-    enabledByDefault: true,
+    enabledByDefault: false,
     description: "Sends a message to all your friends with an anti-rate-limit delay.",
     authors: [{ name: "YouCord", id: 0n }],
     headerBarButton: { icon: MassDMIcon, render: MassDMButton },

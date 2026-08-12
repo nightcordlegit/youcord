@@ -19,22 +19,31 @@ interface AbbrevEntry {
     phrase: string;
 }
 
-// â”€â”€ DataStore helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── DataStore helpers ──────────────────────────────────────────────────────────
 
 let cachedEntries: AbbrevEntry[] = [];
+let exactEntries = new Map<string, AbbrevEntry>();
+let insensitiveEntries = new Map<string, AbbrevEntry>();
+
+function rebuildEntryIndexes() {
+    exactEntries = new Map(cachedEntries.map(entry => [entry.abbrev, entry]));
+    insensitiveEntries = new Map(cachedEntries.map(entry => [entry.abbrev.toLocaleLowerCase(), entry]));
+}
 
 async function loadEntries(): Promise<AbbrevEntry[]> {
     const data = await DataStore.get(DS_KEY) as AbbrevEntry[] | undefined;
     cachedEntries = data ?? [];
+    rebuildEntryIndexes();
     return cachedEntries;
 }
 
 async function saveEntries(entries: AbbrevEntry[]) {
     cachedEntries = entries;
+    rebuildEntryIndexes();
     await DataStore.set(DS_KEY, entries);
 }
 
-// â”€â”€ UI Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── UI Component ───────────────────────────────────────────────────────────────
 
 function AbbreviationManager() {
     const [entries, setEntries] = useState<AbbrevEntry[]>([]);
@@ -139,7 +148,7 @@ function AbbreviationManager() {
                             <span style={{ color: "#fff", fontWeight: 600, minWidth: 80 }}>
                                 {e.abbrev}
                             </span>
-                            <span style={{ color: "#b5bac1" }}>â†’</span>
+                            <span style={{ color: "#b5bac1" }}>→</span>
                             <span style={{ color: "#fff", flex: 1 }}>
                                 {e.phrase}
                             </span>
@@ -156,7 +165,7 @@ function AbbreviationManager() {
                                     fontWeight: 600,
                                 }}
                             >
-                                âœ•
+                                ✕
                             </button>
                         </div>
                     ))}
@@ -166,7 +175,7 @@ function AbbreviationManager() {
     );
 }
 
-// â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Settings ───────────────────────────────────────────────────────────────────
 
 const settings = definePluginSettings({
     matchMode: {
@@ -189,13 +198,12 @@ const settings = definePluginSettings({
     },
 });
 
-// â”€â”€ Pre-send listener â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Pre-send listener ──────────────────────────────────────────────────────────
 
 function onPreSend(_channelId: string, messageObj: { content: string; }) {
     if (!messageObj.content) return;
 
-    const entries = cachedEntries;
-    if (entries.length === 0) return;
+    if (cachedEntries.length === 0) return;
 
     const mode = settings.store.matchMode ?? "word";
     const caseSensitive = settings.store.caseSensitive ?? false;
@@ -203,29 +211,27 @@ function onPreSend(_channelId: string, messageObj: { content: string; }) {
     if (mode === "exact") {
         // The entire message must match the abbreviation exactly
         const input = caseSensitive ? messageObj.content.trim() : messageObj.content.trim().toLowerCase();
-        const match = entries.find(e => {
-            const abbrev = caseSensitive ? e.abbrev : e.abbrev.toLowerCase();
-            return input === abbrev;
-        });
+        const match = (caseSensitive ? exactEntries : insensitiveEntries).get(input);
         if (match) {
             messageObj.content = match.phrase;
         }
     } else {
         // Replaces each word individually
+        const index = caseSensitive ? exactEntries : insensitiveEntries;
         const words = messageObj.content.split(/(\s+)/); // keep whitespace
         const replaced = words.map(w => {
-            const test = caseSensitive ? w : w.toLowerCase();
-            const match = entries.find(e => {
-                const abbrev = caseSensitive ? e.abbrev : e.abbrev.toLowerCase();
-                return test === abbrev;
-            });
-            return match ? match.phrase : w;
+            const parts = w.match(/^([^\p{L}\p{N}]*)([\p{L}\p{N}'’_-]+)([^\p{L}\p{N}]*)$/u);
+            if (!parts) return w;
+            const [, prefix, token, suffix] = parts;
+            const key = caseSensitive ? token : token.toLocaleLowerCase();
+            const match = index.get(key);
+            return match ? `${prefix}${match.phrase}${suffix}` : w;
         });
         messageObj.content = replaced.join("");
     }
 }
 
-// â”€â”€ Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Plugin ─────────────────────────────────────────────────────────────────────
 
 export default definePlugin({
     name: "Abbreviation",

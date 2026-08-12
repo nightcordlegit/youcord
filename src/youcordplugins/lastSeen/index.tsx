@@ -15,7 +15,7 @@ import { FluxDispatcher, React, useStateFromStores } from "@webpack/common";
 const Section = findComponentByCodeLazy("headingVariant:", '"section"', "headingIcon:");
 const PresenceStore = findByPropsLazy("getStatus", "getActivities");
 
-// â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Settings ───────────────────────────────────────────────────────────────
 
 const settings = definePluginSettings({
     language: {
@@ -28,7 +28,7 @@ const settings = definePluginSettings({
     }
 });
 
-// â”€â”€ Storage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Storage ────────────────────────────────────────────────────────────────
 
 const STORAGE_PREFIX = "youcord_lastseen_";
 
@@ -51,7 +51,7 @@ function setLastSeen(userId: string, ts: number) {
     }
 }
 
-// â”€â”€ Format â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Format ─────────────────────────────────────────────────────────────────
 
 function formatDate(ts: number): string {
     const now = new Date();
@@ -74,9 +74,9 @@ function formatDate(ts: number): string {
     return lang === "fr" ? `Le ${dateStr} à ${timeStr}` : `${dateStr} at ${timeStr}`;
 }
 
-// â”€â”€ Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Handlers ───────────────────────────────────────────────────────────────
 
-// Handle a single presence entry â€” called from multiple events
+// Handle a single presence entry — called from multiple events
 function handlePresenceEntry(entry: any) {
     if (!entry) return;
 
@@ -96,7 +96,7 @@ function handlePresenceEntry(entry: any) {
     setLastSeen(userId, Date.now());
 }
 
-// PRESENCE_UPDATE â€” may dispatch single user or array
+// PRESENCE_UPDATE — may dispatch single user or array
 function onPresenceUpdate(data: any) {
     if (Array.isArray(data?.updates)) {
         for (const entry of data.updates) handlePresenceEntry(entry);
@@ -141,7 +141,7 @@ function onReactionAdd(data: any) {
     if (userId) setLastSeen(userId, Date.now());
 }
 
-// â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Component ──────────────────────────────────────────────────────────────
 
 function LastSeenText({ userId }: { userId: string; }) {
     const status = useStateFromStores([PresenceStore], () => PresenceStore.getStatus(userId));
@@ -182,7 +182,7 @@ const LastSeenSection = ErrorBoundary.wrap(
     { noop: true }
 );
 
-// â”€â”€ Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Plugin ─────────────────────────────────────────────────────────────────
 
 export default definePlugin({
     name: "LastSeen",

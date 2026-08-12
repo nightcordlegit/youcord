@@ -9,12 +9,12 @@ import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, React, showToast, Toasts } from "@webpack/common";
 
-// â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Constants ──────────────────────────────────────────────────────────────────
 
 const STYLE_ID = "live-wallpaper-style";
 const CONTAINER_ID = "live-wallpaper-container";
 
-// â”€â”€ File picker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── File picker ────────────────────────────────────────────────────────────────
 
 function pickFile(): Promise<string | null> {
     return new Promise(resolve => {
@@ -82,7 +82,7 @@ function SettingsComponent() {
                             }
                         }}
                     >
-                        ðŸ“ Choose a local file
+                        📁 Choose a local file
                     </Button>
 
                     {hasFile && (
@@ -98,7 +98,7 @@ function SettingsComponent() {
                                 showToast("Wallpaper removed", Toasts.Type.SUCCESS);
                             }}
                         >
-                            ðŸ—‘ï¸ Delete
+                            🗑️ Delete
                         </Button>
                     )}
                 </div>
@@ -109,7 +109,7 @@ function SettingsComponent() {
                     <input
                         type="text"
                         placeholder="https://example.com/video.mp4"
-                        value={isDataUrl ? "âœ… [Local file loaded]" : inputValue}
+                        value={isDataUrl ? "✅ [Local file loaded]" : inputValue}
                         disabled={isDataUrl}
                         style={{
                             width: "100%",
@@ -136,8 +136,8 @@ function SettingsComponent() {
             {hasFile && (
                 <div style={{ marginTop: "10px", fontSize: "12px", color: "var(--text-muted)", fontStyle: "italic" }}>
                     {isDataUrl
-                        ? `âœ… Local file: ${Math.round(currentUrl.length / 1024)} KB`
-                        : `âœ… URL: ${currentUrl.slice(0, 50)}${currentUrl.length > 50 ? "..." : ""}`
+                        ? `✅ Local file: ${Math.round(currentUrl.length / 1024)} KB`
+                        : `✅ URL: ${currentUrl.slice(0, 50)}${currentUrl.length > 50 ? "..." : ""}`
                     }
                 </div>
             )}
@@ -147,7 +147,7 @@ function SettingsComponent() {
     );
 }
 
-// â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Settings ───────────────────────────────────────────────────────────────────
 
 const settings = definePluginSettings({
     main: {
@@ -236,7 +236,7 @@ function handleFocusChange() {
     else pauseVideo();
 }
 
-// â”€â”€ Wallpaper injection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Wallpaper injection ────────────────────────────────────────────────────────
 
 function removeWallpaperElements() {
     document.getElementById(STYLE_ID)?.remove();
@@ -264,7 +264,7 @@ async function applyWallpaper() {
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = `
-/* â”€â”€ LiveWallpaper: full screen overlay OVER Discord â”€â”€ */
+/* ── LiveWallpaper: full screen overlay OVER Discord ── */
 #${CONTAINER_ID} {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;

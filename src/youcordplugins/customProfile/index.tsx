@@ -15,7 +15,7 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { ApngBlendOp, ApngDisposeOp, parseAPNG } from "@utils/apng";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { AuthenticationStore, Button, FluxDispatcher, GuildMemberStore, IconUtils, Menu, OAuth2AuthorizeModal, React, Select, SnowflakeUtils, UserProfileStore, UserStore } from "@webpack/common";
+import { AuthenticationStore, Button, FluxDispatcher, GuildMemberStore, IconUtils, Menu, OAuth2AuthorizeModal, React, RestAPI, Select, SnowflakeUtils, UserProfileStore, UserStore } from "@webpack/common";
 import virtualMerge from "virtual-merge";
 
 import { beginDiscordOAuth,getStoredToken, storeToken } from "../../api/OAuth2";
@@ -24,6 +24,9 @@ import { PROFILE_EFFECT_ASSETS, ProfileEffectAsset } from "./effectAssets";
 
 const DS_KEY = "customProfile_data";
 const DS_ENABLED = "customProfile_enabled";
+// The public YouCord sync endpoint is not deployed. Keep Custom Profile fully
+// local instead of probing Discord's origin and producing a 404 for every user.
+const PUBLIC_PROFILE_SYNC_AVAILABLE = false;
 
 const settings = definePluginSettings({
     showCopyProfileInUserMenu: {
@@ -64,6 +67,40 @@ const BADGES = [
 ];
 
 const OLD_NAME_BADGE_ICON = "https://cdn.discordapp.com/badge-icons/6de6d34650760ba5551a79732e98ed60.png";
+
+const DISPLAY_NAME_FONTS = [
+    [11, "Par défaut"], [1, "Bangers"], [2, "Bio Rhyme"], [3, "Cherry Bomb"],
+    [4, "Chicle"], [5, "Compagnon"], [6, "Museo Moderno"], [7, "Neo Castel"],
+    [8, "Pixelify"], [9, "Ribes"], [10, "Sinistre"], [12, "Zilla Slab"],
+    [13, "Playpen Sans"], [14, "Orbitron"], [15, "New Rocker"], [16, "Kalam"],
+] as const;
+
+const DISPLAY_NAME_EFFECTS = [
+    [1, "Uni"], [2, "Dégradé"], [3, "Néon"], [4, "Cartoon"],
+    [5, "Pop"], [6, "Lueur"], [7, "Prisme"], [8, "Gomme"],
+] as const;
+
+const PROFILE_THEME_PRESETS = [
+    { label: "Discord", colors: [0x5865f2, 0x9b84ee] },
+    { label: "Crépuscule", colors: [0x6a3093, 0xa044ff] },
+    { label: "Océan", colors: [0x005c97, 0x363795] },
+    { label: "Aurore", colors: [0xff512f, 0xdd2476] },
+    { label: "Menthe", colors: [0x11998e, 0x38ef7d] },
+    { label: "Nuit", colors: [0x141e30, 0x243b55] },
+];
+
+const PROFILE_SECTIONS = [
+    ["identity", "Identité"],
+    ["appearance", "Bannière et thème"],
+    ["information", "Informations du profil"],
+    ["badges", "Badges et Nitro"],
+    ["decorations", "Décorations d’avatar"],
+    ["effects", "Effets de profil"],
+    ["nameplates", "Plaques nominatives"],
+    ["frames", "Cadres de profil"],
+] as const;
+
+type ProfileSectionId = typeof PROFILE_SECTIONS[number][0];
 
 const NITRO_LEVELS = [
     { label: t("Nitro (0 mois)"), icon: "https://cdn.discordapp.com/badge-icons/2ba85e8026a8614b640c2837bcdfe21b.png" },
@@ -151,6 +188,10 @@ function getProfileEffectUrl(assetId: string, animated = false): string {
     return `https://cdn.discordapp.com/media/v1/collectibles-shop/${assetId}/${animated ? "animated" : "static"}`;
 }
 
+function getCollectibleItemAssetUrl(skuId: string, assetId: string, animated = false): string {
+    return `https://cdn.discordapp.com/media/v1/collectibles-shop/${skuId}/${assetId}/${animated ? "animated" : "static"}`;
+}
+
 const PROFILE_EFFECTS = [
     { id: "1139323092645183591", label: "Hydro Blast" },
     { id: "1139323093991575696", label: "Sakura Dreams" },
@@ -184,6 +225,167 @@ const PROFILE_EFFECTS = [
     { id: "1245088254647205991", label: "Twinkle Trails" },
 ];
 
+interface CollectibleChoice {
+    id: string;
+    label: string;
+    previewUrl?: string;
+    assetKey?: string;
+    asset?: string;
+    palette?: string;
+    frame?: ProfileFrameData;
+}
+
+interface NameplateData {
+    skuId: string;
+    asset: string;
+    label?: string;
+    palette?: string;
+    type: 2;
+}
+
+interface ProfileFrameData {
+    skuId: string;
+    label?: string;
+    layers: any[];
+    innerWidth?: number;
+    overflowTop?: number;
+    overflowBottom?: number;
+    overflowHorizontal?: number;
+    type: 3;
+}
+
+interface DisplayNameStyleData {
+    fontId: number;
+    effectId: number;
+    colors: number[];
+    font_id: number;
+    effect_id: number;
+}
+
+function firstNonEmptyString(...values: any[]): string | undefined {
+    return values.find(value => typeof value === "string" && value.trim())?.trim();
+}
+
+function localizedCollectibleName(value: any, fallback: string): string {
+    if (typeof value === "string" && value.trim()) return value;
+    if (value && typeof value === "object") {
+        for (const key of ["fr", "fr-FR", "default", "en-US", "en"]) {
+            if (typeof value[key] === "string" && value[key].trim()) return value[key];
+        }
+        const first = Object.values(value).find(entry => typeof entry === "string" && entry.trim());
+        if (typeof first === "string") return first;
+    }
+    return fallback;
+}
+
+function mergeCollectibleChoices(fallback: CollectibleChoice[], incoming: CollectibleChoice[]): CollectibleChoice[] {
+    const choices = new Map<string, CollectibleChoice>();
+    const seenAssets = new Set<string>();
+
+    for (const choice of [...fallback, ...incoming]) {
+        const assetKey = choice.assetKey ?? choice.previewUrl ?? choice.id;
+        if (choices.has(choice.id) || seenAssets.has(assetKey)) continue;
+        choices.set(choice.id, choice);
+        seenAssets.add(assetKey);
+    }
+
+    return Array.from(choices.values());
+}
+
+function extractCollectibleChoices(payload: any): {
+    decorations: CollectibleChoice[];
+    effects: CollectibleChoice[];
+    nameplates: CollectibleChoice[];
+    frames: CollectibleChoice[];
+} {
+    const decorations: CollectibleChoice[] = [];
+    const effects: CollectibleChoice[] = [];
+    const nameplates: CollectibleChoice[] = [];
+    const frames: CollectibleChoice[] = [];
+    const seen = new Set<any>();
+
+    const visit = (value: any, inheritedLabel?: string, inheritedPreview?: string) => {
+        if (!value || typeof value !== "object" || seen.has(value)) return;
+        seen.add(value);
+
+        if (Array.isArray(value)) {
+            value.forEach(entry => visit(entry, inheritedLabel, inheritedPreview));
+            return;
+        }
+
+        const label = localizedCollectibleName(
+            value.name ?? value.title ?? value.label,
+            inheritedLabel ?? "Collectible"
+        );
+        const productPreview = firstNonEmptyString(
+            value.previewAssets?.fgStatic,
+            value.preview_assets?.fg_static,
+            value.previewAssets?.fgAnimated,
+            value.preview_assets?.fg_animated,
+            inheritedPreview
+        );
+        const skuId = value.sku_id ?? value.skuId;
+        const rawType = value.type ?? value.item_type ?? value.itemType;
+        const normalizedType = typeof rawType === "string" ? rawType.toUpperCase() : rawType;
+        if (skuId != null) {
+            const id = String(skuId);
+            const previewUrl = firstNonEmptyString(
+                value.thumbnailPreviewSrc,
+                value.thumbnail_preview_src,
+                value.staticFrameSrc,
+                value.static_frame_src,
+                value.reducedMotionSrc,
+                value.reduced_motion_src,
+                productPreview
+            );
+            const assetKey = firstNonEmptyString(value.asset, previewUrl);
+            // Discord CollectiblesItemType: decoration = 0, profile effect = 1.
+            // Classify the item itself, never the pack containing it.
+            if (normalizedType === 0 || normalizedType === "0" || normalizedType === "AVATAR_DECORATION")
+                decorations.push({ id, label, assetKey });
+            if ((normalizedType === 1 || normalizedType === "1" || normalizedType === "PROFILE_EFFECT") && previewUrl)
+                effects.push({ id, label, previewUrl, assetKey });
+            if (normalizedType === 2 || normalizedType === "2" || normalizedType === "NAMEPLATE") {
+                const asset = firstNonEmptyString(value.asset);
+                if (asset) nameplates.push({
+                    id,
+                    label,
+                    asset,
+                    palette: firstNonEmptyString(value.palette),
+                    assetKey: asset,
+                    previewUrl: productPreview ?? getCollectibleItemAssetUrl(id, asset)
+                });
+            }
+            if (normalizedType === 3 || normalizedType === "3" || normalizedType === "PROFILE_FRAME") {
+                const layers = Array.isArray(value.layers) ? value.layers : [];
+                const firstLayerId = firstNonEmptyString(layers[0]?.id, layers[0]?.asset);
+                const frame: ProfileFrameData = {
+                    skuId: id,
+                    label,
+                    layers,
+                    innerWidth: value.innerWidth ?? value.inner_width,
+                    overflowTop: value.overflowTop ?? value.overflow_top,
+                    overflowBottom: value.overflowBottom ?? value.overflow_bottom,
+                    overflowHorizontal: value.overflowHorizontal ?? value.overflow_horizontal,
+                    type: 3
+                };
+                const framePreview = productPreview ?? (firstLayerId ? getCollectibleItemAssetUrl(id, firstLayerId) : undefined);
+                if (layers.length && framePreview) frames.push({ id, label, frame, previewUrl: framePreview, assetKey: framePreview });
+            }
+        }
+
+        Object.values(value).forEach(entry => visit(entry, label, productPreview));
+    };
+
+    visit(payload);
+    return {
+        decorations: mergeCollectibleChoices([], decorations),
+        effects: mergeCollectibleChoices([], effects),
+        nameplates: mergeCollectibleChoices([], nameplates),
+        frames: mergeCollectibleChoices([], frames),
+    };
+}
+
 interface CustomProfileData {
     username?: string;
     globalName?: string;
@@ -204,7 +406,23 @@ interface CustomProfileData {
     oldName?: string;
     decorationAsset?: string;
     profileEffectId?: string;
+    nameplate?: NameplateData;
+    profileFrame?: ProfileFrameData;
+    displayNameStyles?: DisplayNameStyleData;
     copiedUserId?: string;
+}
+
+function mergeCustomCollectibles(base: any, data: CustomProfileData): any {
+    if (!data.nameplate) return base;
+    return { ...(base ?? {}), nameplate: data.nameplate };
+}
+
+function applyProfileCollectibles(merged: any, data: CustomProfileData, baseCollectibles?: any) {
+    if (data.nameplate) merged.collectibles = mergeCustomCollectibles(baseCollectibles, data);
+    if (data.profileFrame) {
+        merged.profileFrame = data.profileFrame;
+        merged.profileFrameId = data.profileFrame.skuId;
+    }
 }
 
 const LS_KEY_DATA = "YouCordCP_data";
@@ -263,6 +481,10 @@ function checkSeeAllSettingChange() {
 
 async function fetchPublicProfileIfNeeded(userId: string) {
     checkSeeAllSettingChange();
+    if (!PUBLIC_PROFILE_SYNC_AVAILABLE) {
+        setPublicProfileCache(userId, { fetched: true, data: null, timestamp: Date.now() });
+        return;
+    }
     if (!Settings.seeAllCustomProfile) return;
     const existing = publicProfilesCache.get(userId);
     if (existing?.fetched && (Date.now() - existing.timestamp) < PUBLIC_CACHE_TTL) return;
@@ -280,6 +502,9 @@ async function fetchPublicProfileIfNeeded(userId: string) {
         delete dataToSave.email;
         delete dataToSave.phone;
         delete dataToSave.copiedUserId;
+        delete dataToSave.nameplate;
+        delete dataToSave.profileFrame;
+        delete dataToSave.displayNameStyles;
     }
     setPublicProfileCache(userId, { fetched: true, data: dataToSave, timestamp: Date.now() });
 
@@ -485,6 +710,9 @@ async function copyUserProfile(userId: string) {
             nitroLevel: -1,
             boostMonths: -1,
             decorationAsset: undefined,
+            nameplate: undefined,
+            profileFrame: undefined,
+            displayNameStyles: undefined,
             createdAt: undefined,
             copiedUserId: userId
         };
@@ -549,6 +777,19 @@ async function copyUserProfile(userId: string) {
             // L'utilisateur peut les sélectionner manuellement dans les réglages.
             newData.badgeFlags = 0;
             if (user.avatarDecorationData?.asset) newData.decorationAsset = user.avatarDecorationData.asset;
+            if (user.collectibles?.nameplate) newData.nameplate = { ...user.collectibles.nameplate, type: 2 };
+            if (user.displayNameStyles) {
+                const fontId = user.displayNameStyles.fontId ?? user.displayNameStyles.font_id;
+                const effectId = user.displayNameStyles.effectId ?? user.displayNameStyles.effect_id;
+                if (typeof fontId === "number" && typeof effectId === "number") newData.displayNameStyles = {
+                    fontId,
+                    effectId,
+                    colors: [...(user.displayNameStyles.colors ?? [])],
+                    font_id: fontId,
+                    effect_id: effectId
+                };
+            }
+            if (profile.profileFrame?.skuId) newData.profileFrame = { ...profile.profileFrame, type: 3 };
         } catch { }
 
         newData.copiedUserId = userId;
@@ -580,7 +821,7 @@ async function copyUserProfile(userId: string) {
 
 const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: any) => {
     if (!children || !Array.isArray(children) || !user || !user.id) return;
-    if (!settings.store.showCopyProfileInUserMenu) return;
+    if (!(Settings.plugins.CustomProfile?.showCopyProfileInUserMenu ?? true)) return;
     try {
         const me = UserStore.getCurrentUser();
         if (!me || user.id === me.id) return;
@@ -690,7 +931,9 @@ function updateCachedRealData() {
 }
 
 let _domQueued = false;
-let _domMutations: MutationRecord[] = [];
+let _domFrame = 0;
+let _initialScanToken = 0;
+const _domNodes = new Set<Node>();
 
 function scanTextNode(node: Text) {
     if (!isEnabled || !node.nodeValue) return;
@@ -734,20 +977,19 @@ function scanNode(node: Node) {
 
 function processDomBatch() {
     _domQueued = false;
-    if (!isEnabled) { _domMutations = []; return; }
-    const batch = _domMutations; _domMutations = [];
+    _domFrame = 0;
+    if (!isEnabled) { _domNodes.clear(); return; }
+    const queued = Array.from(_domNodes);
+    _domNodes.clear();
+    // A newly-added parent already covers all its descendants. Removing nested
+    // roots avoids scanning the same message/profile subtree several times.
+    const roots = queued.filter((node, index) =>
+        !queued.some((other, otherIndex) => otherIndex !== index && other.nodeType === Node.ELEMENT_NODE && other.contains(node))
+    );
     const obs = domObserver;
     if (obs) obs.disconnect();
     try {
-        for (const m of batch) {
-            if (m.type === "characterData") {
-                scanTextNode(m.target as Text);
-            } else {
-                for (const n of m.addedNodes) {
-                    scanNode(n);
-                }
-            }
-        }
+        for (const node of roots) scanNode(node);
     } finally {
         if (isEnabled && obs) {
             obs.observe(document.body, { childList: true, subtree: true, characterData: true });
@@ -755,26 +997,50 @@ function processDomBatch() {
     }
 }
 
+function scheduleDomBatch() {
+    if (_domQueued) return;
+    _domQueued = true;
+    _domFrame = requestAnimationFrame(processDomBatch);
+}
+
+function scanDocumentIncrementally() {
+    const token = ++_initialScanToken;
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const runChunk = () => {
+        if (token !== _initialScanToken || !isEnabled || document.visibilityState === "hidden") return;
+        let count = 0;
+        let node: Node | null;
+        while (count++ < 250 && (node = walker.nextNode())) scanTextNode(node as Text);
+        if (node) setTimeout(runChunk, 0);
+    };
+    setTimeout(runChunk, 0);
+}
+
 function startDomObserver() {
     stopDomObserver();
     if (!isEnabled || document.visibilityState === "hidden") return;
-    scanNode(document.body);
+    scanDocumentIncrementally();
     domObserver = new MutationObserver(mutations => {
         if (!isEnabled || !mutations.length) return;
         if (document.visibilityState === "hidden") {
-            _domMutations = [];
+            _domNodes.clear();
             return;
         }
-        _domMutations.push(...mutations);
-        if (!_domQueued) {
-            _domQueued = true;
-            setTimeout(processDomBatch, 20);
+        for (const mutation of mutations) {
+            if (mutation.type === "characterData") _domNodes.add(mutation.target);
+            else for (const node of mutation.addedNodes) _domNodes.add(node);
         }
+        scheduleDomBatch();
     });
     domObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
 }
 
 function stopDomObserver() {
+    _initialScanToken++;
+    if (_domFrame) cancelAnimationFrame(_domFrame);
+    _domFrame = 0;
+    _domQueued = false;
+    _domNodes.clear();
     domObserver?.disconnect(); domObserver = null;
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     let n: Node | null;
@@ -787,7 +1053,7 @@ function handleVisibilityChange() {
         startDomObserver();
     } else {
         stopDomObserver();
-        _domMutations = [];
+        _domNodes.clear();
         _domQueued = false;
     }
 }
@@ -817,6 +1083,26 @@ function SaveIcon() {
 
 function SectionLabel({ children, style }: { children: React.ReactNode; style?: React.CSSProperties; }) {
     return <div className="cp-section-label" style={style}>{children}</div>;
+}
+
+function ProfileSection({ title, description, count, children }: {
+    title: string;
+    description?: string;
+    count?: React.ReactNode;
+    children: React.ReactNode;
+}) {
+    return (
+        <div className="yc-cp-sb">
+            <div className="yc-cp-sh">
+                <span className="yc-cp-sl">
+                    <span className="yc-cp-st">{title}</span>
+                    {description && <span className="yc-cp-ss">{description}</span>}
+                </span>
+                {count != null && <span className="cp-catalog-count">{count}</span>}
+            </div>
+            <div className="yc-cp-si">{children}</div>
+        </div>
+    );
 }
 
 function Field({ label, value, placeholder, onChange, type = "text" }: {
@@ -971,8 +1257,57 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
     const customIds = data.customBadgeIds ?? [];
     const oldName = data.oldName ?? "";
     const [shareEnabled, setShareEnabled] = React.useState(!!Settings.syncOwnCustomProfile);
+    const [avatarDecorations, setAvatarDecorations] = React.useState<CollectibleChoice[]>(AVATAR_DECORATIONS);
+    const [profileEffects, setProfileEffects] = React.useState<CollectibleChoice[]>(PROFILE_EFFECTS);
+    const [nameplates, setNameplates] = React.useState<CollectibleChoice[]>([]);
+    const [profileFrames, setProfileFrames] = React.useState<CollectibleChoice[]>([]);
+    const [catalogLoading, setCatalogLoading] = React.useState(true);
+    const [activeSection, setActiveSection] = React.useState<ProfileSectionId>("identity");
+    const [visibleCollectibles, setVisibleCollectibles] = React.useState(72);
+    const collectibleSentinelRef = React.useRef<HTMLDivElement | null>(null);
+
+    const activeCollectionSize = activeSection === "decorations" ? avatarDecorations.length
+        : activeSection === "effects" ? profileEffects.length
+            : activeSection === "nameplates" ? nameplates.length
+                : activeSection === "frames" ? profileFrames.length
+                    : 0;
+
+    React.useEffect(() => setVisibleCollectibles(72), [activeSection]);
+    React.useEffect(() => {
+        const sentinel = collectibleSentinelRef.current;
+        if (!sentinel || visibleCollectibles >= activeCollectionSize) return;
+        const observer = new IntersectionObserver(entries => {
+            if (entries.some(entry => entry.isIntersecting)) {
+                setVisibleCollectibles(current => Math.min(current + 72, activeCollectionSize));
+            }
+        }, { rootMargin: "320px 0px" });
+        observer.observe(sentinel);
+        return () => observer.disconnect();
+    }, [activeSection, activeCollectionSize, visibleCollectibles]);
+
+    React.useEffect(() => {
+        let cancelled = false;
+        RestAPI.get({ url: "/collectibles-categories/v2" })
+            .then(response => {
+                if (cancelled) return;
+                const catalog = extractCollectibleChoices(response.body ?? response);
+                setAvatarDecorations(catalog.decorations.length ? catalog.decorations : AVATAR_DECORATIONS);
+                setProfileEffects(catalog.effects.length ? catalog.effects : PROFILE_EFFECTS);
+                setNameplates(catalog.nameplates);
+                setProfileFrames(catalog.frames);
+            })
+            .catch(error => console.warn("[CustomProfile] Discord collectibles catalog unavailable; using fallback", error))
+            .finally(() => { if (!cancelled) setCatalogLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
 
     async function toggleShareProfile(v: boolean) {
+        if (!PUBLIC_PROFILE_SYNC_AVAILABLE) {
+            Settings.syncOwnCustomProfile = false;
+            Settings.seeAllCustomProfile = false;
+            setShareEnabled(false);
+            return;
+        }
         if (v) {
             // Enable settings immediately for local UX
             Settings.syncOwnCustomProfile = true;
@@ -1009,6 +1344,9 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
             delete dataToSync.email;
             delete dataToSync.phone;
             delete dataToSync.copiedUserId;
+            delete dataToSync.nameplate;
+            delete dataToSync.profileFrame;
+            delete dataToSync.displayNameStyles;
 
             // Try OAuth in background — if it fails, settings stay enabled for later
             try {
@@ -1111,7 +1449,7 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                 cacheDatesF = [];
                 _dataVersion++;
 
-                if (Settings.syncOwnCustomProfile) {
+                if (PUBLIC_PROFILE_SYNC_AVAILABLE && Settings.syncOwnCustomProfile) {
                     const dataToSync = { ...savedData };
                     delete dataToSync.username;
                     delete dataToSync.globalName;
@@ -1121,6 +1459,9 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                     delete dataToSync.email;
                     delete dataToSync.phone;
                     delete dataToSync.copiedUserId;
+                    delete dataToSync.nameplate;
+                    delete dataToSync.profileFrame;
+                    delete dataToSync.displayNameStyles;
 
                     getStoredToken().then(token => {
                         if (token) {
@@ -1197,7 +1538,7 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
             _dataVersion++;
 
             // Push private:true to server so others immediately stop seeing the profile
-            if (Settings.syncOwnCustomProfile) {
+            if (PUBLIC_PROFILE_SYNC_AVAILABLE && Settings.syncOwnCustomProfile) {
                 getStoredToken().then(token => {
                     if (token) {
                         saveOwnPluginConfig("customProfile", token, { private: true }).catch(() => {});
@@ -1219,9 +1560,22 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
     }
 
     const accentHex = data.accentColor != null ? "#" + data.accentColor.toString(16).padStart(6, "0") : "";
+    const displayNameStyle = data.displayNameStyles;
+    const displayNameColors = displayNameStyle?.colors?.length ? displayNameStyle.colors : [0x5865f2, 0xeb459e];
+    const updateDisplayNameStyle = (change: Partial<DisplayNameStyleData>) => {
+        const fontId = change.fontId ?? displayNameStyle?.fontId ?? 11;
+        const effectId = change.effectId ?? displayNameStyle?.effectId ?? 2;
+        set("displayNameStyles", {
+            fontId,
+            effectId,
+            colors: change.colors ?? displayNameColors,
+            font_id: fontId,
+            effect_id: effectId,
+        });
+    };
 
     return (
-        <ModalRoot {...rootProps} size="medium">
+        <ModalRoot {...rootProps} size="large" className="yc-cp-modal">
             <ModalHeader separator={false}>
                 <div className="cp-header">
                     <EditIcon size={16} />
@@ -1262,14 +1616,20 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                 </div>
                 <ModalCloseButton onClick={rootProps.onClose} />
             </ModalHeader>
-            <ModalContent className="cp-content">
-                <Toggle
+            <ModalContent className="yc-cp-scroll">
+                {PUBLIC_PROFILE_SYNC_AVAILABLE ? <Toggle
                     label={t("Share my Custom Profile")}
                     sublabel={t("Lets other YouCord users see your Custom Profile, and lets you see theirs")}
                     checked={shareEnabled}
                     onChange={toggleShareProfile}
-                />
-                <div style={{
+                /> : <div className="yc-cp-local-notice">
+                    <span>🔒</span>
+                    <div>
+                        <strong>Profil local</strong>
+                        <small>Les modifications restent uniquement sur cet ordinateur.</small>
+                    </div>
+                </div>}
+                {PUBLIC_PROFILE_SYNC_AVAILABLE && <div style={{
                     margin: "0 0 14px 0",
                     padding: "10px 14px",
                     background: "rgba(250, 166, 26, 0.1)",
@@ -1283,19 +1643,71 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                     <span style={{ color: "var(--text-warning, #faa61a)", fontSize: 13, lineHeight: 1.4 }}>
                         {t("This requires Discord authorization. Once enabled, everyone using YouCord will be able to see your Custom Profile, and you will be able to see theirs.")}
                     </span>
+                </div>}
+                <div className="yc-cp-nav">
+                    <span className="yc-cp-nav-label">Catégories</span>
+                    <div className="yc-cp-nav-grid" role="tablist" aria-label="Catégories du profil personnalisé">
+                        {PROFILE_SECTIONS.map(([value, label]) => (
+                            <button key={value} type="button" role="tab"
+                                aria-selected={activeSection === value}
+                                className={`yc-cp-nav-item ${activeSection === value ? "yc-cp-nav-item-active" : ""}`}
+                                onClick={() => setActiveSection(value)}>
+                                {label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-                <div className="cp-divider" />
                 {/* Account selector bar removed since it's now a Select in the header */}
+                {activeSection === "identity" && <ProfileSection title="Identité" description="Nom, avatar et style du pseudo">
                 <Field label={t("Username")} value={data.username ?? ""} placeholder="my_username_00" onChange={v => set("username", v)} />
                 <Field label={t("Display name")} value={data.globalName ?? ""} placeholder="My Name" onChange={v => set("globalName", v)} />
+                <div className="cp-field">
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <SectionLabel>{t("Display name style")}</SectionLabel>
+                        {displayNameStyle && <button className="cp-clear-btn" onClick={() => set("displayNameStyles", undefined)} title={t("Delete")}><CloseIcon /></button>}
+                    </div>
+                    <div className="cp-name-style-preview" style={{
+                        backgroundImage: `linear-gradient(90deg, #${displayNameColors[0].toString(16).padStart(6, "0")}, #${(displayNameColors[1] ?? displayNameColors[0]).toString(16).padStart(6, "0")})`
+                    }}>
+                        {data.globalName || data.username || t("Your display name")}
+                    </div>
+                    <div className="cp-name-style-controls">
+                        <select className="cp-input" value={displayNameStyle?.fontId ?? 11}
+                            onChange={e => updateDisplayNameStyle({ fontId: Number(e.target.value) })}>
+                            {DISPLAY_NAME_FONTS.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+                        </select>
+                        <select className="cp-input" value={displayNameStyle?.effectId ?? 2}
+                            onChange={e => updateDisplayNameStyle({ effectId: Number(e.target.value) })}>
+                            {DISPLAY_NAME_EFFECTS.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+                        </select>
+                        {[0, 1].map(index => (
+                            <input key={index} type="color" className="cp-color-swatch"
+                                value={`#${(displayNameColors[index] ?? displayNameColors[0]).toString(16).padStart(6, "0")}`}
+                                onChange={e => {
+                                    const colors = [...displayNameColors];
+                                    colors[index] = parseInt(e.target.value.slice(1), 16);
+                                    updateDisplayNameStyle({ colors });
+                                }} />
+                        ))}
+                    </div>
+                </div>
                 <ImageUpload label={t("Profile picture")} value={data.avatar ?? ""} onChange={v => set("avatar", v)} />
+                </ProfileSection>}
+                {activeSection === "appearance" && <ProfileSection title="Bannière et thème du profil" description="Simulation Nitro, bannière, couleurs et dégradés">
                 <Toggle label={t("Simulate Nitro")} sublabel={t("Enables banner and profile color")} checked={data.nitro ?? false} onChange={v => set("nitro", v)} />
                 {data.nitro && <ImageUpload label={t("Banner")} value={data.banner ?? ""} onChange={v => set("banner", v)} />}
-                <div className="cp-divider" />
-                <Field label={t("Bio")} value={data.bio ?? ""} placeholder={t("My description...")} onChange={v => set("bio", v)} />
-                <Field label={t("Pronouns")} value={data.pronouns ?? ""} placeholder={t("he/him")} onChange={v => set("pronouns", v)} />
                 <div className="cp-field">
                     <SectionLabel>{t("Profile color (Nitro — gradient possible)")}</SectionLabel>
+                    <div className="cp-theme-presets">
+                        {PROFILE_THEME_PRESETS.map(preset => (
+                            <button key={preset.label} className="cp-theme-preset" title={preset.label}
+                                style={{ background: `linear-gradient(135deg, #${preset.colors[0].toString(16).padStart(6, "0")}, #${preset.colors[1].toString(16).padStart(6, "0")})` }}
+                                onClick={() => {
+                                    set("accentColor", preset.colors[0]);
+                                    set("accentColor2", preset.colors[1]);
+                                }} />
+                        ))}
+                    </div>
                     <div className="cp-color-row" style={{ marginBottom: 6 }}>
                         <span style={{ fontSize: 11, color: "var(--text-muted)", marginRight: 6 }}>{t("Color 1")}</span>
                         <input type="color" value={accentHex || "#5865f2"} onChange={e => { const n = parseInt(e.target.value.replace("#", ""), 16); if (!isNaN(n)) set("accentColor", n); }} className="cp-color-swatch" />
@@ -1313,10 +1725,15 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                         })()}
                     </div>
                 </div>
+                </ProfileSection>}
+                {activeSection === "information" && <ProfileSection title="Informations du profil" description="Bio, pronoms et informations locales du compte">
+                <Field label={t("Bio")} value={data.bio ?? ""} placeholder={t("My description...")} onChange={v => set("bio", v)} />
+                <Field label={t("Pronouns")} value={data.pronouns ?? ""} placeholder={t("he/him")} onChange={v => set("pronouns", v)} />
                 <Field label={t("Account creation date")} value={data.createdAt ?? ""} placeholder="2010-06-29" type="date" onChange={v => set("createdAt", v)} />
                 <Field label={t("Email address (local display)")} value={data.email ?? ""} placeholder="exemple@mail.com" onChange={v => set("email", v)} />
                 <Field label={t("Phone (local display)")} value={data.phone ?? ""} placeholder="+33 6 00 00 00 00" onChange={v => set("phone", v)} />
-                <div className="cp-divider" />
+                </ProfileSection>}
+                {activeSection === "badges" && <ProfileSection title="Badges et niveaux Nitro" description="Badges, ancienneté Nitro et boost de serveur">
                 <BadgePicker
                     selected={data.badgeFlags ?? 0} onChange={v => set("badgeFlags", v)}
                     nitroType={nitroLevel} onNitroType={v => {
@@ -1329,53 +1746,46 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                     customIds={customIds} onCustomIds={v => set("customBadgeIds", v)}
                     oldName={oldName} onOldName={v => set("oldName", v)}
                 />
-                <div className="cp-divider" />
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <SectionLabel>{t("Avatar decoration")}</SectionLabel>
-                </div>
+                </ProfileSection>}
+                {activeSection === "decorations" && <ProfileSection title="Décorations d’avatar" description="Décorations animées autour de l’avatar"
+                    count={catalogLoading ? t("Loading...") : avatarDecorations.length}>
                 <div className="cp-badges" style={{ flexWrap: "wrap", gap: 6 }}>
                     <button onClick={() => set("decorationAsset", undefined)}
                         className={`cp-badge ${!data.decorationAsset ? "cp-badge--on" : ""}`} style={{ minWidth: 60 }}>
                         {t("None")}
                     </button>
-                    {AVATAR_DECORATIONS.map(dec => (
+                    {avatarDecorations.slice(0, visibleCollectibles).map(dec => (
                         <button key={dec.id}
                             onClick={() => set("decorationAsset", data.decorationAsset === dec.id ? undefined : dec.id)}
                             className={`cp-badge ${data.decorationAsset === dec.id ? "cp-badge--on" : ""}`}
                             title={dec.label} style={{ padding: 3, lineHeight: 0, width: 52, height: 52, borderRadius: 6 }}>
-                            <img src={getDecorationUrl(dec.id)} alt={dec.label}
+                            <img src={dec.previewUrl ?? getDecorationUrl(dec.id)} alt={dec.label} loading="lazy" decoding="async"
+                                onError={() => setAvatarDecorations(current => current.filter(item => item.id !== dec.id))}
                                 style={{ width: 46, height: 46, objectFit: "contain", display: "block" }} />
                         </button>
                     ))}
+                    {visibleCollectibles < avatarDecorations.length && <div ref={collectibleSentinelRef} className="cp-progressive-sentinel" />}
                 </div>
-                <div className="cp-divider" />
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <SectionLabel>{t("Profile Effect")}</SectionLabel>
-                </div>
+                </ProfileSection>}
+                {activeSection === "effects" && <ProfileSection title="Effets de profil" description="Effets animés affichés sur le profil"
+                    count={catalogLoading ? t("Loading...") : profileEffects.length}>
                 <div className="cp-badges" style={{ flexWrap: "wrap", gap: 6 }}>
                     <button onClick={() => set("profileEffectId", undefined)}
                         className={`cp-badge ${!data.profileEffectId ? "cp-badge--on" : ""}`} style={{ minWidth: 60 }}>
                         {t("None")}
                     </button>
-                    {PROFILE_EFFECTS.map(eff => {
+                    {profileEffects.slice(0, visibleCollectibles).map(eff => {
                         const asset = PROFILE_EFFECT_ASSETS[eff.id];
                         const thumb = asset?.thumb;
+                        const previewUrl = thumb ?? eff.previewUrl ?? getProfileEffectUrl(eff.id);
                         return (
                             <div key={eff.id} className={`cp-badge cp-effect-tile ${data.profileEffectId === eff.id ? "cp-badge--on" : ""}`}>
                                 <button
                                     onClick={() => set("profileEffectId", data.profileEffectId === eff.id ? undefined : eff.id)}
                                     className="cp-effect-tile-btn"
                                     title={eff.label}>
-                                    <img src={getProfileEffectUrl(eff.id)} alt={eff.label} loading="lazy"
-                                        onError={e => {
-                                            const img = e.currentTarget;
-                                            if (thumb) {
-                                                img.src = thumb;
-                                                img.onerror = null;
-                                            } else {
-                                                img.style.display = "none";
-                                            }
-                                        }} />
+                                    <img src={previewUrl} alt={eff.label} loading="lazy" decoding="async"
+                                        onError={() => setProfileEffects(current => current.filter(item => item.id !== eff.id))} />
                                 </button>
                                 <span className="cp-effect-tile-label">{eff.label}</span>
                                 <button className="cp-effect-eye" title={t("Preview")}
@@ -1385,6 +1795,8 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                                             effectId={eff.id}
                                             avatar={data.avatar}
                                             displayName={data.globalName || data.username}
+                                            label={eff.label}
+                                            previewUrl={previewUrl}
                                             onApply={id => set("profileEffectId", data.profileEffectId === id ? undefined : id)}
                                         />
                                     ))}>
@@ -1393,7 +1805,55 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                             </div>
                         );
                     })}
+                    {visibleCollectibles < profileEffects.length && <div ref={collectibleSentinelRef} className="cp-progressive-sentinel" />}
                 </div>
+                </ProfileSection>}
+                {activeSection === "nameplates" && <ProfileSection title="Plaques nominatives" description="Arrière-plans décoratifs derrière le pseudo"
+                    count={catalogLoading ? t("Loading...") : nameplates.length}>
+                <div className="cp-collectible-grid cp-nameplate-grid">
+                    <button onClick={() => set("nameplate", undefined)}
+                        className={`cp-collectible-card cp-collectible-none ${!data.nameplate ? "cp-badge--on" : ""}`}>
+                        {t("None")}
+                    </button>
+                    {nameplates.slice(0, visibleCollectibles).map(item => (
+                        <button key={item.id}
+                            className={`cp-collectible-card cp-nameplate-card ${data.nameplate?.skuId === item.id ? "cp-badge--on" : ""}`}
+                            title={item.label}
+                            onClick={() => set("nameplate", data.nameplate?.skuId === item.id ? undefined : {
+                                skuId: item.id,
+                                asset: item.asset!,
+                                label: item.label,
+                                palette: item.palette,
+                                type: 2
+                            })}>
+                            <img src={item.previewUrl} alt={item.label} loading="lazy" decoding="async"
+                                onError={() => setNameplates(current => current.filter(choice => choice.id !== item.id))} />
+                            <span>{item.label}</span>
+                        </button>
+                    ))}
+                    {visibleCollectibles < nameplates.length && <div ref={collectibleSentinelRef} className="cp-progressive-sentinel" />}
+                </div>
+                </ProfileSection>}
+                {activeSection === "frames" && <ProfileSection title="Cadres de profil" description="Cadres animés autour de l’ensemble du profil"
+                    count={catalogLoading ? t("Loading...") : profileFrames.length}>
+                <div className="cp-collectible-grid cp-frame-grid">
+                    <button onClick={() => set("profileFrame", undefined)}
+                        className={`cp-collectible-card cp-collectible-none ${!data.profileFrame ? "cp-badge--on" : ""}`}>
+                        {t("None")}
+                    </button>
+                    {profileFrames.slice(0, visibleCollectibles).map(item => (
+                        <button key={item.id}
+                            className={`cp-collectible-card cp-frame-card ${data.profileFrame?.skuId === item.id ? "cp-badge--on" : ""}`}
+                            title={item.label}
+                            onClick={() => set("profileFrame", data.profileFrame?.skuId === item.id ? undefined : item.frame)}>
+                            <img src={item.previewUrl} alt={item.label} loading="lazy" decoding="async"
+                                onError={() => setProfileFrames(current => current.filter(choice => choice.id !== item.id))} />
+                            <span>{item.label}</span>
+                        </button>
+                    ))}
+                    {visibleCollectibles < profileFrames.length && <div ref={collectibleSentinelRef} className="cp-progressive-sentinel" />}
+                </div>
+                </ProfileSection>}
             </ModalContent>
             <ModalFooter className="cp-footer">
                 <button className="cp-btn cp-btn-ghost" onClick={rootProps.onClose}>{t("Cancel")}</button>
@@ -1469,6 +1929,15 @@ function EffectAnimator({ asset }: { asset: ProfileEffectAsset; }) {
     React.useEffect(() => {
         let alive = true;
         let raf = 0;
+        let viewportObserver: IntersectionObserver | null = null;
+        let inViewport = true;
+        let pageVisible = document.visibilityState === "visible";
+        let scheduleFrame: (() => void) | null = null;
+        const onPageVisibility = () => {
+            pageVisible = document.visibilityState === "visible";
+            if (pageVisible) scheduleFrame?.();
+        };
+        document.addEventListener("visibilitychange", onPageVisibility);
 
         (async () => {
             const frames = (asset.frames || []).slice().sort((a, b) => a.zIndex - b.zIndex);
@@ -1520,7 +1989,8 @@ function EffectAnimator({ asset }: { asset: ProfileEffectAsset; }) {
 
             const startAt = performance.now();
             const tick = (nowMs: number) => {
-                if (!alive) return;
+                raf = 0;
+                if (!alive || !inViewport || !pageVisible) return;
                 const now = nowMs - startAt;
                 for (const l of layers) {
                     const local = l.loop ? now % (l.total + l.loopDelay) : Math.min(now, l.total);
@@ -1530,14 +2000,25 @@ function EffectAnimator({ asset }: { asset: ProfileEffectAsset; }) {
                 for (const l of layers) {
                     mctx.drawImage(l.canvas, 0, 0);
                 }
-                raf = requestAnimationFrame(tick);
+                scheduleFrame?.();
             };
-            raf = requestAnimationFrame(tick);
+            scheduleFrame = () => {
+                if (alive && inViewport && pageVisible && !raf) raf = requestAnimationFrame(tick);
+            };
+            viewportObserver = new IntersectionObserver(entries => {
+                inViewport = entries.some(entry => entry.isIntersecting);
+                if (inViewport) scheduleFrame?.();
+                else if (raf) { cancelAnimationFrame(raf); raf = 0; }
+            }, { rootMargin: "100px" });
+            viewportObserver.observe(main);
+            scheduleFrame();
         })();
 
         return () => {
             alive = false;
             cancelAnimationFrame(raf);
+            viewportObserver?.disconnect();
+            document.removeEventListener("visibilitychange", onPageVisibility);
         };
     }, [asset]);
 
@@ -1548,11 +2029,13 @@ function EffectAnimator({ asset }: { asset: ProfileEffectAsset; }) {
     return <canvas ref={canvasRef} className="cp-effect-canvas" />;
 }
 
-function ProfileEffectPreviewModal({ rootProps, effectId, avatar, displayName, onApply }: {
+function ProfileEffectPreviewModal({ rootProps, effectId, avatar, displayName, label, previewUrl, onApply }: {
     rootProps: any;
     effectId: string;
     avatar?: string;
     displayName?: string;
+    label?: string;
+    previewUrl?: string;
     onApply: (id: string) => void;
 }) {
     const eff = PROFILE_EFFECTS.find(e => e.id === effectId);
@@ -1562,7 +2045,7 @@ function ProfileEffectPreviewModal({ rootProps, effectId, avatar, displayName, o
         <ModalRoot {...rootProps} size="medium">
             <ModalHeader separator={false}>
                 <div className="cp-header">
-                    <span className="cp-header-title">{eff?.label ?? effectId}</span>
+                    <span className="cp-header-title">{label ?? eff?.label ?? effectId}</span>
                 </div>
                 <ModalCloseButton onClick={rootProps.onClose} />
             </ModalHeader>
@@ -1572,7 +2055,7 @@ function ProfileEffectPreviewModal({ rootProps, effectId, avatar, displayName, o
                         {avatar && <img src={avatar} alt="" className="cp-effect-card-avatar" />}
                         <span className="cp-effect-card-name">{displayName || t("You")}</span>
                     </div>
-                    <EffectAnimator asset={asset ?? { thumb: null, reducedMotion: null, staticFrame: null, frames: [] }} />
+                    <EffectAnimator asset={asset ?? { thumb: previewUrl ?? getProfileEffectUrl(effectId), reducedMotion: null, staticFrame: null, frames: [] }} />
                 </div>
             </ModalContent>
             <ModalFooter className="cp-footer">
@@ -1601,6 +2084,7 @@ function CPDMNotice({ userId }: { userId: string; }) {
         data.username || data.globalName || data.avatar || data.banner ||
         data.bio || data.pronouns || data.accentColor != null ||
         data.badgeFlags || data.nitro || data.decorationAsset || data.profileEffectId ||
+        data.nameplate || data.profileFrame || data.displayNameStyles ||
         (data.customBadgeIds && data.customBadgeIds.length > 0) ||
         data.createdAt
     );
@@ -1661,6 +2145,7 @@ export default definePlugin({
     description: t("Visually customize your Discord profile (username, PFP, banner, badges, bio...) — persistent, only visible to you."),
     authors: [{ name: "YouCord", id: 0n }],
     dependencies: ["HeaderBarAPI", "ContextMenuAPI"],
+    settings,
 
     headerBarButton: {
         icon: EditIcon,
@@ -1861,6 +2346,9 @@ export default definePlugin({
             clone.avatarDecoration = null;
             clone.avatarDecorationData = decoData;
         }
+        if (storedData.nameplate) clone.collectibles = mergeCustomCollectibles(realUser.collectibles, storedData);
+        if (storedData.profileFrame) clone.profileFrame = storedData.profileFrame;
+        if (storedData.displayNameStyles) clone.displayNameStyles = storedData.displayNameStyles;
 
         // Override flags/nitro/boost so Discord doesn't show real native badges
         const wantedFlags = (isEnabled && storedData.badgeFlags != null) ? storedData.badgeFlags : realUser.publicFlags;
@@ -1935,6 +2423,9 @@ export default definePlugin({
             clone.avatarDecoration = null;
             clone.avatarDecorationData = decoData;
         }
+        if (data.nameplate) clone.collectibles = mergeCustomCollectibles(realUser.collectibles, data);
+        if (data.profileFrame) clone.profileFrame = data.profileFrame;
+        if (data.displayNameStyles) clone.displayNameStyles = data.displayNameStyles;
 
         const wantedFlags = data.badgeFlags != null ? data.badgeFlags : realUser.publicFlags;
         clone.publicFlags = wantedFlags;
@@ -1984,6 +2475,7 @@ export default definePlugin({
                 merged.avatarDecoration = null;
                 merged.avatarDecorationData = decoData;
             }
+            applyProfileCollectibles(merged, data, profile.collectibles);
 
             if (data.nitro || data.badgeFlags != null) {
                 merged.premiumType = data.nitro ? 2 : 0;
@@ -2076,6 +2568,7 @@ export default definePlugin({
                 merged.avatarDecoration = null;
                 merged.avatarDecorationData = decoData;
             }
+            applyProfileCollectibles(merged, storedData, profile.collectibles);
 
             if (isEnabled && (storedData.nitro || storedData.badgeFlags != null)) {
                 merged.premiumType = storedData.nitro ? 2 : 0;
@@ -2165,7 +2658,8 @@ export default definePlugin({
             const d = cached.data;
             const hasRealModifications = d.username || d.globalName || d.avatar || d.banner ||
                 d.bio || d.pronouns || d.accentColor != null || d.badgeFlags ||
-                d.nitro || d.decorationAsset || d.profileEffectId || (d.customBadgeIds && d.customBadgeIds.length > 0) || d.createdAt;
+                d.nitro || d.decorationAsset || d.profileEffectId || d.nameplate || d.profileFrame || d.displayNameStyles ||
+                (d.customBadgeIds && d.customBadgeIds.length > 0) || d.createdAt;
             if (!hasRealModifications) return null;
             return <CPDMNotice userId={recipientId} />;
         } catch { return null; }
@@ -2209,7 +2703,7 @@ export default definePlugin({
 
         // Auto-sync own profile to cloud on startup if option enabled
         loadData().then(() => {
-            if (Settings.syncOwnCustomProfile && storedData && Object.keys(storedData).length > 0) {
+            if (PUBLIC_PROFILE_SYNC_AVAILABLE && Settings.syncOwnCustomProfile && storedData && Object.keys(storedData).length > 0) {
                 const dataToSync = { ...storedData };
                 delete dataToSync.username;
                 delete dataToSync.globalName;
@@ -2219,6 +2713,9 @@ export default definePlugin({
                 delete dataToSync.email;
                 delete dataToSync.phone;
                 delete dataToSync.copiedUserId;
+                delete dataToSync.nameplate;
+                delete dataToSync.profileFrame;
+                delete dataToSync.displayNameStyles;
 
                 getStoredToken().then(t => {
                     if (t) {
@@ -2298,10 +2795,13 @@ export default definePlugin({
                     const member = origGetMember(guildId, userId);
                     if (!member) return member;
 
-                    // Only patch own user — never expose custom nick to other users' views
-                    if (isEnabled && isMe(userId)) {
+                    const publicData = publicProfilesCache.get(userId)?.data;
+                    const customData = isEnabled && isMe(userId) ? storedData : publicData;
+                    if (customData) {
                         const patched = { ...member };
-                        if (storedData.username) patched.nick = storedData.globalName || storedData.username;
+                        if (customData.username) patched.nick = customData.globalName || customData.username;
+                        if (customData.nameplate) patched.collectibles = mergeCustomCollectibles(member.collectibles, customData);
+                        if (customData.displayNameStyles) patched.displayNameStyles = customData.displayNameStyles;
                         return patched;
                     }
 
@@ -2500,9 +3000,12 @@ export default definePlugin({
                         // Only patch our own member entry
                         if (isEnabled && userId === myId && member) {
                             const customNick = storedData.globalName || storedData.username;
-                            if (customNick) {
-                                return { ...member, nick: customNick };
-                            }
+                            return {
+                                ...member,
+                                ...(customNick ? { nick: customNick } : {}),
+                                ...(storedData.nameplate ? { collectibles: mergeCustomCollectibles(member.collectibles, storedData) } : {}),
+                                ...(storedData.displayNameStyles ? { displayNameStyles: storedData.displayNameStyles } : {})
+                            };
                         }
                     } catch { }
                     return member;

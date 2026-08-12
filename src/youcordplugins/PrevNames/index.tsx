@@ -42,7 +42,9 @@ const STATUS_COLOR: Record<UserStatus, string> = {
     offline:   "#80848e",
 };
 
-const API_BASE = "";
+// The previous-names backend is not deployed. An empty base URL would send
+// /prevnames/* requests to Discord's origin and produce a guaranteed 404.
+const PREVIOUS_NAMES_API_AVAILABLE = false;
 
 interface PrevNameEntry {
     timestamp: number;
@@ -56,10 +58,12 @@ interface PrevNamesResponse {
 }
 
 async function fetchPrevNames(userId: string): Promise<PrevNamesResponse> {
+    if (!PREVIOUS_NAMES_API_AVAILABLE) return { userId, prevnames: [] };
+
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15_000); // 15s timeout
     try {
-        const res = await fetch(`${API_BASE}/prevnames/${userId}`, { signal: controller.signal });
+        const res = await fetch(`/prevnames/${userId}`, { signal: controller.signal });
         if (res.status === 404) return { userId, prevnames: [] };
         if (res.status === 429) throw new Error("RATE_LIMITED");
         if (!res.ok) throw new Error(`HTTP ${res.status}`);

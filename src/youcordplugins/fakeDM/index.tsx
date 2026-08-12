@@ -10,7 +10,7 @@ import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import definePlugin from "@utils/types";
 import { ChannelStore, FluxDispatcher, IconUtils, MessageStore, React, ReactDOM, SelectedChannelStore, UserStore } from "@webpack/common";
 
-// â”€â”€â”€ Unique IDs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Unique IDs ─────────────────────────────────────────────────────────────
 let _idCounter = 0;
 function uniqueSnowflake(date: Date): string {
     const offset = _idCounter++ % 4096;
@@ -18,14 +18,14 @@ function uniqueSnowflake(date: Date): string {
     return ((BigInt(ms) << 22n) | BigInt(offset)).toString();
 }
 
-// â”€â”€â”€ Random seconds helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Random seconds helper ───────────────────────────────────────────────────
 // Adds 1-59 random seconds so timestamps never land exactly on :00
 function randomSeconds(date: Date): Date {
     const sec = 1 + Math.floor(Math.random() * 59);
     return new Date(date.getTime() + sec * 1000);
 }
 
-// â”€â”€â”€ Persistence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Persistence ─────────────────────────────────────────────────────────────
 const STORAGE_KEY = "youcord_fakedm_fakes";
 
 interface PersistedMessage {
@@ -67,7 +67,7 @@ function removePersisted(channelId: string, ids: Set<string>) {
     savePersisted(fakes);
 }
 
-// â”€â”€â”€ Fake message ID storage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Fake message ID storage ───────────────────────────────────────────────
 const fakeIds = new Map<string, Set<string>>();
 
 function registerFake(channelId: string, id: string) {
@@ -88,13 +88,13 @@ function clearFakes(channelId: string): number {
     return n;
 }
 
-// â”€â”€â”€ Avatar URL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Avatar URL ───────────────────────────────────────────────────────────────
 function avatarUrl(user: any): string {
     if (!user) return "";
     return user.avatar ? IconUtils.getUserAvatarURL(user, false, 32) : IconUtils.getDefaultAvatarURL(user.id);
 }
 
-// â”€â”€â”€ Channel helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Channel helpers ─────────────────────────────────────────────────────────
 
 /** Returns the current channel if it's a DM (type 1) or group DM (type 3), else null */
 function getCurrentDMChannel(): any | null {
@@ -136,7 +136,7 @@ function getChannelMembers(): any[] {
     } catch { return []; }
 }
 
-// â”€â”€â”€ Build author object â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Build author object ──────────────────────────────────────────────────────
 function buildAuthor(user: any) {
     return {
         id: user.id,
@@ -155,7 +155,7 @@ function buildAuthor(user: any) {
     };
 }
 
-// â”€â”€â”€ Message injection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Message injection ────────────────────────────────────────────────────────
 function inject(channelId: string, author: any, content: string, date: Date, persistedId?: string) {
     const actualDate = persistedId ? date : randomSeconds(date);
     const id = persistedId ?? uniqueSnowflake(actualDate);
@@ -197,7 +197,7 @@ function inject(channelId: string, author: any, content: string, date: Date, per
     }
 }
 
-// â”€â”€â”€ Call injection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Call injection ───────────────────────────────────────────────────────────
 function injectCall(
     channelId: string,
     caller: any,
@@ -260,7 +260,7 @@ function injectCall(
     }
 }
 
-// â”€â”€â”€ Restore persisted fakes on startup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Restore persisted fakes on startup ──────────────────────────────────────
 let _restoreHandler: (() => void) | null = null;
 
 function scheduleRestore() {
@@ -311,13 +311,13 @@ function handleChannelSelect(e: any) {
     if (e.channelId) setTimeout(() => doRestoreForChannel(e.channelId), 400);
 }
 
-// â”€â”€â”€ Date helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Date helpers ─────────────────────────────────────────────────────────────
 function toLocal(d: Date): string {
     const p = (n: number) => String(n).padStart(2, "0");
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
-// â”€â”€â”€ Avatar component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Avatar component ─────────────────────────────────────────────────────────
 function UserAvatar({ user }: { user: any; }) {
     const [err, setErr] = React.useState(false);
     if (!user) return null;
@@ -326,7 +326,7 @@ function UserAvatar({ user }: { user: any; }) {
     return <img src={url} className="fdm-sender-avatar" alt="" onError={() => setErr(true)} />;
 }
 
-// â”€â”€â”€ Member selector (group DM) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Member selector (group DM) ───────────────────────────────────────────────
 function MemberSelect({ members, value, onChange, label }: { members: any[]; value: string; onChange(id: string): void; label?: string; }) {
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 12px" }}>
@@ -349,7 +349,7 @@ function MemberSelect({ members, value, onChange, label }: { members: any[]; val
     );
 }
 
-// â”€â”€â”€ FakeDM Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── FakeDM Panel ───────────────────────────────────────────────────────────
 function FakeDMPanel({ onClose, btnRect }: { onClose(): void; btnRect: DOMRect; }) {
     const me = UserStore.getCurrentUser();
     const ch = getCurrentDMChannel();
@@ -362,7 +362,7 @@ function FakeDMPanel({ onClose, btnRect }: { onClose(): void; btnRect: DOMRect; 
     // Mode: "message" | "call"
     const [mode, setMode] = React.useState<"message" | "call">("message");
 
-    // Message mode state â€” for groups we use a member ID string; for 1:1 we keep "me"/"other"
+    // Message mode state — for groups we use a member ID string; for 1:1 we keep "me"/"other"
     const [senderId, setSenderId] = React.useState<string>(() => me?.id ?? "");
 
     // Call mode state
@@ -380,7 +380,7 @@ function FakeDMPanel({ onClose, btnRect }: { onClose(): void; btnRect: DOMRect; 
     const textareaRef = React.useRef<HTMLTextAreaElement>(null);
     const panelRef = React.useRef<HTMLDivElement>(null);
 
-    // â”€â”€ Position â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Position ──────────────────────────────────────────────────────────────
     const [pos, setPos] = React.useState<React.CSSProperties>({ opacity: 0, position: "fixed", zIndex: 1000000, width: "430px" });
 
     React.useLayoutEffect(() => {
@@ -412,7 +412,7 @@ function FakeDMPanel({ onClose, btnRect }: { onClose(): void; btnRect: DOMRect; 
         if (isNaN(date.getTime())) { setMsg("Invalid Date!", false); return; }
         inject(channelId, author, text.trim(), date);
         setText("");
-        setMsg("Message injected âœ“", true);
+        setMsg("Message injected ✓", true);
         setDateStr(toLocal(new Date(date.getTime() + 60_000)));
         setTimeout(() => textareaRef.current?.focus(), 10);
     }
@@ -426,7 +426,7 @@ function FakeDMPanel({ onClose, btnRect }: { onClose(): void; btnRect: DOMRect; 
         if (isNaN(date.getTime())) { setMsg("Invalid Date!", false); return; }
         const durSec = callMissed ? 0 : Math.max(1, Math.round((parseFloat(callDuration) || 0) * 60));
         injectCall(channelId, callerUser, receiverUser, callMissed, durSec, date);
-        setMsg(callMissed ? "Missed call injected âœ“" : "Call injected âœ“", true);
+        setMsg(callMissed ? "Missed call injected ✓" : "Call injected ✓", true);
         setDateStr(toLocal(new Date(date.getTime() + 60_000)));
     }
 
@@ -475,14 +475,14 @@ function FakeDMPanel({ onClose, btnRect }: { onClose(): void; btnRect: DOMRect; 
                 onMouseUp={e => e.stopPropagation()}
             >
                 <div className="fdm-header">
-                    <span className="fdm-title">{mode === "message" ? "âœ Fake DM" : "ðŸ“ž Fake Call"}{isGroup ? " (Group)" : ""}</span>
-                    <button className="fdm-close" onClick={onClose}>âœ•</button>
+                    <span className="fdm-title">{mode === "message" ? "✏ Fake DM" : "📞 Fake Call"}{isGroup ? " (Group)" : ""}</span>
+                    <button className="fdm-close" onClick={onClose}>✕</button>
                 </div>
 
                 {/* Mode tabs */}
                 <div style={{ display: "flex", gap: 6, padding: "0 12px 10px" }}>
-                    <button onClick={() => setMode("message")} style={{ flex: 1, padding: "5px 0", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, background: mode === "message" ? "#5865f2" : "rgba(255,255,255,0.07)", color: mode === "message" ? "#fff" : "rgba(255,255,255,0.5)" }}>ðŸ’¬ Message</button>
-                    <button onClick={() => setMode("call")} style={{ flex: 1, padding: "5px 0", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, background: mode === "call" ? "#5865f2" : "rgba(255,255,255,0.07)", color: mode === "call" ? "#fff" : "rgba(255,255,255,0.5)" }}>ðŸ“ž Call</button>
+                    <button onClick={() => setMode("message")} style={{ flex: 1, padding: "5px 0", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, background: mode === "message" ? "#5865f2" : "rgba(255,255,255,0.07)", color: mode === "message" ? "#fff" : "rgba(255,255,255,0.5)" }}>💬 Message</button>
+                    <button onClick={() => setMode("call")} style={{ flex: 1, padding: "5px 0", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, background: mode === "call" ? "#5865f2" : "rgba(255,255,255,0.07)", color: mode === "call" ? "#fff" : "rgba(255,255,255,0.5)" }}>📞 Call</button>
                 </div>
 
                 {!isInDMOrGroup ? (
@@ -500,7 +500,7 @@ function FakeDMPanel({ onClose, btnRect }: { onClose(): void; btnRect: DOMRect; 
                                 ref={textareaRef}
                                 className="fdm-textarea"
                                 rows={2}
-                                placeholder={"Messageâ€¦ (â†µ send)"}
+                                placeholder={"Message… (↵ send)"}
                                 value={text}
                                 onChange={e => setText(e.target.value)}
                                 onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
@@ -510,8 +510,8 @@ function FakeDMPanel({ onClose, btnRect }: { onClose(): void; btnRect: DOMRect; 
                                 <button className="fdm-clear-btn" onClick={() => {
                                     if (!channelId) return;
                                     const n = clearFakes(channelId);
-                                    setMsg(`${n} msg${n !== 1 ? "s" : ""} deleted âœ“`, true);
-                                }}>ðŸ—‘ Clear</button>
+                                    setMsg(`${n} msg${n !== 1 ? "s" : ""} deleted ✓`, true);
+                                }}>🗑 Clear</button>
                             </div>
                         </div>
                     </>
@@ -520,8 +520,8 @@ function FakeDMPanel({ onClose, btnRect }: { onClose(): void; btnRect: DOMRect; 
                         {CallerRow}
 
                         <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px" }}>
-                            <button onClick={() => setCallMissed(false)} style={{ flex: 1, padding: "4px 0", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, background: !callMissed ? "#3ba55c" : "rgba(255,255,255,0.07)", color: !callMissed ? "#fff" : "rgba(255,255,255,0.45)" }}>âœ… Answered</button>
-                            <button onClick={() => setCallMissed(true)} style={{ flex: 1, padding: "4px 0", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, background: callMissed ? "#ed4245" : "rgba(255,255,255,0.07)", color: callMissed ? "#fff" : "rgba(255,255,255,0.45)" }}>âŒ Missed</button>
+                            <button onClick={() => setCallMissed(false)} style={{ flex: 1, padding: "4px 0", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, background: !callMissed ? "#3ba55c" : "rgba(255,255,255,0.07)", color: !callMissed ? "#fff" : "rgba(255,255,255,0.45)" }}>✅ Answered</button>
+                            <button onClick={() => setCallMissed(true)} style={{ flex: 1, padding: "4px 0", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, background: callMissed ? "#ed4245" : "rgba(255,255,255,0.07)", color: callMissed ? "#fff" : "rgba(255,255,255,0.45)" }}>❌ Missed</button>
                             {!callMissed && (
                                 <>
                                     <input type="number" min="0" step="1" className="fdm-date-input" style={{ width: 52, textAlign: "center", flexShrink: 0 }} value={callDuration} onChange={e => setCallDuration(e.target.value)} />
@@ -541,8 +541,8 @@ function FakeDMPanel({ onClose, btnRect }: { onClose(): void; btnRect: DOMRect; 
                             <button className="fdm-clear-btn" onClick={() => {
                                 if (!channelId) return;
                                 const n = clearFakes(channelId);
-                                setMsg(`${n} msg${n !== 1 ? "s" : ""} deleted âœ“`, true);
-                            }}>ðŸ—‘ Clear</button>
+                                setMsg(`${n} msg${n !== 1 ? "s" : ""} deleted ✓`, true);
+                            }}>🗑 Clear</button>
                         </div>
                     </>
                 )}
@@ -555,7 +555,7 @@ function FakeDMPanel({ onClose, btnRect }: { onClose(): void; btnRect: DOMRect; 
     );
 }
 
-// â”€â”€â”€ Icon â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Icon ─────────────────────────────────────────────────────────────────────
 function FakeDMIcon({ height = 20, width = 20, className }: any) {
     return (
         <svg className={className} aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 24 24">
@@ -565,7 +565,7 @@ function FakeDMIcon({ height = 20, width = 20, className }: any) {
     );
 }
 
-// â”€â”€â”€ Chat Bar Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Chat Bar Button ──────────────────────────────────────────────────────────
 const FakeDMButton: ChatBarButtonFactory = (props: any) => {
     const { isMainChat } = props;
     const [btnRect, setBtnRect] = React.useState<DOMRect | null>(null);
@@ -583,7 +583,7 @@ const FakeDMButton: ChatBarButtonFactory = (props: any) => {
 
     return (
         <div onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()} onMouseUp={e => e.stopPropagation()} style={{ display: "contents" }}>
-            <ChatBarButton tooltip="Fake DM â€” inject a fake message" onClick={handleClick}>
+            <ChatBarButton tooltip="Fake DM — inject a fake message" onClick={handleClick}>
                 <FakeDMIcon />
             </ChatBarButton>
             {btnRect && ReactDOM.createPortal(
@@ -594,7 +594,7 @@ const FakeDMButton: ChatBarButtonFactory = (props: any) => {
     );
 };
 
-// â”€â”€â”€ Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Plugin ───────────────────────────────────────────────────────────────────
 export default definePlugin({
     name: "FakeDM",
     enabledByDefault: true,

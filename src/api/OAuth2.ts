@@ -5,12 +5,16 @@
  */
 
 export const API_BASE = "";
+export const YOUCORD_OAUTH_AVAILABLE = false;
 
 import * as DataStore from "./DataStore";
 
 export const OAUTH_TOKEN_KEY = "youcord_oauth_token";
 
 export async function beginDiscordOAuth(state?: string) {
+    if (!YOUCORD_OAUTH_AVAILABLE) {
+        throw new Error("YouCord OAuth is not available on this build");
+    }
     const url = new URL(`${API_BASE}/api/oauth2/signing`);
     if (state) {
         url.searchParams.set("state", state);
@@ -29,6 +33,7 @@ export async function beginDiscordOAuth(state?: string) {
 }
 
 export async function checkOAuthToken(token: string) {
+    if (!YOUCORD_OAUTH_AVAILABLE) return null;
     try {
         const response = await fetch(`${API_BASE}/api/oauth2/check?token=${encodeURIComponent(token)}`);
         if (!response.ok) {

@@ -195,7 +195,7 @@ export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
     );
 }, { noop: true });
 
-/* Vencord Buttons context menu removed â€” managed by Backpack plugin */
+/* Vencord Buttons context menu removed — managed by Backpack plugin */
 
 function CompactChatPopout({ chatBarProps, closePopout }: any) {
     const { chatBarButtons } = useSettings(["uiElements.chatBarButtons.*"]).uiElements;

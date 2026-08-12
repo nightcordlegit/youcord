@@ -7,19 +7,13 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
-import { filters, find, findComponentByCodeLazy } from "@webpack";
+import { findComponentByCodeLazy } from "@webpack";
 import { Clickable, Popout, Tooltip, useEffect, useMemo, useRef, useState } from "@webpack/common";
 import { openYouCordModal } from "@youcordplugins/compactMode/YouCordModal";
 import type { ComponentType, JSX, MouseEventHandler, ReactNode } from "react";
 
 const logger = new Logger("HeaderBarAPI");
 
-const HeaderBarClasses = new Proxy({}, {
-    get: (_, prop: string) => {
-        const mod = find(filters.byProps("clickable", "withHighlight"));
-        return mod ? mod[prop] : prop;
-    }
-}) as any;
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '"aria-haspopup":') as ComponentType<ChannelToolbarButtonProps>;
 
 export interface HeaderBarButtonProps {
@@ -89,7 +83,7 @@ export function HeaderBarButton(props: HeaderBarButtonProps & { ref?: React.RefO
             {({ onMouseEnter, onMouseLeave }) => (
                 <Clickable
                     {...{ innerRef: ref } as any}
-                    className={classes(HeaderBarClasses.clickable, "youcord-header-btn", className)}
+                    className={classes("youcord-header-btn", className)}
                     style={headerBtnStyle}
                     onClick={onClick}
                     onContextMenu={onContextMenu}
@@ -137,9 +131,9 @@ export function removeChannelToolbarButton(id: string) {
     channelToolbarListeners.forEach(listener => listener());
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ══════════════════════════════════════════════════════════════════
 // STEALTH MODE
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ══════════════════════════════════════════════════════════════════
 
 let _stealthActive = false;
 try { _stealthActive = localStorage.getItem("YouCord_stealthMode") === "1"; } catch { }
@@ -182,7 +176,7 @@ export function toggleStealthMode() {
     hideNonReactElements(_stealthActive);
     _notifyStealthChange();
     try { if (_stealthActive) document.body?.classList.add("youcord-stealth"); else document.body?.classList.remove("youcord-stealth"); } catch { }
-    console.log("[StealthMode] toggled â†’", _stealthActive);
+    console.log("[StealthMode] toggled →", _stealthActive);
     return _stealthActive;
 }
 
@@ -234,9 +228,9 @@ export function _notifyStealthChange() {
 export function addStealthListener(fn: () => void) { stealthListeners.add(fn); }
 export function removeStealthListener(fn: () => void) { stealthListeners.delete(fn); }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ══════════════════════════════════════════════════════════════════
 // COMPACT MODE
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ══════════════════════════════════════════════════════════════════
 
 let _compactActive = false;
 try { _compactActive = localStorage.getItem("YouCord_compactMode") === "1"; } catch { }
@@ -275,7 +269,7 @@ export function toggleCompactMode() {
     persistCompact(_compactActive);
     _notifyCompactChange();
     try { if (_compactActive) document.body?.classList.add("youcord-compact"); else document.body?.classList.remove("youcord-compact"); } catch { }
-    console.log("[CompactMode] toggled â†’", _compactActive);
+    console.log("[CompactMode] toggled →", _compactActive);
     return _compactActive;
 }
 
@@ -291,9 +285,9 @@ export function _notifyCompactChange() {
 export function addCompactListener(fn: () => void) { compactListeners.add(fn); }
 export function removeCompactListener(fn: () => void) { compactListeners.delete(fn); }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ══════════════════════════════════════════════════════════════════
 // ICONS
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ══════════════════════════════════════════════════════════════════
 
 const GridVerticalIcon = (props: any) => (
     <svg width={props.width || 24} height={props.height || 24} viewBox="0 0 24 24" fill={props.color || "currentColor"} {...props}>
@@ -307,9 +301,41 @@ const GearIcon = (props: any) => (
     </svg>
 );
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+const YouCordBrandIcon = () => (
+    <svg width="23" height="23" viewBox="0 0 40 34" aria-hidden="true">
+        <defs>
+            <linearGradient id="youcord-brand-y" x1="0" y1="0" x2="1" y2="1">
+                <stop stopColor="#ffe45c" />
+                <stop offset="1" stopColor="#ffad00" />
+            </linearGradient>
+            <linearGradient id="youcord-brand-c" x1="0" y1="0" x2="1" y2="1">
+                <stop stopColor="#cb65ff" />
+                <stop offset="1" stopColor="#6f24d9" />
+            </linearGradient>
+        </defs>
+        <path d="M3 3h7l5 8 5-8h7l-9 14v9h-7v-9L3 3Z" fill="url(#youcord-brand-y)" stroke="#fff" strokeWidth="1.4" strokeLinejoin="round" />
+        <path d="M37 13.5c-2-2.4-5-3.7-8.3-3.7-6.4 0-11.2 4.3-11.2 10.5s4.8 10.4 11.2 10.4c3.4 0 6.5-1.3 8.5-3.9l-4.6-3.3c-.9 1.1-2.1 1.8-3.7 1.8-2.8 0-4.8-2-4.8-5s2-5.1 4.8-5.1c1.5 0 2.8.7 3.7 1.8l4.4-3.5Z" fill="url(#youcord-brand-c)" stroke="#fff" strokeWidth="1.2" strokeLinejoin="round" />
+    </svg>
+);
+
+function YouCordTitleLink() {
+    return (
+        <button
+            id="youcord-titlebar-btn"
+            type="button"
+            title="Ouvrir YouCord.fr"
+            aria-label="Ouvrir YouCord.fr"
+            onClick={() => VencordNative.native.openExternal("https://youcord.fr")}
+        >
+            <YouCordBrandIcon />
+            <span>YouCord</span>
+        </button>
+    );
+}
+
+// ══════════════════════════════════════════════════════════════════
 // COMPACT POPOUTS
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ══════════════════════════════════════════════════════════════════
 
 function CompactHeaderPopout({ type, closePopout }: { type: "header" | "channel", closePopout: () => void; }) {
     const map = type === "header" ? headerBarButtons : channelToolbarButtons;
@@ -398,9 +424,9 @@ function CompactSettingsPopout({ closePopout }: { closePopout: () => void; }) {
     );
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ══════════════════════════════════════════════════════════════════
 // TOGGLE COMPONENTS
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ══════════════════════════════════════════════════════════════════
 
 function CompactHeaderBarToggle() {
     const [, forceUpdate] = useState(0);
@@ -487,9 +513,9 @@ function CompactChannelToolbarToggle() {
     );
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ══════════════════════════════════════════════════════════════════
 // MAIN RENDER COMPONENTS
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ══════════════════════════════════════════════════════════════════
 
 function HeaderBarButtons() {
     const [, forceUpdate] = useState(0);
@@ -579,6 +605,35 @@ function ChannelToolbarButtons() {
 export function _addHeaderBarButtons() {
     return [
         <style key="youcord-headerbar-style">{`
+            #youcord-titlebar-btn {
+                -webkit-app-region: no-drag;
+                position: fixed;
+                top: 3px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 10010;
+                height: 28px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 2px 10px 2px 6px;
+                border: 1px solid transparent;
+                border-radius: 8px;
+                background: transparent;
+                color: var(--interactive-normal, #b5bac1);
+                font: 700 13px/1 var(--font-primary, sans-serif);
+                cursor: pointer;
+                transition: color .15s ease, background-color .15s ease, border-color .15s ease;
+            }
+            #youcord-titlebar-btn:hover {
+                color: var(--interactive-active, #fff);
+                background: var(--background-modifier-hover, rgb(255 255 255 / 8%));
+                border-color: rgb(255 255 255 / 8%);
+            }
+            #youcord-titlebar-btn:focus-visible {
+                outline: 2px solid var(--brand-500, #5865f2);
+                outline-offset: 1px;
+            }
             .youcord-header-btn {
                 display: flex;
                 align-items: center;
@@ -593,6 +648,7 @@ export function _addHeaderBarButtons() {
                 color: var(--interactive-hover, oklab(0.89908 -0.00192902 -0.01033)) !important;
             }
         `}</style>,
+        <YouCordTitleLink key="youcord-titlebar-link" />,
         <HeaderBarButtons key="vc-header-bar-buttons" />
     ];
 }

@@ -100,7 +100,7 @@ handle(IpcEvents.RELAUNCH, async () => {
     app.exit();
 });
 
-// Handler pour VencordNative.youcord.relaunch() â€” utilisé par les boutons Restart dans les settings plugins
+// Handler pour VencordNative.youcord.relaunch() — utilisé par les boutons Restart dans les settings plugins
 handle(IpcEvents.RELAUNCH_APP, async () => {
     setBadgeCount(0);
 

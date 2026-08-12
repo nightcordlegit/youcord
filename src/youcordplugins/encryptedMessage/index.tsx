@@ -15,27 +15,27 @@ import { t } from "../autoTranslateYouCord";
 const MARKER = "\u200B\u200C\u200D";
 
 const NOISE_CHARSETS = [
-    "Â§Â¤Â¦Â¶â€ â€¡â€¢â€°â„¢Â©Â®",
-    "Î±Î²Î³Î´ÎµÎ¶Î·Î¸Î¹ÎºÎ»Î¼",
-    "â•”â•—â•šâ•â•‘â•â•¬â• â•£â•¦â•©â”¼",
-    "â–‘â–’â–“â–ˆâ–„â–€â–â–Œâ—†â—‡â—‹â—",
-    "âˆ€âˆ‚âˆƒâˆ…âˆ†âˆ‡âˆˆâˆâˆ‘âˆžâˆâˆš",
-    "â‘ â‘¡â‘¢â‘£â‘¤â‘¥â‘¦â‘§â‘¨â‘©â‘ª",
+    "§¤¦¶†‡•‰™©®",
+    "αβγδεζηθικλμ",
+    "╔╗╚╝║═╬╠╣╦╩┼",
+    "░▒▓█▄▀▐▌◆◇○●",
+    "∀∂∃∅∆∇∈∏∑∞∝√",
+    "①②③④⑤⑥⑦⑧⑨⑩⑪",
     "â’¶ â’· â’¸ â’¹ â’º â’» â’¼ â’½ â’¾ â’¿ â“€".replace(/ /g, ""),
-    "â™ â™£â™¦â™¥â™¤â™§â™¢â™¡â˜…â˜†âœ¦",
-    "â™ˆâ™‰â™Šâ™‹â™Œâ™â™Žâ™â™â™‘â™’â™“",
-    "â˜€â˜â˜‚â˜ƒâ¿â€ââ‚âƒâ„â…",
-    "âš€âšâš‚âšƒâš„âš…â—â—‘â—’â—“â—”",
-    "â–²â–³â–´â–µâ–¶â–·â–¸â–¹â–ºâ–»â–¼â–½",
-    "âŠ•âŠ–âŠ—âŠ˜âŠ™âŠšâŠ›âŠœâŠâŠžâŠŸ",
-    "â†â†’â†‘â†“â†”â†•â†–â†—â†˜â†™â†šâ†›",
-    "âŒÂ¬âˆšâˆ›âˆœâˆâˆžâˆŸâˆ âˆ¡âˆ¢âˆ£",
-    "â‚ â‚¡â‚¢â‚£â‚¤â‚¥â‚¦â‚§â‚¨â‚©â‚ªâ‚«",
-    "â™©â™ªâ™«â™¬â™­â™®â™¯â—Šâ™¦â—ˆâ—‡",
-    "â‰ˆâ‰‰â‰Šâ‰‹â‰Œâ‰â‰Žâ‰â‰â‰‘â‰’â‰“",
-    "âŠ›âŠ•âŠ—âŠ˜âŠ™âŠšâŠœâŠâŠžâŠŸâŸ",
-    "âœ•âœ–âœ—âœ˜âœ™âœšâœ›âœœâœâœžâœŸ",
-    "â˜°â˜±â˜²â˜³â˜´â˜µâ˜¶â˜·âšŠâš‹âšŒ",
+    "♠♣♦♥♤♧♢♡★☆✦",
+    "♈♉♊♋♌♍♎♏♐♑♒♓",
+    "☀☁☂☃❿❀❁❂❃❄❅",
+    "⚀⚁⚂⚃⚄⚅◐◑◒◓◔",
+    "▲△▴▵▶▷▸▹►▻▼▽",
+    "⊕⊖⊗⊘⊙⊚⊛⊜⊝⊞⊟",
+    "←→↑↓↔↕↖↗↘↙↚↛",
+    "⌐¬√∛∜∝∞∟∠∡∢∣",
+    "₠₡₢₣₤₥₦₧₨₩₪₫",
+    "♩♪♫♬♭♮♯◊♦◈◇",
+    "≈≉≊≋≌≍≎≏≐≑≒≓",
+    "⊛⊕⊗⊘⊙⊚⊜⊝⊞⊟⟐",
+    "✕✖✗✘✙✚✛✜✝✞✟",
+    "☰☱☲☳☴☵☶☷⚊⚋⚌",
 ];
 
 function seededRng(seed: number) {
@@ -166,7 +166,7 @@ function TechniqueMenu() {
                                     currentTechnique = idx;
                                     forceUpdate();
                                     Toasts.show({
-                                        message: `ðŸ” Encryption key â†’ ${idx}`,
+                                        message: `🔐 Encryption key → ${idx}`,
                                         type: Toasts.Type.SUCCESS,
                                         id: Toasts.genId(),
                                     });
@@ -186,7 +186,7 @@ const EncryptButton: ChatBarButtonFactory = ({ type }) => {
     if (!["normal", "sidebar"].some(n => type.analyticsName === n)) return null;
 
     const tooltip = enabled
-        ? `${t("Encryption active")} â€” Technique ${currentTechnique}`
+        ? `${t("Encryption active")} — Technique ${currentTechnique}`
         : t("Encryption disabled");
 
     return (
@@ -211,7 +211,7 @@ const EncryptButton: ChatBarButtonFactory = ({ type }) => {
     );
 };
 
-/* â”€â”€ Inline decryption accessory (like translate) â”€â”€ */
+/* ── Inline decryption accessory (like translate) ── */
 const DecryptionSetters = new Map<string, (v: string | undefined) => void>();
 
 function DecryptionAccessory({ message }: { message: Message; }) {
@@ -231,7 +231,7 @@ function DecryptionAccessory({ message }: { message: Message; }) {
             {" "}
             {Parser.parse(decrypted)}
             <br />
-            (decrypted â€”{" "}
+            (decrypted —{" "}
             <button
                 onClick={() => setDecrypted(undefined)}
                 style={{
@@ -264,7 +264,7 @@ const messageContextPatch = (children: any, { message }: { message: any; }) => {
             <Menu.MenuGroup key="nc-encryption-group">
                 <Menu.MenuItem
                     id="nc-decrypt-message"
-                    label={`ðŸ”“ ${t("Decrypt message")}`}
+                    label={`🔓 ${t("Decrypt message")}`}
                     action={() => {
                         const found = autoDecrypt(message.content);
                         if (found !== null) {
@@ -272,12 +272,12 @@ const messageContextPatch = (children: any, { message }: { message: any; }) => {
                             if (setter) {
                                 setter(found.text);
                             } else {
-                                Toasts.show({ message: `ðŸ”“ ${found.text}`, type: Toasts.Type.SUCCESS, id: Toasts.genId() });
+                                Toasts.show({ message: `🔓 ${found.text}`, type: Toasts.Type.SUCCESS, id: Toasts.genId() });
                             }
                             Toasts.show({ message: `Technique detected: ${found.technique}`, type: Toasts.Type.MESSAGE, id: Toasts.genId() });
                         } else {
                             Toasts.show({
-                                message: "âŒ Unable to decrypt â€” no technique works",
+                                message: "❌ Unable to decrypt — no technique works",
                                 type: Toasts.Type.FAILURE,
                                 id: Toasts.genId(),
                             });
@@ -303,7 +303,7 @@ const userContextPatch = (children: any) => {
             <Menu.MenuGroup key="nc-encryption-user-group">
                 <Menu.MenuItem
                     id="nc-decrypt-all"
-                    label={`ðŸ”“ ${t("Decrypt all")}`}
+                    label={`🔓 ${t("Decrypt all")}`}
                     action={() => {
                         const msgs = MessageStore.getMessages(channelId)?._array;
                         if (!msgs) return;
@@ -321,9 +321,9 @@ const userContextPatch = (children: any) => {
                             }
                         }
                         if (count > 0) {
-                            Toasts.show({ message: `ðŸ”“ Decrypted ${count} messages`, type: Toasts.Type.SUCCESS, id: Toasts.genId() });
+                            Toasts.show({ message: `🔓 Decrypted ${count} messages`, type: Toasts.Type.SUCCESS, id: Toasts.genId() });
                         } else {
-                            Toasts.show({ message: "âŒ No encrypted messages found on screen", type: Toasts.Type.FAILURE, id: Toasts.genId() });
+                            Toasts.show({ message: "❌ No encrypted messages found on screen", type: Toasts.Type.FAILURE, id: Toasts.genId() });
                         }
                     }}
                 />
@@ -337,7 +337,7 @@ const userContextPatch = (children: any) => {
 export default definePlugin({
     name: "EncryptedMessage",
     enabledByDefault: true,
-    description: "Encrypts your messages with 400 unique techniques (0â€“399). Only those who know the key can decrypt.",
+    description: "Encrypts your messages with 400 unique techniques (0–399). Only those who know the key can decrypt.",
     authors: [{ name: "YouCord", id: 0n }],
     dependencies: ["ChatInputButtonAPI", "MessageEventsAPI", "MessageAccessoriesAPI"],
 
@@ -365,7 +365,7 @@ export default definePlugin({
         const encrypted = encrypt(messageObj.content, currentTechnique);
         if (encrypted.length > 2000) {
             Toasts.show({
-                message: `âŒ Message too long to be encrypted (${encrypted.length}/2000)`,
+                message: `❌ Message too long to be encrypted (${encrypted.length}/2000)`,
                 type: Toasts.Type.FAILURE,
                 id: Toasts.genId(),
             });

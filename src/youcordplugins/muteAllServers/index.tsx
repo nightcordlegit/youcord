@@ -5,6 +5,7 @@
  */
 
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import { runDiscordRequest } from "@utils/discordRequestQueue";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { ActiveJoinedThreadsStore, ChannelStore,FluxDispatcher, GuildChannelStore, GuildStore, Menu, React, ReadStateStore, RestAPI, Toasts } from "@webpack/common";
@@ -71,7 +72,7 @@ async function muteAllServers() {
     const guildIds = Object.keys(guilds);
 
     Toasts.show({
-        message: "Muting all and clearing notificationsâ€¦",
+        message: "Muting all and clearing notifications…",
         type: Toasts.Type.MESSAGE,
         id: Toasts.genId(),
     });
@@ -88,7 +89,9 @@ async function muteAllServers() {
         for (const id of guildIds) {
             try {
                 // Ack individuel (sécurité)
-                try { await RestAPI.post({ url: `/guilds/${id}/ack`, body: {} }); } catch { }
+                try {
+                    await runDiscordRequest(() => RestAPI.post({ url: `/guilds/${id}/ack`, body: {} }));
+                } catch { }
 
                 const settings = {
                     muted: true,
@@ -101,24 +104,22 @@ async function muteAllServers() {
 
                 try {
                     if (updateSettings?.updateGuildNotificationSettings) {
-                        await updateSettings.updateGuildNotificationSettings(id, settings);
+                        await runDiscordRequest(() => updateSettings.updateGuildNotificationSettings(id, settings));
                     } else {
-                        await RestAPI.patch({ url: `/users/@me/guilds/${id}/settings`, body: settings });
+                        await runDiscordRequest(() => RestAPI.patch({ url: `/users/@me/guilds/${id}/settings`, body: settings }));
                     }
                     count++;
                 } catch (e: any) {
                     if (e?.httpStatus === 429 || e?.response?.status === 429) {
                         const retryAfter = Number(e?.response?.headers?.["retry-after"] ?? 5) * 1000;
                         await sleep(Math.max(1000, retryAfter));
-                        await RestAPI.patch({ url: `/users/@me/guilds/${id}/settings`, body: settings });
+                        await runDiscordRequest(() => RestAPI.patch({ url: `/users/@me/guilds/${id}/settings`, body: settings }));
                         count++;
                     } else {
                         throw e;
                     }
                 }
 
-                // Espacement pour éviter les rate limits en rafale (429 sur ack / settings)
-                await sleep(400 + Math.random() * 400);
             } catch (e) {
                 console.warn(`[MuteAllServers] Error for ${id}:`, e);
             }
@@ -153,8 +154,8 @@ const guildContextPatch = (children: any, { guild }: { guild?: any; }) => {
 
 export default definePlugin({
     name: "MuteAllServers",
-    enabledByDefault: true,
-    description: "Right-click a server â†’ mute all servers and mark all as read in one click.",
+    enabledByDefault: false,
+    description: "Right-click a server → mute all servers and mark all as read in one click.",
     authors: [{ name: "YouCord", id: 0n }],
 
     start() {

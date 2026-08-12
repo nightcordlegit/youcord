@@ -7,7 +7,7 @@
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { addHeaderBarButton, HeaderBarButton, removeHeaderBarButton } from "@api/HeaderBar";
 import { DataStore } from "@api/index";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy, waitFor } from "@webpack";
 import { FluxDispatcher, Menu, React, UserStore } from "@webpack/common";
@@ -24,7 +24,7 @@ const settings = definePluginSettings({
     },
 });
 
-// â”€â”€ Global State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Global State ────────────────────────────────────────────────────────────
 let fakeAccounts: any[] = [];
 let activeFakeId: string | null = null;
 let realUserSnapshot: any = null;
@@ -32,7 +32,7 @@ let _store: any = null;
 let _origGetUsers: (() => any[]) | null = null;
 let _origGetValidUsers: (() => any[]) | null = null;
 
-// â”€â”€ Store Validation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Store Validation ────────────────────────────────────────────────────
 // Critical Guard: waitFor("getUsers","getValidUsers","getHasLoggedInAccounts") can match
 // several Webpack stores that share these method names. If we patch the wrong store
 // (e.g., a permissions or channels store), corrupted results make all rooms disappear
@@ -51,7 +51,7 @@ function isMultiAccountStore(mod: any): boolean {
         if (!Array.isArray(users)) return false;
 
         // Si des users sont présents, ils doivent avoir une structure de account Discord
-        // (id string + tokenStatus number) â€” caractéristique exclusive du MultiAccountStore
+        // (id string + tokenStatus number) — caractéristique exclusive du MultiAccountStore
         if (users.length > 0) {
             const first = users[0];
             if (typeof first !== "object" || first === null) return false;
@@ -76,7 +76,7 @@ function isMultiAccountStore(mod: any): boolean {
     }
 }
 
-// â”€â”€ Store Patch â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Store Patch ─────────────────────────────────────────────────────────
 function patchStore() {
     if (!_store || _origGetUsers) return;
 
@@ -118,7 +118,7 @@ function patchStore() {
     };
 
     _store.getHasLoggedInAccounts = () => true;
-    console.log("[FakeAccount] Store patched âœ…");
+    console.log("[FakeAccount] Store patched ✅");
 }
 
 function unpatchStore() {
@@ -130,7 +130,7 @@ function unpatchStore() {
     _store.emitChange?.();
 }
 
-// â”€â”€ simulateSwitch â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── simulateSwitch ─────────────────────────────────────────────────────────
 function simulateSwitch(fake: any) {
     const me = UserStore.getCurrentUser();
     if (!me) return;
@@ -177,10 +177,10 @@ function simulateSwitch(fake: any) {
     } catch { }
 
     _store?.emitChange?.();
-    console.log("[FakeAccount] âœ… Profile changed:", fake.username);
+    console.log("[FakeAccount] ✅ Profile changed:", fake.username);
 }
 
-// â”€â”€ restoreRealAccount â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── restoreRealAccount ─────────────────────────────────────────────────────
 function restoreRealAccount() {
     if (!realUserSnapshot) return;
     const me = UserStore.getCurrentUser();
@@ -215,16 +215,16 @@ function restoreRealAccount() {
     } catch { }
 
     _store?.emitChange?.();
-    console.log("[FakeAccount] âœ… Profile restored");
+    console.log("[FakeAccount] ✅ Profile restored");
 }
 
-// â”€â”€ Switch action subscriptions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Switch action subscriptions ──────────────────────────────────
 function onSwitchFailure(action: any) {
     console.log("[FakeAccount] SWITCH_FAILURE action:", JSON.stringify(action));
     const userId = action.userId ?? action.user_id ?? action.id;
     const fake = fakeAccounts.find(f => f.id === userId);
     if (!fake) return;
-    console.log("[FakeAccount] â†’ simulateSwitch:", fake.username);
+    console.log("[FakeAccount] → simulateSwitch:", fake.username);
     simulateSwitch(fake);
 }
 
@@ -233,11 +233,11 @@ function onSwitchAttempt(action: any) {
     const userId = action.userId ?? action.user_id ?? action.id;
     const fake = fakeAccounts.find(f => f.id === userId);
     if (!fake) return;
-    console.log("[FakeAccount] ATTEMPT â†’ simulateSwitch:", fake.username);
+    console.log("[FakeAccount] ATTEMPT → simulateSwitch:", fake.username);
     simulateSwitch(fake);
 }
 
-// â”€â”€ DISCONNECT Handler (removal) of a fake account â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── DISCONNECT Handler (removal) of a fake account ──────────────────
 function onRemoveAccount(action: any) {
     const userId = action.userId ?? action.user_id ?? action.id;
     if (!userId) return;
@@ -289,7 +289,7 @@ function addToSwitcher(userId: string) {
     console.log("[FakeAccount] Added:", username);
 }
 
-// â”€â”€ UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── UI ─────────────────────────────────────────────────────────────────────
 function RestoreIcon() {
     return (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -312,7 +312,7 @@ function RestoreButton() {
     return (
         <HeaderBarButton
             icon={RestoreIcon}
-            tooltip="Fake account active â€” click to restore your real account"
+            tooltip="Fake account active — click to restore your real account"
             onClick={() => { restoreRealAccount(); setActive(false); }}
         />
     );
@@ -330,7 +330,11 @@ const ctxPatch: NavContextMenuPatchCallback = (children, { user }) => {
     if (!children || !Array.isArray(children)) return;
     try {
         if (!user || user.id === UserStore.getCurrentUser()?.id) return;
-        if (!settings.store.showInUserMenu) return;
+        // Context-menu patches may run while plugins are still being initialised.
+        // Reading definePluginSettings().store during that window throws, which in
+        // turn breaks Discord's whole user context menu. Plain Settings is safe to
+        // read here and the nullish fallback preserves the option's default.
+        if (!(Settings.plugins.FakeSwitcher?.showInUserMenu ?? true)) return;
         children.push(
             <Menu.MenuItem
                 id="fake-account-add"
@@ -344,13 +348,14 @@ const ctxPatch: NavContextMenuPatchCallback = (children, { user }) => {
     }
 };
 
-// â”€â”€ Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Plugin ─────────────────────────────────────────────────────────────────
 export default definePlugin({
     name: "FakeSwitcher",
     enabledByDefault: true,
-    description: "Right-click â†’ add a user to the switcher. Click in the switcher â†’ your profile takes their appearance locally.",
+    description: "Right-click → add a user to the switcher. Click in the switcher → your profile takes their appearance locally.",
     authors: [{ name: "YouCord", id: 0n }],
     dependencies: ["HeaderBarAPI"],
+    settings,
 
     async start() {
         FluxDispatcher.subscribe("MULTI_ACCOUNT_SWITCH_FAILURE", onSwitchFailure);

@@ -110,11 +110,6 @@ const VencordNative = {
     },
     desktopCapture: { getSources: () => r("VencordGetDesktopSources") },
     pluginHelpers: S,
-    worldBomb: {
-        sequence: (word, lps, humanChance, targetX = -1, targetY = -1) =>
-            r("WorldBombSequence", word, lps, humanChance, targetX, targetY),
-        getCursorPos: () => r("WorldBombGetCursorPos"),
-    },
     window: {
         setBackgroundMaterial: e => r("EquicordSetWindowBackgroundMaterial", e),
         setThumbarButtons: e => r("SoundCordSetThumbarButtons", e),
