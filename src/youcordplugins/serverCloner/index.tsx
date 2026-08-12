@@ -14,19 +14,12 @@ import { runDiscordRequest } from "@utils/discordRequestQueue";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Button, Forms, GuildStore, IconUtils, Menu, React, RestAPI, Select, Toasts, useMemo, useRef, UserStore, useState } from "@webpack/common";
+import { Button, Forms, GuildMemberStore, GuildStore, IconUtils, Menu, React, RestAPI, Select, Toasts, useMemo, useRef, UserStore, useState } from "@webpack/common";
 const F = Forms as any;
 
 const PermissionStore = findStoreLazy("PermissionStore");
 
 const ADMIN_BIT = 0x8n;
-
-function getToken(): string {
-    try {
-        const mod = (window as any).Vencord?.Webpack?.findByProps?.("getToken");
-        return mod?.getToken?.() ?? "";
-    } catch { return ""; }
-}
 
 function hasAdmin(guildId: string): boolean {
     try {
@@ -112,8 +105,11 @@ async function cloneServer(
 ) {
     _cancelled = false;
     let sourceChannels: any[] = [];
-    const token = getToken();
-    if (!token) { log({ text: "Token not found!", type: "err" }); return; }
+    let failureCount = 0;
+    const recordError = (text: string) => {
+        failureCount++;
+        log({ text, type: "err" });
+    };
 
     const steps: string[] = [];
     if (options.guildSettings) steps.push("settings");
@@ -160,7 +156,7 @@ async function cloneServer(
                 log({ text: "Settings copied (name, description, etc.)", type: "ok" });
             }
         } catch (e: any) {
-            log({ text: `Settings error: ${e?.message || e}`, type: "err" });
+            recordError(`Settings error: ${e?.message || e}`);
         }
         await wait(500);
         advance("Settings");
@@ -172,6 +168,7 @@ async function cloneServer(
             const iconUrl = IconUtils?.getGuildIconURL({ id: sourceId, icon: sourceGuild.icon, size: 512 }) ?? "";
             if (!iconUrl) throw new Error("Could not construct icon URL");
             const resp = await fetch(iconUrl);
+            if (!resp.ok) throw new Error(`Icon download failed (HTTP ${resp.status})`);
             const blob = await resp.blob();
             const base64 = await new Promise<string>(resolve => {
                 const reader = new FileReader();
@@ -181,7 +178,7 @@ async function cloneServer(
             await apiCall("patch", `/guilds/${targetId}`, { icon: base64 });
             log({ text: "Icon copied", type: "ok" });
         } catch (e: any) {
-            log({ text: `Icon error: ${e?.message || e}`, type: "err" });
+            recordError(`Icon error: ${e?.message || e}`);
         }
         await wait(500);
         advance("Icon");
@@ -238,7 +235,7 @@ async function cloneServer(
                     log({ text: `  Role created: ${role.name}`, type: "ok" });
                     await wait(300);
                 } catch (e: any) {
-                    log({ text: `  Role error "${role.name}": ${e?.message || e}`, type: "err" });
+                    recordError(`  Role error "${role.name}": ${e?.message || e}`);
                 }
             }
             if (positions.length) {
@@ -251,7 +248,7 @@ async function cloneServer(
             }
             log({ text: `${sorted.length} roles processed`, type: "ok" });
         } catch (e: any) {
-            log({ text: `Roles error: ${e?.message || e}`, type: "err" });
+            recordError(`Roles error: ${e?.message || e}`);
         }
         await wait(500);
         advance("Roles");
@@ -280,13 +277,13 @@ async function cloneServer(
                 try {
                     const body: any = { name: cat.name, type: 4, position: cat.position };
                     if (options.permissions && cat.permission_overwrites?.length)
-                        body.permission_overwrites = mapPermOverwrites(cat.permission_overwrites, roleMapping);
+                        body.permission_overwrites = mapPermOverwrites(cat.permission_overwrites, roleMapping, targetId);
                     const created = await apiCall("post", `/guilds/${targetId}/channels`, body);
                     channelMapping.set(cat.id, created.id);
                     log({ text: `  Category created: ${cat.name}`, type: "ok" });
                     await wait(500);
                 } catch (e: any) {
-                    log({ text: `  Category error "${cat.name}": ${e?.message || JSON.stringify(e)}`, type: "err" });
+                    recordError(`  Category error "${cat.name}": ${e?.message || JSON.stringify(e)}`);
                 }
             }
 
@@ -298,22 +295,34 @@ async function cloneServer(
                         topic: ch.topic ?? undefined, nsfw: ch.nsfw ?? false,
                         bitrate: ch.bitrate ?? undefined, user_limit: ch.user_limit ?? undefined,
                         rate_limit_per_user: ch.rate_limit_per_user ?? undefined,
+                        rtc_region: ch.rtc_region ?? undefined,
+                        video_quality_mode: ch.video_quality_mode ?? undefined,
+                        default_auto_archive_duration: ch.default_auto_archive_duration ?? undefined,
+                        default_thread_rate_limit_per_user: ch.default_thread_rate_limit_per_user ?? undefined,
+                        default_sort_order: ch.default_sort_order ?? undefined,
+                        default_forum_layout: ch.default_forum_layout ?? undefined,
+                        available_tags: ch.available_tags?.map((tag: any) => ({
+                            name: tag.name,
+                            moderated: tag.moderated,
+                            emoji_id: tag.emoji_id,
+                            emoji_name: tag.emoji_name,
+                        })),
                     };
                     if (ch.parent_id && channelMapping.has(ch.parent_id))
                         body.parent_id = channelMapping.get(ch.parent_id);
                     if (options.permissions && ch.permission_overwrites?.length)
-                        body.permission_overwrites = mapPermOverwrites(ch.permission_overwrites, roleMapping);
+                        body.permission_overwrites = mapPermOverwrites(ch.permission_overwrites, roleMapping, targetId);
                     const created = await apiCall("post", `/guilds/${targetId}/channels`, body);
                     channelMapping.set(ch.id, created.id);
                     log({ text: `  Channel created: #${ch.name} (type ${ch.type})`, type: "ok" });
                     await wait(500);
                 } catch (e: any) {
-                    log({ text: `  Channel error "${ch.name}": ${e?.message || JSON.stringify(e)}`, type: "err" });
+                    recordError(`  Channel error "${ch.name}": ${e?.message || JSON.stringify(e)}`);
                 }
             }
             log({ text: `${categories.length + nonCategories.length} channels processed`, type: "ok" });
         } catch (e: any) {
-            log({ text: `Channels error: ${e?.message || e}`, type: "err" });
+            recordError(`Channels error: ${e?.message || e}`);
         }
         await wait(500);
         advance("Channels");
@@ -331,23 +340,27 @@ async function cloneServer(
                     const emojiUrl = IconUtils?.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: 128 }) ?? "";
                     if (!emojiUrl) throw new Error("Could not construct emoji URL");
                     const resp = await fetch(emojiUrl);
+                    if (!resp.ok) throw new Error(`Emoji download failed (HTTP ${resp.status})`);
                     const blob = await resp.blob();
                     const base64 = await new Promise<string>(resolve => {
                         const reader = new FileReader();
                         reader.onloadend = () => resolve(reader.result as string);
                         reader.readAsDataURL(blob);
                     });
-                    await apiCall("post", `/guilds/${targetId}/emojis`, { name: emoji.name, image: base64, roles: [] });
+                    const mappedRoles = (emoji.roles ?? [])
+                        .map((roleId: string) => roleMapping.get(roleId))
+                        .filter(Boolean);
+                    await apiCall("post", `/guilds/${targetId}/emojis`, { name: emoji.name, image: base64, roles: mappedRoles });
                     count++;
                     log({ text: `  Emoji copied: ${emoji.name} (${count}/${sourceEmojis.length})`, type: "ok" });
                     await wait(3000);
                 } catch (e: any) {
-                    log({ text: `  Emoji error "${emoji.name}": ${e?.message || e}`, type: "err" });
+                    recordError(`  Emoji error "${emoji.name}": ${e?.message || e}`);
                 }
             }
             log({ text: `${count}/${sourceEmojis.length} emojis copied`, type: "ok" });
         } catch (e: any) {
-            log({ text: `Emojis error: ${e?.message || e}`, type: "err" });
+            recordError(`Emojis error: ${e?.message || e}`);
         }
         await wait(500);
         advance("Emojis");
@@ -379,7 +392,7 @@ async function cloneServer(
                             enabledByDefault: true
                         });
                     } catch (e: any) {
-                        log({ text: `  Webhook creation error for channel ${targetChId}: ${e?.message || e}`, type: "err" });
+                        recordError(`  Webhook creation error for channel ${targetChId}: ${e?.message || e}`);
                         continue;
                     }
 
@@ -432,22 +445,22 @@ async function cloneServer(
                                 embedCount++;
                             } else {
                                 const errText = await resp?.text().catch(() => "?") ?? "?";
-                                log({ text: `  Webhook error (${resp?.status}): ${errText.slice(0, 200)}`, type: "err" });
+                                recordError(`  Webhook error (${resp?.status}): ${errText.slice(0, 200)}`);
                             }
                             await wait(800);
                         } catch (e: any) {
-                            log({ text: `  Embed send error: ${e?.message || e}`, type: "err" });
+                            recordError(`  Embed send error: ${e?.message || e}`);
                         }
                     }
                     try { await apiCall("del", `/webhooks/${webhook.id}`); } catch { /* ignore */ }
                     await wait(300);
                 } catch (e: any) {
-                    log({ text: `  Channel read error ${sourceChId}: ${e?.message || JSON.stringify(e)}`, type: "err" });
+                    recordError(`  Channel read error ${sourceChId}: ${e?.message || JSON.stringify(e)}`);
                 }
             }
             log({ text: `${embedCount} embed messages copied`, type: "ok" });
         } catch (e: any) {
-            log({ text: `Embeds error: ${e?.message || e}`, type: "err" });
+            recordError(`Embeds error: ${e?.message || e}`);
         }
         advance("Embeds");
     } else if (options.embeds) {
@@ -460,16 +473,26 @@ async function cloneServer(
         log({ text: "═══ Cloning cancelled! ═══", type: "warn" });
         Toasts.show({ message: "Cloning cancelled.", type: Toasts.Type.FAILURE, id: Toasts.genId() });
     } else {
-        log({ text: "═══ Cloning finished! ═══", type: "info" });
-        Toasts.show({ message: "Server cloning finished!", type: Toasts.Type.SUCCESS, id: Toasts.genId() });
+        const partial = failureCount > 0;
+        log({
+            text: partial
+                ? `═══ Cloning finished with ${failureCount} error(s) ═══`
+                : "═══ Cloning finished successfully! ═══",
+            type: partial ? "warn" : "ok",
+        });
+        Toasts.show({
+            message: partial ? `Cloning completed with ${failureCount} error(s). Check the log.` : "Server cloning finished successfully!",
+            type: partial ? Toasts.Type.FAILURE : Toasts.Type.SUCCESS,
+            id: Toasts.genId(),
+        });
     }
 }
 
-function mapPermOverwrites(overwrites: any[], roleMapping: Map<string, string>): any[] {
+function mapPermOverwrites(overwrites: any[], roleMapping: Map<string, string>, targetGuildId: string): any[] {
     return overwrites
-        .filter(ow => roleMapping.has(ow.id))
+        .filter(ow => ow.type === 0 ? roleMapping.has(ow.id) : Boolean(GuildMemberStore.getMember(targetGuildId, ow.id)))
         .map(ow => ({
-            id: roleMapping.get(ow.id)!,
+            id: ow.type === 0 ? roleMapping.get(ow.id)! : ow.id,
             type: ow.type,
             allow: String(ow.allow),
             deny: String(ow.deny),
@@ -480,7 +503,7 @@ function ServerClonerUI({ initialSourceId = "" }: { initialSourceId?: string }) 
     const [sourceId, setSourceId] = useState<string>(initialSourceId);
     const [targetId, setTargetId] = useState<string>("");
     const [opts, setOpts] = useState<CloneOptions>({
-        roles: true, clearRoles: true, channels: true, noDeleteChannels: false, permissions: true,
+        roles: true, clearRoles: false, channels: true, noDeleteChannels: true, permissions: true,
         icon: true, emojis: true, embeds: true, guildSettings: true,
     });
     const [, forceUpdate] = useState(0);
@@ -511,6 +534,7 @@ function ServerClonerUI({ initialSourceId = "" }: { initialSourceId?: string }) 
     async function startClone() {
         if (!sourceId || !targetId || _running) return;
         if (sourceId === targetId) { persistLog({ text: "Source and destination cannot be identical!", type: "err" }); return; }
+        if (!hasAdmin(targetId)) { persistLog({ text: "Administrator permission is required on the target server.", type: "err" }); return; }
         persistRunning(true);
         _progress = 0;
         _logs = [];
