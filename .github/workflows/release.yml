@@ -171,7 +171,17 @@ jobs:
       - name: Build desktop app & package .app/.dmg
         run: |
           pnpm buildDesktop
-          npx electron-builder --config electron-builder.config.cjs --mac --publish never
+          for attempt in 1 2 3; do
+            if npx electron-builder --config electron-builder.config.cjs --mac --publish never; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "electron-builder failed after 3 attempts"
+              exit 1
+            fi
+            echo "electron-builder download failed; retrying in $((attempt * 15)) seconds..."
+            sleep $((attempt * 15))
+          done
 
       - name: Upload macOS artifacts to Release
         env:
