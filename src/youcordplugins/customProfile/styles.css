@@ -167,8 +167,7 @@
     flex: 1 1 0 !important;
     flex-direction: column;
     gap: 8px;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
+    overflow: hidden auto !important;
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
     touch-action: pan-y;
@@ -771,7 +770,7 @@
     border-radius: 8px;
     color: transparent;
     background-clip: text;
-    -webkit-background-clip: text;
+    background-clip: text;
     font-size: 20px;
     font-weight: 700;
     text-align: center;
@@ -873,6 +872,7 @@
     font-size: 11px;
     font-weight: 500;
 }
+
 .cp-progressive-sentinel {
     flex: 0 0 100%;
     width: 100%;
