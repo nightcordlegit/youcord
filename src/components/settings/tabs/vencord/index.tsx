@@ -6,7 +6,7 @@
 
 import "./VencordTab.css";
 
-import { isCompactModeEnabled, isStealthModeEnabled, toggleCompactMode, toggleStealthMode } from "@api/HeaderBar";
+import { areHeaderBarButtonsHidden, isCompactModeEnabled, isStealthModeEnabled, toggleCompactMode, toggleHeaderBarButtons, toggleStealthMode } from "@api/HeaderBar";
 import { t } from "@api/i18n";
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { plugins } from "@api/PluginManager";
@@ -168,6 +168,16 @@ function useStealthActive() {
     return active;
 }
 
+function useHeaderButtonsHidden() {
+    const [hidden, setHidden] = React.useState(areHeaderBarButtonsHidden);
+    React.useEffect(() => {
+        const handler = () => setHidden(areHeaderBarButtonsHidden());
+        window.addEventListener("youcord-header-buttons-change", handler);
+        return () => window.removeEventListener("youcord-header-buttons-change", handler);
+    }, []);
+    return hidden;
+}
+
 function StealthModeSection() {
     const enabled = useStealthActive();
 
@@ -206,6 +216,7 @@ function EquicordSettings() {
     const settings = useSettings();
     const stealthActive = useStealthActive();
     const compactActive = useCompactActive();
+    const headerButtonsHidden = useHeaderButtonsHidden();
 
     const needsVibrancySettings = IS_DISCORD_DESKTOP && IS_MAC;
 
@@ -433,6 +444,19 @@ function EquicordSettings() {
                 </Flex>
 
             </>)}
+
+            <Divider className={Margins.top20} />
+
+            <Heading className={Margins.top20}>Boutons de plugins en haut</Heading>
+            <Paragraph className={Margins.bottom16}>
+                Masque uniquement les icônes de plugins dans la barre supérieure. Raccourci : Ctrl+Shift+B
+            </Paragraph>
+            <Button
+                onClick={toggleHeaderBarButtons}
+                variant={headerButtonsHidden ? "secondary" : "primary"}
+            >
+                {headerButtonsHidden ? "Afficher les boutons du haut" : "Cacher les boutons du haut"}
+            </Button>
 
             <Divider className={Margins.top20} />
 

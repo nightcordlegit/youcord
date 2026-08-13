@@ -111,6 +111,34 @@ const channelToolbarButtons = new Map<string, ButtonEntry>();
 const headerBarListeners = new Set<() => void>();
 const channelToolbarListeners = new Set<() => void>();
 
+let _headerBarHidden = false;
+try { _headerBarHidden = localStorage.getItem("YouCord_hideHeaderPluginButtons") === "1"; } catch { }
+
+export function areHeaderBarButtonsHidden(): boolean {
+    return _headerBarHidden;
+}
+
+export function toggleHeaderBarButtons() {
+    _headerBarHidden = !_headerBarHidden;
+    try {
+        if (_headerBarHidden) localStorage.setItem("YouCord_hideHeaderPluginButtons", "1");
+        else localStorage.removeItem("YouCord_hideHeaderPluginButtons");
+    } catch { }
+    headerBarListeners.forEach(listener => listener());
+    window.dispatchEvent(new Event("youcord-header-buttons-change"));
+    return _headerBarHidden;
+}
+
+try {
+    document.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.ctrlKey && event.shiftKey && !event.altKey && !event.metaKey && event.code === "KeyB") {
+            event.preventDefault();
+            event.stopPropagation();
+            toggleHeaderBarButtons();
+        }
+    }, true);
+} catch { }
+
 export function addHeaderBarButton(id: string, render: HeaderBarButtonFactory, priority = 0) {
     headerBarButtons.set(id, { render, priority });
     headerBarListeners.forEach(listener => listener());
@@ -536,7 +564,7 @@ function HeaderBarButtons() {
         };
     }, []);
 
-    if (isStealthModeEnabled()) return null;
+    if (isStealthModeEnabled() || areHeaderBarButtonsHidden()) return null;
 
     if (isCompactModeEnabled()) {
         return (
