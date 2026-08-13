@@ -1009,7 +1009,7 @@ function scanDocumentIncrementally() {
     const runChunk = () => {
         if (token !== _initialScanToken || !isEnabled || document.visibilityState === "hidden") return;
         let count = 0;
-        let node: Node | null;
+        let node: Node | null = null;
         while (count++ < 250 && (node = walker.nextNode())) scanTextNode(node as Text);
         if (node) setTimeout(runChunk, 0);
     };

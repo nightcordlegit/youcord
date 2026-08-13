@@ -733,7 +733,7 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
         setReady(true);
     }, []);
 
-    function loadChannelsForGuilds() {
+    React.useEffect(() => {
         if (selectedGuildIds.length === 0) { setGuildChannelsMap({}); return; }
         try {
             const map: Record<string, string[]> = {};
@@ -746,11 +746,6 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
             }
             setGuildChannelsMap(map);
         } catch { setGuildChannelsMap({}); }
-    }
-
-    React.useEffect(() => {
-        if (selectedGuildIds.length === 0) { setGuildChannelsMap({}); return; }
-        loadChannelsForGuilds();
     }, [selectedGuildIds]);
 
     if (!ready) {
@@ -1142,51 +1137,50 @@ function DmServeurPanel({ showHeader = true }: { showHeader?: boolean; } = {}) {
 const settings = definePluginSettings({
     panel: {
         type: OptionType.COMPONENT,
-        description: "",
         component: DmServeurPanel as any,
     },
     isActive: {
         type: OptionType.BOOLEAN,
-        description: () => t("Enable Dmserveur"),
+        description: t("Enable Dmserveur"),
         default: false,
         restartNeeded: false,
         hidden: true,
     },
     responseMode: {
         type: OptionType.SELECT,
-        description: () => t("When should Dmserveur respond?"),
+        description: t("When should Dmserveur respond?"),
         options: [
-            { label: () => t("Only when mentioned (@Dmserveur)"), value: "mention_only", default: true },
-            { label: () => t("All messages in selected channels"), value: "all_messages" },
+            { label: t("Only when mentioned (@Dmserveur)"), value: "mention_only", default: true },
+            { label: t("All messages in selected channels"), value: "all_messages" },
         ],
         restartNeeded: false,
         hidden: true,
     },
     mentionUser: {
         type: OptionType.BOOLEAN,
-        description: () => t("Mention (ping) the user when replying"),
+        description: t("Mention (ping) the user when replying"),
         default: false,
         restartNeeded: false,
         hidden: true,
     },
     personality: {
         type: OptionType.SELECT,
-        description: () => t("Dmserveur personality / mood"),
+        description: t("Dmserveur personality / mood"),
         options: [
-            { label: () => t("Chill & Friendly"), value: "chill", default: true },
-            { label: () => t("Angry & Aggressive"), value: "angry" },
-            { label: () => t("Sarcastic & Witty"), value: "sarcastic" },
-            { label: () => t("Clever & Witty"), value: "witty" },
-            { label: () => t("Wise & Motivational"), value: "sage" },
+            { label: t("Chill & Friendly"), value: "chill", default: true },
+            { label: t("Angry & Aggressive"), value: "angry" },
+            { label: t("Sarcastic & Witty"), value: "sarcastic" },
+            { label: t("Clever & Witty"), value: "witty" },
+            { label: t("Wise & Motivational"), value: "sage" },
         ],
         restartNeeded: false,
         hidden: true,
     },
     language: {
         type: OptionType.SELECT,
-        description: () => t("Response language"),
+        description: t("Response language"),
         options: [
-            { label: () => t("Same as the message (auto)"), value: "auto", default: true },
+            { label: t("Same as the message (auto)"), value: "auto", default: true },
             { label: "English", value: "english" },
             { label: "Français (French)", value: "french" },
             { label: "Español (Spanish)", value: "spanish" },
@@ -1207,7 +1201,7 @@ const settings = definePluginSettings({
     },
     customInstructions: {
         type: OptionType.STRING,
-        description: () => t("Custom personality instructions (overrides personality selection)"),
+        description: t("Custom personality instructions (overrides personality selection)"),
         default: "",
         multiline: true,
         restartNeeded: false,
@@ -1215,7 +1209,7 @@ const settings = definePluginSettings({
     },
     personalInfo: {
         type: OptionType.STRING,
-        description: () => t("Personal information (name, age, location, etc.)"),
+        description: t("Personal information (name, age, location, etc.)"),
         default: "",
         multiline: true,
         restartNeeded: false,
@@ -1223,7 +1217,7 @@ const settings = definePluginSettings({
     },
     writingStyle: {
         type: OptionType.STRING,
-        description: () => t("Your writing style (casual, no caps, use slang, etc.)"),
+        description: t("Your writing style (casual, no caps, use slang, etc.)"),
         default: "",
         multiline: true,
         restartNeeded: false,
@@ -1245,7 +1239,7 @@ const settings = definePluginSettings({
     },
     cooldownSec: {
         type: OptionType.SLIDER,
-        description: () => t("Cooldown between responses in same channel (seconds)"),
+        description: t("Cooldown between responses in same channel (seconds)"),
         markers: [0, 10, 30, 60, 120, 300],
         default: 30,
         restartNeeded: false,
@@ -1253,7 +1247,7 @@ const settings = definePluginSettings({
     },
     maxPerMinute: {
         type: OptionType.SLIDER,
-        description: () => t("Max responses per minute (global rate limit safety)"),
+        description: t("Max responses per minute (global rate limit safety)"),
         markers: [1, 3, 5, 10, 15, 20, 30],
         default: 2,
         restartNeeded: false,
@@ -1261,7 +1255,7 @@ const settings = definePluginSettings({
     },
     responseMinDelay: {
         type: OptionType.SLIDER,
-        description: () => t("Minimum delay before responding (seconds)"),
+        description: t("Minimum delay before responding (seconds)"),
         markers: [1, 2, 3, 5, 8, 10],
         default: 3,
         restartNeeded: false,
@@ -1269,7 +1263,7 @@ const settings = definePluginSettings({
     },
     responseMaxDelay: {
         type: OptionType.SLIDER,
-        description: () => t("Maximum delay before responding (seconds)"),
+        description: t("Maximum delay before responding (seconds)"),
         markers: [3, 5, 7, 10, 15, 20],
         default: 9,
         restartNeeded: false,
@@ -1277,14 +1271,14 @@ const settings = definePluginSettings({
     },
     learnAbbreviations: {
         type: OptionType.BOOLEAN,
-        description: () => t("Learn abbreviations from conversations and use them"),
+        description: t("Learn abbreviations from conversations and use them"),
         default: false,
         restartNeeded: false,
         hidden: true,
     },
     contextMessageCount: {
         type: OptionType.SLIDER,
-        description: () => t("Number of recent messages to include as context (0 = none)"),
+        description: t("Number of recent messages to include as context (0 = none)"),
         markers: [0, 5, 10, 15, 20],
         default: 12,
         restartNeeded: false,
@@ -1577,7 +1571,8 @@ const DmServeurHeaderButton = () => {
             tooltip="Dmserveur"
             onClick={() => openModal(props => (
                 <ModalRoot size={ModalSize.DYNAMIC} transitionState={props.transitionState} onClose={props.onClose}>
-                    <ModalHeader separator={false} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <ModalHeader separator={false}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                         <div style={{ fontSize: 20, fontWeight: 700, color: "var(--header-primary)", marginRight: 16 }}>
                             {t("Dmserveur Configuration")}
                         </div>
@@ -1585,6 +1580,7 @@ const DmServeurHeaderButton = () => {
                             <DmServeurStatusToggle />
                         </div>
                         <ModalCloseButton onClick={props.onClose} />
+                        </div>
                     </ModalHeader>
                     <ModalContent>
                         <div style={{ padding: 16 }}>

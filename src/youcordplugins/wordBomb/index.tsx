@@ -197,14 +197,14 @@ function WordBombModal({ rootProps }: { rootProps: any; }) {
             size={ModalSize.MEDIUM}
             style={{ translate: `${position.x}px ${position.y}px` }}
         >
-            <ModalHeader
-                separator={false}
+            <div
                 className="yc-wb-header"
                 onPointerDown={startDragging}
                 onPointerMove={dragWindow}
                 onPointerUp={stopDragging}
                 onPointerCancel={stopDragging}
             >
+                <ModalHeader separator={false}>
                 <div className="yc-wb-heading">
                     <span className="yc-wb-heading-icon"><TrophyIcon width={24} height={24} /></span>
                     <div>
@@ -213,7 +213,8 @@ function WordBombModal({ rootProps }: { rootProps: any; }) {
                     </div>
                 </div>
                 <ModalCloseButton onClick={rootProps.onClose} />
-            </ModalHeader>
+                </ModalHeader>
+            </div>
 
             <ModalContent className="yc-wb-content">
                 <section className="yc-wb-panel">

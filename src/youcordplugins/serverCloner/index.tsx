@@ -40,7 +40,7 @@ async function apiCall(method: "get" | "post" | "patch" | "put" | "del", url: st
     if (body) opts.body = body;
 
     for (let attempt = 0; attempt < 3; attempt++) {
-        const res = await runDiscordRequest(() => (RestAPI as any)[method](opts));
+        const res = await runDiscordRequest<any>(() => (RestAPI as any)[method](opts));
         if (res?.status === 429) {
             const retryAfter = Number((res as any)?.headers?.["retry-after"] ?? 5);
             await wait(Math.max(1, retryAfter) * 1000);

@@ -9,7 +9,6 @@ import "./ipc";
 import "./userAssets";
 import "./vesktopProtocol";
 
-import { execSync } from "child_process";
 import { app, BrowserWindow, nativeTheme } from "electron";
 
 import { DATA_DIR } from "./constants";
@@ -20,16 +19,6 @@ import { registerScreenShareHandler } from "./screenShare";
 import { Settings, State } from "./settings";
 import { setAsDefaultProtocolClient } from "./utils/setAsDefaultProtocolClient";
 import { isDeckGameMode } from "./utils/steamOS";
-
-// Détection de build dev : si HEAD n'est pas un tag Git, suffixer -dev
-// (uniquement en dev : en build packagé, execSync git coûte du temps de boot pour rien)
-if (!app.isPackaged) {
-    try {
-        execSync("git describe --exact-match --tags HEAD", { encoding: "utf-8", stdio: "ignore" });
-    } catch {
-        app.setVersion(app.getVersion() + "-dev");
-    }
-}
 
 console.log("YouCord v" + app.getVersion());
 

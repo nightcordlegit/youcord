@@ -394,7 +394,8 @@ async function handleMessage(message: any) {
             return;
         }
 
-        const lang = LANGUAGES[settings.store.responseLanguage] ?? LANGUAGES.fr;
+        const language = settings.store.responseLanguage ?? "fr";
+        const lang = LANGUAGES[language as keyof typeof LANGUAGES] ?? LANGUAGES.fr;
 
         let localHistory = "";
         try {
