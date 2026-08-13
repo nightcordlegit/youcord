@@ -14,6 +14,7 @@ import { React, showToast, Toasts, useEffect, useMemo, useRef, useState } from "
 
 const DICTIONARY_URL = "https://raw.githubusercontent.com/words/an-array-of-french-words/master/index.json";
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz";
+const POSITION_KEY = "YouCord_WordBomb_position";
 const FALLBACK_WORDS = [
     "abricot", "admirable", "aventure", "bibliotheque", "cascade", "chocolat", "citrouille",
     "courageux", "decouverte", "dinosaure", "elegance", "fabuleux", "fenetre", "girafe",
@@ -98,7 +99,14 @@ function WordBombModal({ rootProps }: { rootProps: any; }) {
     const [lengthMode, setLengthMode] = useState<"balanced" | "short" | "long">("balanced");
     const [loading, setLoading] = useState(true);
     const [debouncedQuery, setDebouncedQuery] = useState("");
-    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [position, setPosition] = useState(() => {
+        try {
+            const saved = JSON.parse(localStorage.getItem(POSITION_KEY) ?? "null");
+            if (Number.isFinite(saved?.x) && Number.isFinite(saved?.y)) return saved as { x: number; y: number; };
+        } catch { }
+        return { x: Math.max(8, (window.innerWidth - 444) / 2), y: Math.max(8, (window.innerHeight - 310) / 2) };
+    });
+    const modalRef = useRef<HTMLDivElement | null>(null);
     const dragState = useRef<{ pointerId: number; startX: number; startY: number; originX: number; originY: number; } | null>(null);
 
     useEffect(() => {
@@ -115,6 +123,23 @@ function WordBombModal({ rootProps }: { rootProps: any; }) {
         const timeout = window.setTimeout(() => setDebouncedQuery(normalizeWord(query)), 120);
         return () => window.clearTimeout(timeout);
     }, [query]);
+
+    const clampPosition = (x: number, y: number) => {
+        const bounds = modalRef.current?.getBoundingClientRect();
+        const width = bounds?.width ?? 444;
+        const height = bounds?.height ?? 310;
+        return {
+            x: Math.min(Math.max(x, 8), Math.max(8, window.innerWidth - width - 8)),
+            y: Math.min(Math.max(y, 8), Math.max(8, window.innerHeight - height - 8))
+        };
+    };
+
+    useEffect(() => {
+        const keepOnScreen = () => setPosition(current => clampPosition(current.x, current.y));
+        keepOnScreen();
+        window.addEventListener("resize", keepOnScreen);
+        return () => window.removeEventListener("resize", keepOnScreen);
+    }, []);
 
     const suggestions = useMemo(() => {
         if (debouncedQuery.length < 2) return [];
@@ -166,20 +191,9 @@ function WordBombModal({ rootProps }: { rootProps: any; }) {
         const drag = dragState.current;
         if (!drag || drag.pointerId !== event.pointerId) return;
 
-        const modal = event.currentTarget.closest(".yc-wb-modal") as HTMLElement | null;
-        if (!modal) return;
-        const bounds = modal.getBoundingClientRect();
-        const baseLeft = bounds.left - position.x;
-        const baseRight = bounds.right - position.x;
-        const baseTop = bounds.top - position.y;
-        const baseBottom = bounds.bottom - position.y;
         const wantedX = drag.originX + event.clientX - drag.startX;
         const wantedY = drag.originY + event.clientY - drag.startY;
-
-        setPosition({
-            x: Math.min(Math.max(wantedX, 8 - baseLeft), window.innerWidth - 8 - baseRight),
-            y: Math.min(Math.max(wantedY, 8 - baseTop), window.innerHeight - 8 - baseBottom)
-        });
+        setPosition(clampPosition(wantedX, wantedY));
     };
 
     const stopDragging = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -188,6 +202,7 @@ function WordBombModal({ rootProps }: { rootProps: any; }) {
         if (event.currentTarget.hasPointerCapture(event.pointerId)) {
             event.currentTarget.releasePointerCapture(event.pointerId);
         }
+        try { localStorage.setItem(POSITION_KEY, JSON.stringify(position)); } catch { }
     };
 
     return (
@@ -195,9 +210,10 @@ function WordBombModal({ rootProps }: { rootProps: any; }) {
             {...rootProps}
             className="yc-wb-modal"
             size={ModalSize.MEDIUM}
-            style={{ translate: `${position.x}px ${position.y}px` }}
+            style={{ "--yc-wb-left": `${position.x}px`, "--yc-wb-top": `${position.y}px` } as React.CSSProperties}
         >
             <div
+                ref={element => { modalRef.current = element?.closest(".yc-wb-modal") as HTMLDivElement | null; }}
                 className="yc-wb-header"
                 onPointerDown={startDragging}
                 onPointerMove={dragWindow}

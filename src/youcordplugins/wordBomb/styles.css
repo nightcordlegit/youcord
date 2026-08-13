@@ -1,5 +1,12 @@
 .yc-wb-modal {
-    will-change: translate;
+    position: fixed !important;
+    inset: auto !important;
+    top: var(--yc-wb-top) !important;
+    left: var(--yc-wb-left) !important;
+    margin: 0 !important;
+    transform: none !important;
+    translate: none !important;
+    will-change: top, left;
 }
 
 .yc-wb-header {
