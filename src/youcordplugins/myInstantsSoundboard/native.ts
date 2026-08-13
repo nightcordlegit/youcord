@@ -36,7 +36,7 @@ function parseResults(html: string): MyInstantResult[] {
     return results;
 }
 
-export async function browse(query: string, category: string, page = 1): Promise<string> {
+export async function browse(_event: Electron.IpcMainInvokeEvent, query: string, category: string, page = 1): Promise<string> {
     const safePage = Math.max(1, Math.min(50, Math.trunc(page)));
     let url: URL;
     if (query.trim()) {
@@ -54,4 +54,16 @@ export async function browse(query: string, category: string, page = 1): Promise
     });
     if (!response.ok) throw new Error(`MyInstants HTTP ${response.status}`);
     return JSON.stringify(parseResults(await response.text()));
+}
+
+export async function fetchAudio(_event: Electron.IpcMainInvokeEvent, rawUrl: string): Promise<string> {
+    const url = new URL(rawUrl);
+    if (url.protocol !== "https:" || !(url.hostname === "myinstants.com" || url.hostname.endsWith(".myinstants.com")))
+        throw new Error("Untrusted audio host");
+
+    const response = await fetch(url, { headers: { "User-Agent": USER_AGENT, Accept: "audio/*" } });
+    if (!response.ok) throw new Error(`Audio HTTP ${response.status}`);
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (bytes.byteLength > 12 * 1024 * 1024) throw new Error("Audio file is too large");
+    return bytes.toString("base64");
 }
