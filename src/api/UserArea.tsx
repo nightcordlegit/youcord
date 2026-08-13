@@ -84,6 +84,8 @@ function UserAreaButtons({ props }: { props: UserAreaRenderProps; }) {
                    freeing up space for the extra plugins buttons without cutting them off */
                 div[class*="nameTag_"] {
                     min-width: 0 !important;
+                    width: 0 !important;
+                    flex: 1 1 0 !important;
                 }
                 div[class*="nameTag_"] > * {
                     min-width: 0 !important;
