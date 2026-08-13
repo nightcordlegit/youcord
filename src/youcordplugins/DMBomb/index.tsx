@@ -6,11 +6,11 @@
 
 import "./styles.css";
 
-import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { runDiscordRequest } from "@utils/discordRequestQueue";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { GuildMemberStore, GuildRoleStore, GuildStore, Menu, React, RestAPI, Select, showToast, Toasts, useEffect, useRef, UserStore, useState } from "@webpack/common";
+import { GuildMemberStore, GuildRoleStore, GuildStore, React, RestAPI, Select, showToast, Toasts, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
@@ -268,45 +268,21 @@ function DMBombModal({ rootProps, guildId }: { rootProps: any; guildId: string; 
     );
 }
 
+const DMBombChatButton: ChatBarButtonFactory = ({ channel, isMainChat }) => {
+    const guildId = channel?.guild_id;
+    if (!isMainChat || !guildId) return null;
+    return (
+        <ChatBarButton tooltip="DM Bomb" onClick={() => openModal(props => <DMBombModal rootProps={props} guildId={guildId} />)}>
+            <BombIcon />
+        </ChatBarButton>
+    );
+};
+
 export default definePlugin({
     name: "DMBomb",
     enabledByDefault: false,
     description: "Sends an aggressive message to ALL server members or a specific role via right click.",
     authors: [{ name: "YouCord", id: 0n }],
-
-    start() {
-        addContextMenuPatch("guild-context", this.patchGuildContext);
-    },
-
-    stop() {
-        removeContextMenuPatch("guild-context", this.patchGuildContext);
-    },
-
-    patchGuildContext(children: any[], { guild }: { guild?: any; }) {
-        if (!children || !Array.isArray(children)) return;
-        try {
-            if (!guild) return;
-
-            const bombsItem = (
-                <Menu.MenuItem
-                    id="dmbomb-btn"
-                    key="dmbomb-btn"
-                    label="DM Bomb"
-                    action={() => openModal(props => <DMBombModal rootProps={props} guildId={guild.id} />)}
-                />
-            );
-
-            // Find "Fake Friend Request" (from FakeFriends plugin)
-            const ffIndex = children.findIndex(c => c?.props?.id === "ff-g-flood");
-
-            if (ffIndex !== -1) {
-                children.splice(ffIndex + 1, 0, bombsItem);
-            } else {
-                // Fallback: search in groups or just push
-                children.push(bombsItem);
-            }
-        } catch (e) {
-            console.error("[DMBomb] Context menu patch error:", e);
-        }
-    }
+    dependencies: ["ChatInputButtonAPI"],
+    chatBarButton: { icon: BombIcon, render: DMBombChatButton }
 });

@@ -6,8 +6,8 @@
 
 import "./styles.css";
 
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { DataStore } from "@api/index";
-import { UserAreaButton, UserAreaButtonFactory, UserAreaRenderProps } from "@api/UserArea";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { PluginNative } from "@utils/types";
 import { Button, Forms, React, Toasts, useEffect, useRef, useState } from "@webpack/common";
@@ -116,17 +116,18 @@ function SoundboardModal({ modalProps }: { modalProps: any; }) {
     </ModalRoot>;
 }
 
-function SoundboardButton({ iconForeground, hideTooltips, nameplate }: UserAreaRenderProps) {
-    return <UserAreaButton tooltipText={hideTooltips ? void 0 : "MyInstants Soundboard"} icon={<SoundboardIcon className={iconForeground} />} plated={nameplate != null} onClick={() => openModal(props => <SoundboardModal modalProps={props} />)} />;
-}
-const renderButton: UserAreaButtonFactory = props => <SoundboardButton {...props} />;
+const SoundboardButton: ChatBarButtonFactory = ({ isAnyChat }) => isAnyChat ? (
+    <ChatBarButton tooltip="MyInstants Soundboard" onClick={() => openModal(props => <SoundboardModal modalProps={props} />)}>
+        <SoundboardIcon />
+    </ChatBarButton>
+) : null;
 
 export default definePlugin({
     name: "MyInstantsSoundboard",
     enabledByDefault: true,
     description: "Search, preview and favorite MyInstants sounds from the user panel.",
     authors: [{ name: "YouCord", id: 0n }],
-    dependencies: ["UserAreaAPI"],
-    userAreaButton: { icon: SoundboardIcon, render: renderButton, priority: -100 },
+    dependencies: ["ChatInputButtonAPI"],
+    chatBarButton: { icon: SoundboardIcon, render: SoundboardButton },
     stop: stopAudio,
 });

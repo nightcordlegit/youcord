@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { HeaderBarButton } from "@api/HeaderBar";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
@@ -1564,10 +1564,10 @@ Réponds à ce dernier message en tenant compte du contexte ci-dessus. Avant d'e
     }
 }
 
-const DmServeurHeaderButton = () => {
+const DmServeurChatButton: ChatBarButtonFactory = ({ isAnyChat }) => {
+    if (!isAnyChat) return null;
     return (
-        <HeaderBarButton
-            icon={DmServeurIcon}
+        <ChatBarButton
             tooltip="Dmserveur"
             onClick={() => openModal(props => (
                 <ModalRoot size={ModalSize.DYNAMIC} transitionState={props.transitionState} onClose={props.onClose}>
@@ -1589,7 +1589,9 @@ const DmServeurHeaderButton = () => {
                     </ModalContent>
                 </ModalRoot>
             ))}
-        />
+        >
+            <DmServeurIcon />
+        </ChatBarButton>
     );
 };
 
@@ -1599,9 +1601,10 @@ export default definePlugin({
     authors: [{ name: "YouCord", id: 0n }],
     enabledByDefault: false,
     settings,
-    headerBarButton: {
+    dependencies: ["ChatInputButtonAPI"],
+    chatBarButton: {
         icon: DmServeurIcon,
-        render: DmServeurHeaderButton,
+        render: DmServeurChatButton,
     },
     flux: {
         async MESSAGE_CREATE({ message, optimistic }: { message: any; optimistic?: boolean; }) {
