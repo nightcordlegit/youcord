@@ -27,10 +27,13 @@ interface UpdateInfo {
 
 let pendingUpdate: UpdateInfo | null = null;
 let listeners: Array<() => void> = [];
+let initialCheckTimer: ReturnType<typeof setTimeout> | null = null;
+let periodicCheckTimer: ReturnType<typeof setInterval> | null = null;
+let checkPromise: Promise<void> | null = null;
 
 function notify() { listeners.forEach(f => f()); }
 
-async function checkForUpdates() {
+async function runUpdateCheck() {
     try {
         const localVersion = getLocalVersion();
         const myBuildTime = getBuildTimestamp();
@@ -52,60 +55,30 @@ async function checkForUpdates() {
             }
         } catch { /* IPC non disponible (web) */ }
 
-        // 2) Check GitHub releases (seulement si pas de build local plus recent)
+        // 2) Ask the native updater. It validates the release manifest and uses
+        // the exact same release data that will later be downloaded.
         if (!found) {
-            const GITHUB_API = "https://api.github.com/repos/nightcordlegit/youcord";
-            const getRelease = (path: string, rejectOnError = false) => new Promise<any>((resolve, reject) => {
-                    const timeout = setTimeout(() => reject(new Error("timeout")), 8000);
-                    const xhr = new XMLHttpRequest();
-                    xhr.open("GET", GITHUB_API + path, true);
-                    xhr.onload = () => {
-                        clearTimeout(timeout);
-                        if (xhr.status >= 200 && xhr.status < 300) {
-                            try { resolve(JSON.parse(xhr.responseText)); }
-                            catch { rejectOnError ? reject(new Error("parse error")) : resolve(null); }
-                        } else {
-                            rejectOnError ? reject(new Error(`HTTP ${xhr.status}`)) : resolve(null);
-                        }
-                    };
-                    xhr.onerror = () => {
-                        clearTimeout(timeout);
-                        rejectOnError ? reject(new Error("network error")) : resolve(null);
-                    };
-                    xhr.send();
-                });
-
-            const remoteData = await getRelease("/releases/latest", true);
-
-            if (!remoteData?.tag_name) return;
-
-            const remoteDate = new Date(remoteData.published_at).getTime();
-            const isDevelopmentBuild = /(?:^|[-.])(dev|canary|nightly)(?:[.-]|$)/i.test(localVersion);
-            let localDate = myBuildTime;
-
-            // Development builds do not have a matching GitHub tag. Their build
-            // timestamp is the authoritative comparison and avoids a noisy 404.
-            if (!isDevelopmentBuild) {
-                const tag = localVersion.startsWith("v") ? localVersion : `v${localVersion}`;
-                const localData = await getRelease(`/releases/tags/${encodeURIComponent(tag)}`);
-                if (!localData?.published_at) return;
-                localDate = new Date(localData.published_at).getTime();
+            const { VencordNative } = (window as any);
+            const result = await VencordNative?.updater?.getUpdates?.();
+            if (!result?.ok) throw new Error(result?.error?.message ?? "Update check failed");
+            const updates = result.value as Array<{ hash: string; message: string; }>;
+            if (updates?.length) {
+                pendingUpdate = { remoteVersion: updates[0].hash.slice(0, 8), localVersion };
+                found = true;
             }
-
-            if (!Number.isFinite(remoteDate) || !Number.isFinite(localDate) || localDate <= 0) return;
-
-            if (remoteDate <= localDate) return;
-
-            const remoteVersion: string = remoteData.tag_name;
-            console.log(`[YouCordUpdater] GitHub release: local=${localVersion} remote=${remoteVersion} (${new Date(remoteDate).toISOString()} > ${new Date(localDate).toISOString()})`);
-
-            pendingUpdate = { remoteVersion, localVersion };
         }
+
+        if (!found) pendingUpdate = null;
 
         notify();
     } catch (e: any) {
         console.error("[YouCordUpdater] Error:", e);
     }
+}
+
+function checkForUpdates() {
+    if (!checkPromise) checkPromise = runUpdateCheck().finally(() => { checkPromise = null; });
+    return checkPromise;
 }
 
 function UpdateBanner() {
@@ -286,10 +259,16 @@ export default definePlugin({
         if (document.readyState === "complete") mountWhenReady();
         else window.addEventListener("load", mountWhenReady, { once: true });
 
-        setTimeout(() => checkForUpdates(), 15000);
+        initialCheckTimer = setTimeout(() => void checkForUpdates(), 15_000);
+        periodicCheckTimer = setInterval(() => void checkForUpdates(), 30 * 60_000);
+        window.addEventListener("online", checkForUpdates);
     },
 
     stop() {
+        if (initialCheckTimer) clearTimeout(initialCheckTimer);
+        if (periodicCheckTimer) clearInterval(periodicCheckTimer);
+        initialCheckTimer = periodicCheckTimer = null;
+        window.removeEventListener("online", checkForUpdates);
         unmountBanner();
         pendingUpdate = null;
         listeners = [];

@@ -67,6 +67,16 @@ jobs:
                   Compress-Archive -Path "$staging\*" -DestinationPath "youcord-dist.zip" -Force
                   Write-Host "youcord-dist.zip created ($($(Get-Item youcord-dist.zip).Length / 1MB) MB)"
 
+                  $buildInfo = Get-Content "$staging\build.json" -Raw | ConvertFrom-Json
+                  $manifest = [ordered]@{
+                      version = $buildInfo.version
+                      buildTime = [double]$buildInfo.buildTime
+                      gitHash = $env:GITHUB_SHA
+                      asset = "youcord-dist.zip"
+                      sha256 = (Get-FileHash "youcord-dist.zip" -Algorithm SHA256).Hash.ToLowerInvariant()
+                  }
+                  $manifest | ConvertTo-Json | Set-Content "update-manifest.json" -Encoding utf8NoBOM
+
             - name: Upload other build artifacts
               shell: pwsh
               run: |
@@ -99,6 +109,7 @@ jobs:
 
                   # Upload artifacts (--clobber overwrites existing files)
                   gh release upload $tag --clobber "youcord-dist.zip"
+                  gh release upload $tag --clobber "update-manifest.json"
 
                   if (Test-Path "dist\release") {
                       Get-ChildItem "dist\release\*" -File | ForEach-Object {
