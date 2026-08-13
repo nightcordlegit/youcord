@@ -117,6 +117,23 @@ jobs:
                       }
                   }
 
+                  # One-time compatibility bridge for clients using the legacy
+                  # updater, which only understands GitHub's /releases/latest.
+                  $manifest = Get-Content "update-manifest.json" -Raw | ConvertFrom-Json
+                  $compatTag = "v$($manifest.version)"
+                  $previousTag = "v1.22.2-dev"
+                  $previousCommit = git rev-parse HEAD^
+                  gh release view $previousTag 2>$null
+                  if ($LASTEXITCODE -ne 0) {
+                      gh release create $previousTag --target $previousCommit --title "YouCord 1.22.2 compatibility baseline" --notes "Compatibility marker for legacy updaters." --latest=false
+                  }
+                  gh release view $compatTag 2>$null
+                  if ($LASTEXITCODE -ne 0) {
+                      gh release create $compatTag --target $env:GITHUB_SHA --title "YouCord $($manifest.version)" --notes "Automatic updater migration release ($env:GITHUB_SHA)" --latest
+                  }
+                  gh release upload $compatTag --clobber "youcord-dist.zip" "update-manifest.json"
+                  gh release edit $compatTag --latest
+
     Build-Mac:
         name: Build YouCord (macOS)
         runs-on: macos-latest
