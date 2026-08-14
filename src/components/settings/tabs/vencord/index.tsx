@@ -122,7 +122,7 @@ function DevTeamSection() {
                 <QuickAction
                     Icon={PlanetIcon}
                     text="YouCord Channel"
-                    action={() => VencordNative.native.openExternal("https://discord.gg/deBXzjjEzg")}
+                    action={() => VencordNative.native.openExternal("https://discord.gg/hGnBxwejfk")}
                 />
             </QuickActionCard>
 

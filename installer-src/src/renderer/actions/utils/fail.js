@@ -1,7 +1,7 @@
 ﻿import {log} from "./log";
 import {action, status} from "../../stores/installation";
 
-const discordURL = "https://discord.gg/youcord";
+const discordURL = "https://discord.gg/hGnBxwejfk";
 
 export default function fail() {
     log("");

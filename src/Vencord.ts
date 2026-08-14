@@ -365,7 +365,7 @@ async function init() {
                 confirmText: t("Open link"),
                 cancelText: t("Cancel"),
                 onConfirm: () => {
-                    VencordNative.native.openExternal("https://discord.gg/deBXzjjEzg");
+                    VencordNative.native.openExternal("https://discord.gg/hGnBxwejfk");
                 }
             });
         }, 3000);
