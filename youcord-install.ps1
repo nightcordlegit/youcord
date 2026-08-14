@@ -120,9 +120,9 @@ try {
 
     # Verification SHA-256 (si checksums.txt disponible)
     $checksumUrls = @(
-        $distAsset.browser_download_url -replace "youcord-dist.zip", "checksums.txt",
-        $distAsset.browser_download_url -replace "youcord-dist.zip", "SHA256SUMS",
-        $distAsset.browser_download_url -replace "youcord-dist.zip", "youcord-dist.zip.sha256"
+        ($distAsset.browser_download_url -replace "youcord-dist.zip", "checksums.txt"),
+        ($distAsset.browser_download_url -replace "youcord-dist.zip", "SHA256SUMS"),
+        ($distAsset.browser_download_url -replace "youcord-dist.zip", "youcord-dist.zip.sha256")
     )
     $hashVerified = $false
     foreach ($csUrl in $checksumUrls) {
