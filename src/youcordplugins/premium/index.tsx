@@ -89,7 +89,7 @@ async function connectDiscordAccount(): Promise<boolean> {
 }
 
 async function subscribeFlow() {
-    let token = await getStoredToken();
+    const token = await getStoredToken();
     if (!token) {
         const connected = await connectDiscordAccount();
         if (!connected) return;
