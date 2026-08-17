@@ -8,7 +8,7 @@ import type { Settings } from "@api/Settings";
 import { IpcEvents } from "@shared/IpcEvents";
 import { SettingsStore } from "@shared/SettingsStore";
 import { mergeDefaults } from "@utils/mergeDefaults";
-import { ipcMain } from "electron";
+import { app, ipcMain } from "electron";
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
 
 import { NATIVE_SETTINGS_FILE, SETTINGS_DIR, SETTINGS_FILE } from "./utils/constants";
@@ -75,3 +75,13 @@ const saveNativeSettings = debounce(() => {
 }, 500);
 
 NativeSettings.addGlobalChangeListener(saveNativeSettings);
+
+// Fix: settings changes made shortly before quitting (enabling a plugin,
+// toggling React Devtools, etc.) were silently lost — the writes above are
+// debounced by 500ms and nothing forced them to run before the process
+// exited. Flush any pending writes synchronously as soon as a quit starts,
+// so the very last thing the user changed is always saved to disk.
+app.on("before-quit", () => {
+    saveRendererSettings.flush();
+    saveNativeSettings.flush();
+});

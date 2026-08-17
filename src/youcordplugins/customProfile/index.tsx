@@ -68,6 +68,35 @@ const BADGES = [
 
 const OLD_NAME_BADGE_ICON = "https://cdn.discordapp.com/badge-icons/6de6d34650760ba5551a79732e98ed60.png";
 
+// Nitro gifting badges (awarded for gifting Nitro to other users). Not part of
+// the public_flags bitfield, so they're toggled via customBadgeIds like the
+// "Special Badges" below rather than the FLAG bitmask.
+const GIFT_BADGES = [
+    { id: "gift_patron", label: t("Don Nitro — Patron"), icon: "https://cdn.discordapp.com/badge-icons/ac305d1b9481f312ce4419e7f8296558.png" },
+    { id: "gift_champion", label: t("Don Nitro — Champion"), icon: "https://cdn.discordapp.com/badge-icons/8b7792c4f65953d3ff564f23429cb79e.png" },
+    { id: "gift_luminary", label: t("Don Nitro — Luminary"), icon: "https://cdn.discordapp.com/badge-icons/3119f5504b2cd09576a323908c7c3517.png" },
+    { id: "gift_icon", label: t("Don Nitro — Icon"), icon: "https://cdn.discordapp.com/badge-icons/64f2413c9b9803661322aaad25826b62.png" },
+    { id: "gift_hero", label: t("Don Nitro — Hero"), icon: "https://cdn.discordapp.com/badge-icons/77d65b1f210014a11eb1582ee06ab684.png" },
+    { id: "gift_legend", label: t("Don Nitro — Legend"), icon: "https://cdn.discordapp.com/badge-icons/7fe346cfc5da1340087d8759a9e7a395.png" },
+];
+
+// Badges Discord annonce en deploiement progressif (aout 2026) et pas encore
+// visibles pour tout le monde (rollout region par region, pas encore actif en
+// France au moment de l'ecriture). Discord n'a pas encore publie leurs icones
+// officielles publiquement — impossible de trouver un hash CDN verifie pour
+// l'instant, donc ces 4 badges utilisent un icone provisoire (etoile grise)
+// en attendant. Remplace NEW_ROLLOUT_PLACEHOLDER_ICON par la vraie URL
+// cdn.discordapp.com/badge-icons/... des que Discord les rend disponibles
+// (inspecte la reponse /users/@me depuis un compte qui a deja le rollout, ou
+// suis https://twitter.com/discordpreviews).
+const NEW_ROLLOUT_PLACEHOLDER_ICON = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><circle cx='8' cy='8' r='7' fill='%235865F2'/><path d='M8 3.5l1.2 2.6 2.8.3-2.1 2 .5 2.9L8 9.9l-2.4 1.4.5-2.9-2.1-2 2.8-.3z' fill='white'/></svg>";
+const NEW_ROLLOUT_BADGES = [
+    { id: "new_account_age", label: t("Anciennete du compte (beta, pas encore en France)"), icon: NEW_ROLLOUT_PLACEHOLDER_ICON },
+    { id: "new_streaming", label: t("Streaming (beta, pas encore en France)"), icon: NEW_ROLLOUT_PLACEHOLDER_ICON },
+    { id: "new_game_variety", label: t("Variete de jeux (beta, pas encore en France)"), icon: NEW_ROLLOUT_PLACEHOLDER_ICON },
+    { id: "new_game_time", label: t("Temps de jeu (beta, pas encore en France)"), icon: NEW_ROLLOUT_PLACEHOLDER_ICON },
+];
+
 const DISPLAY_NAME_FONTS = [
     [11, "Par défaut"], [1, "Bangers"], [2, "Bio Rhyme"], [3, "Cherry Bomb"],
     [4, "Chicle"], [5, "Compagnon"], [6, "Museo Moderno"], [7, "Neo Castel"],
@@ -1214,6 +1243,22 @@ function BadgePicker({ selected, onChange, nitroType, onNitroType, boostLevel, o
                     </div>
                 </div>
             )}
+            <SectionLabel style={{ marginTop: 8 }}>{t("Don Nitro (Gifting)")}</SectionLabel>
+            <div className="cp-badges">
+                {GIFT_BADGES.map(b => (
+                    <BadgeBtn key={b.id} label={b.label} icon={b.icon}
+                        active={customIds.includes(b.id)}
+                        onClick={() => onCustomIds(customIds.includes(b.id) ? customIds.filter(x => x !== b.id) : [...customIds, b.id])} />
+                ))}
+            </div>
+            <SectionLabel style={{ marginTop: 8 }}>{t("Nouveaux badges Discord (bêta, pas encore déployés partout)")}</SectionLabel>
+            <div className="cp-badges">
+                {NEW_ROLLOUT_BADGES.map(b => (
+                    <BadgeBtn key={b.id} label={b.label} icon={b.icon}
+                        active={customIds.includes(b.id)}
+                        onClick={() => onCustomIds(customIds.includes(b.id) ? customIds.filter(x => x !== b.id) : [...customIds, b.id])} />
+                ))}
+            </div>
             <SectionLabel style={{ marginTop: 8 }}>{t("Boost Badge (Server Booster)")}</SectionLabel>
             <div className="cp-badges">
                 <BadgeBtn label={t("None")} active={boostLevel === -1} onClick={() => onBoostLevel(-1)} />
@@ -2528,6 +2573,19 @@ export default definePlugin({
                 const dText = data.oldName ? "Originally known as " + data.oldName : "Originally known as ...";
                 badgesArr.push({ id: "legacy_username", icon: "6de6d34650760ba5551a79732e98ed60", description: dText });
             }
+            // Gifting badges use real Discord CDN hashes so they render through
+            // Discord's own native badge component like the others above.
+            // NEW_ROLLOUT_BADGES are intentionally NOT added here: their icon is a
+            // local placeholder data URI, not a real cdn.discordapp.com hash, and
+            // this native badge shape can't render a data URI — they're only added
+            // via the plugin's own ProfileBadge entries below (which accept any
+            // iconSrc, including the placeholder).
+            for (const gift of GIFT_BADGES) {
+                if (customIds.includes(gift.id)) {
+                    const hash = gift.icon.split("/").pop()!.replace(".png", "");
+                    badgesArr.push({ id: gift.id, icon: hash, description: gift.label });
+                }
+            }
             if (badgesArr.length > 0) merged.badges = badgesArr;
 
             if (data.profileEffectId) {
@@ -3076,6 +3134,12 @@ export default definePlugin({
                         const oldNameText = d.oldName ? `Old username: ${d.oldName}` : "Old username";
                         extra.push({ description: oldNameText, iconSrc: OLD_NAME_BADGE_ICON, position: 0, props: { style } });
                     }
+                    for (const gift of GIFT_BADGES) {
+                        if (d.customBadgeIds?.includes(gift.id)) extra.push({ description: gift.label, iconSrc: gift.icon, position: 0, props: { style } });
+                    }
+                    for (const nb of NEW_ROLLOUT_BADGES) {
+                        if (d.customBadgeIds?.includes(nb.id)) extra.push({ description: nb.label, iconSrc: nb.icon, position: 0, props: { style } });
+                    }
                     badges.push(...extra);
                     return badges;
                 }
@@ -3205,6 +3269,21 @@ export default definePlugin({
                 // 15. Orbs
                 if (storedData.customBadgeIds?.includes("orbs")) {
                     badgeList.push({ description: "Orbs — Apprentice", iconSrc: "https://cdn.discordapp.com/badge-icons/83d8a1eb09a8d64e59233eec5d4d5c2d.png", position: 0, props: { style } });
+                }
+
+                // 16. Nitro gifting badges (Patron/Champion/Luminary/Icon/Hero/Legend)
+                for (const gift of GIFT_BADGES) {
+                    if (storedData.customBadgeIds?.includes(gift.id)) {
+                        badgeList.push({ description: gift.label, iconSrc: gift.icon, position: 0, props: { style } });
+                    }
+                }
+
+                // 17. New Discord rollout badges (Account Age / Streaming / Game Variety / Game Time) —
+                // placeholder icon until Discord's real assets are publicly known, see NEW_ROLLOUT_BADGES above.
+                for (const nb of NEW_ROLLOUT_BADGES) {
+                    if (storedData.customBadgeIds?.includes(nb.id)) {
+                        badgeList.push({ description: nb.label, iconSrc: nb.icon, position: 0, props: { style } });
+                    }
                 }
 
                 badges.push(...badgeList);

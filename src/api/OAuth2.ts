@@ -4,8 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export const API_BASE = "";
-export const YOUCORD_OAUTH_AVAILABLE = false;
+// Remplace cette URL par celle de ton service Railway une fois déployé
+// (ex: "https://youcord-premium-production.up.railway.app"), puis repasse
+// YOUCORD_OAUTH_AVAILABLE à true. Voir youcord-premium-server/README.md.
+export const API_BASE = "https://REMPLACE-MOI.up.railway.app";
+export const YOUCORD_OAUTH_AVAILABLE = true;
 
 import * as DataStore from "./DataStore";
 
