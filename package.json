@@ -81,7 +81,7 @@
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/adm-zip": "^0.5.8",
     "@types/chrome": "^0.1.43",
-    "@types/diff": "^7.0.2",
+    "@types/diff": "^8.0.0",
     "@types/lodash": "^4.17.24",
     "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
