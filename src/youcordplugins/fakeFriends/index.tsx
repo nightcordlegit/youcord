@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Vencord, a Discord client mod
  * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -13,15 +13,15 @@ import { ChannelStore, FluxDispatcher, GuildMemberStore, Menu, React, Relationsh
 
 const DS_KEY = "FakeFriends_state";
 
-// fakeState is in memory only — does NOT persist across restarts
+// fakeState is in memory only � does NOT persist across restarts
 const fakeState = new Map<string, "pending" | "accepted">();
 
 async function persistState() {
-    // No persistence — fakeState reset on restart intentionally
+    // No persistence � fakeState reset on restart intentionally
 }
 
 async function loadState() {
-    // No loading at startup — fakeState starts empty
+    // No loading at startup � fakeState starts empty
 }
 
 const FAKE_DM_PHRASES = [
@@ -36,7 +36,7 @@ const FAKE_DM_PHRASES = [
     "hey, cool nickname", "hi, do you stream?", "yo, we follow each other?",
 ];
 
-// ── Patch RelationshipStore ────────────────────────────────────────────────────
+// -- Patch RelationshipStore ----------------------------------------------------
 let origGetRelType: Function | null = null;
 let origIsFriend: Function | null = null;
 let origGetFriendIDs: Function | null = null;
@@ -89,7 +89,7 @@ function unpatchStore() {
     if (origGetMutable) { store.getMutableRelationships = origGetMutable; origGetMutable = null; }
 }
 
-// ── Patch acceptFriend ─────────────────────────────────────────────────────────
+// -- Patch acceptFriend ---------------------------------------------------------
 let origAccept: Function | null = null;
 
 function patchAcceptFriend() {
@@ -121,20 +121,12 @@ function unpatchAcceptFriend() {
     } catch { }
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
-function makeUserPayload(user: any) {
-    const bot = isBot(user);
-    return {
-        id: user.id,
-        username: user.username,
-        global_name: user.globalName ?? user.username,
-        avatar: user.avatar ?? null,
-        discriminator: user.discriminator ?? "0",
-        public_flags: user.publicFlags ?? 0,
-        flags: user.flags ?? 0,
-        bot,
-    };
-}
+// -- Helpers --------------------------------------------------------------------
+// IMPORTANT: never dispatch plain-JS copies of users into Discord stores.
+// Discord merges message/relationship payloads into UserStore; a plain object
+// becomes a record WITHOUT the User prototype and every store iterating users
+// then crashes (getStatus -> this.hasFlag is not a function). Always pass the
+// real UserStore instance instead.
 
 function isBot(user: any): boolean {
     if (!user) return true;
@@ -151,7 +143,7 @@ function makeSnowflake(): string {
 function dispatchRelationship(user: any, type: RelationshipType) {
     FluxDispatcher.dispatch({
         type: "RELATIONSHIP_UPDATE",
-        relationship: { id: user.id, type, nickname: null, since: new Date().toISOString(), user: makeUserPayload(user) }
+        relationship: { id: user.id, type, nickname: null, since: new Date().toISOString() }
     });
 }
 
@@ -171,13 +163,12 @@ async function addPendingRequest(user: any) {
             type: RelationshipType.INCOMING_REQUEST,
             nickname: null,
             since: new Date().toISOString(),
-            user: makeUserPayload(user),
         },
         incoming: true,
     });
 }
 
-// ── Reapplying fakeStates at startup ──────────────────────────────────
+// -- Reapplying fakeStates at startup ----------------------------------
 // After reload, we redispatch all saved states
 async function reapplyFakeStates() {
     for (const [userId, state] of fakeState) {
@@ -192,12 +183,12 @@ async function reapplyFakeStates() {
             if (state === "accepted") {
                 FluxDispatcher.dispatch({
                     type: "RELATIONSHIP_UPDATE",
-                    relationship: { id: userId, type: RelationshipType.FRIEND, nickname: null, since: new Date().toISOString(), user: makeUserPayload(user) }
+                    relationship: { id: userId, type: RelationshipType.FRIEND, nickname: null, since: new Date().toISOString() }
                 });
             } else if (state === "pending") {
                 FluxDispatcher.dispatch({
                     type: "RELATIONSHIP_ADD",
-                    relationship: { id: userId, type: RelationshipType.INCOMING_REQUEST, nickname: null, since: new Date().toISOString(), user: makeUserPayload(user) },
+                    relationship: { id: userId, type: RelationshipType.INCOMING_REQUEST, nickname: null, since: new Date().toISOString() },
                     incoming: true,
                 });
             }
@@ -206,7 +197,7 @@ async function reapplyFakeStates() {
     }
 }
 
-// ── Fake DM ────────────────────────────────────────────────────────────────────
+// -- Fake DM --------------------------------------------------------------------
 
 function getChannelClass(): any {
     try {
@@ -228,7 +219,7 @@ function buildRealDMChannel(user: any): any {
         flags: 0,
         last_message_id: msgId,
         last_pin_timestamp: null,
-        recipients: [makeUserPayload(user)],
+        recipients: [user],
         recipient_ids: [user.id],
         is_spam: false,
         is_message_request: false,
@@ -283,7 +274,7 @@ function buildRealDMChannel(user: any): any {
         applicationId: null,
         recipients: [user.id],
         recipientIDs: [user.id],
-        rawRecipients: [makeUserPayload(user)],
+        rawRecipients: [user],
         nicks: {},
         isSpam: false,
         isMessageRequest: false,
@@ -386,7 +377,7 @@ async function sendFakeDM(user: any) {
             type: 0,
             content: phrase,
             channel_id: channelId!,
-            author: makeUserPayload(user),
+            author: user,
             attachments: [],
             embeds: [],
             mentions: [],
@@ -423,7 +414,7 @@ async function doFakeFriendRequest(userId: string) {
     await addPendingRequest(user);
 }
 
-// ── Modal React pour saisir un nombre ─────────────────────────────────────────────
+// -- Modal React pour saisir un nombre ---------------------------------------------
 function askCount(title: string, max: number): Promise<number | null> {
     return new Promise(resolve => {
         const resolveRef = { current: resolve, done: false };
@@ -517,7 +508,7 @@ function askCount(title: string, max: number): Promise<number | null> {
     });
 }
 
-// ── Candidats d'un serveur ────────────────────────────────────────────────────
+// -- Candidats d'un serveur ----------------------------------------------------
 async function fetchAllGuildMembers(guildId: string): Promise<void> {
     const queries = [
         ..."abcdefghijklmnopqrstuvwxyz0123456789".split(""),
@@ -559,7 +550,7 @@ function getGuildCandidates(guildId: string): string[] {
     });
 }
 
-// ── Fake Friend Request avec saisie du nombre ─────────────────────────────────
+// -- Fake Friend Request avec saisie du nombre ---------------------------------
 async function floodGuild(guildId: string) {
     Toasts.show({ message: "Chargement des membres...", type: Toasts.Type.MESSAGE, id: "ff-loading" });
     await fetchAllGuildMembers(guildId);
@@ -592,7 +583,7 @@ async function floodGuild(guildId: string) {
     Toasts.show({ message: `${sent} fake friend request${sent > 1 ? "s" : ""} sent!`, type: Toasts.Type.SUCCESS, id: Toasts.genId() });
 }
 
-// ── Remove fake requests pour un serveur ──────────────────────────────────────
+// -- Remove fake requests pour un serveur --------------------------------------
 async function removeFakeFriendsForGuild(guildId: string) {
     const memberIds = new Set<string>(GuildMemberStore.getMemberIds(guildId) as string[]);
     const toRemove = [...fakeState.keys()].filter(id => memberIds.has(id));
@@ -612,7 +603,7 @@ async function removeFakeFriendsForGuild(guildId: string) {
     Toasts.show({ message: `${toRemove.length} fake request${toRemove.length > 1 ? "s" : ""} removed!`, type: Toasts.Type.SUCCESS, id: Toasts.genId() });
 }
 
-// ── Fake Message Request ─────────────────────────────────────────────────────
+// -- Fake Message Request -----------------------------------------------------
 async function fakeMessageRequestGuild(guildId: string) {
     const candidates = getGuildCandidates(guildId);
     if (!candidates.length) {
@@ -693,7 +684,7 @@ async function sendIncomingMessageRequest(user: any) {
         flags: 0,
         last_message_id: msgId,
         last_pin_timestamp: null,
-        recipients: [makeUserPayload(user)],
+        recipients: [user],
         recipient_ids: [user.id],
         is_spam: false,
         is_message_request: true,
@@ -739,7 +730,7 @@ async function sendIncomingMessageRequest(user: any) {
             lastMessageId: msgId, lastPinTimestamp: null,
             name: "", icon: null, ownerId: null, applicationId: null,
             recipients: [user.id], recipientIDs: [user.id],
-            rawRecipients: [makeUserPayload(user)],
+            rawRecipients: [user],
             nicks: {},
             isSpam: false,
             isMessageRequest: true,
@@ -769,7 +760,7 @@ async function sendIncomingMessageRequest(user: any) {
             type: 0,
             content: "hi",
             channel_id: channelId,
-            author: makeUserPayload(user),
+            author: user,
             attachments: [], embeds: [], mentions: [],
             mention_roles: [], mention_channels: [],
             pinned: false, mention_everyone: false, tts: false,
@@ -782,7 +773,7 @@ async function sendIncomingMessageRequest(user: any) {
     });
 }
 
-// ── Context menus ──────────────────────────────────────────────────────────────
+// -- Context menus --------------------------------------------------------------
 const userContextPatch: NavContextMenuPatchCallback = (children, props) => {
     if (!children || !Array.isArray(children)) return;
     try {
@@ -850,7 +841,7 @@ const guildContextPatch: NavContextMenuPatchCallback = (children, props) => {
                 action={() => floodGuild(guildId)} />
         ];
 
-        // Bouton "Remove fake friend requests" — visible seulement si des fakes existent pour ce serveur
+        // Bouton "Remove fake friend requests" � visible seulement si des fakes existent pour ce serveur
         if (fakeCount > 0) {
             items.push(
                 <Menu.MenuItem
@@ -872,7 +863,7 @@ const guildContextPatch: NavContextMenuPatchCallback = (children, props) => {
     }
 };
 
-// ── Plugin ─────────────────────────────────────────────────────────────────────
+// -- Plugin ---------------------------------------------------------------------
 export default definePlugin({
     name: "FakeFriends",
     enabledByDefault: true,
@@ -888,10 +879,10 @@ export default definePlugin({
         addContextMenuPatch("user-context", userContextPatch);
         addContextMenuPatch("guild-context", guildContextPatch);
 
-        // Charger l'état persistant puis réappliquer les dispatches
+        // Charger l'�tat persistant puis r�appliquer les dispatches
         await loadState();
         if (fakeState.size > 0) {
-            // Délai pour laisser Discord se charger complètement
+            // D�lai pour laisser Discord se charger compl�tement
             setTimeout(() => reapplyFakeStates(), 3000);
         }
     },
@@ -900,7 +891,7 @@ export default definePlugin({
         removeContextMenuPatch("user-context", userContextPatch);
         removeContextMenuPatch("guild-context", guildContextPatch);
         unpatchAcceptFriend();
-        // On ne clear pas fakeState au stop — persistant intentionnellement
+        // On ne clear pas fakeState au stop � persistant intentionnellement
         // Pour reset : clic Reset dans le plugin ou "Remove fake friend requests"
         unpatchStore();
         unpatchChannelStore();

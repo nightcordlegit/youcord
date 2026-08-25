@@ -26,6 +26,11 @@ export default definePlugin({
     description: "Do not hide messages from 'likely spammers'",
     tags: ["Utility", "Chat"],
     authors: [Devs.botato, Devs.Nyako],
+    // Disabled by default: this patch targets the module that DEFINES User.hasFlag.
+    // When Discord updates their minified code, the replacement can land in the wrong
+    // function of that module and strip hasFlag from every user, crashing the client
+    // on CHANNEL_SELECT ("this.hasFlag is not a function").
+    enabledByDefault: false,
     patches: [
         {
             find: "hasFlag:{writable",

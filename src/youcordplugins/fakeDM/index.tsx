@@ -136,26 +136,15 @@ function getChannelMembers(): any[] {
     } catch { return []; }
 }
 
-// ─── Build author object ──────────────────────────────────────────────────────
-function buildAuthor(user: any) {
-    return {
-        id: user.id,
-        username: user.username,
-        discriminator: user.discriminator ?? "0",
-        avatar: user.avatar ?? null,
-        public_flags: user.publicFlags ?? 0,
-        flags: user.flags ?? 0,
-        banner: user.banner ?? null,
-        accent_color: null,
-        global_name: user.globalName ?? user.username,
-        avatar_decoration_data: user.avatarDecorationData
-            ? { asset: user.avatarDecorationData.asset, sku_id: user.avatarDecorationData.skuId }
-            : null,
-        banner_color: null,
-    };
+// ─── Message injection ────────────────────────────────────────────────────────
+// IMPORTANT: the author MUST be the real User instance from UserStore.
+// Dispatching a plain JS object as message.author makes Discord merge it into
+// UserStore as a record WITHOUT the User prototype, which then crashes every
+// store iterating users (getStatus/hasFlag/isProvisional) e.g. on CHANNEL_SELECT.
+function resolveAuthor(user: any) {
+    return (user && UserStore.getUser(user.id)) || user;
 }
 
-// ─── Message injection ────────────────────────────────────────────────────────
 function inject(channelId: string, author: any, content: string, date: Date, persistedId?: string) {
     const actualDate = persistedId ? date : randomSeconds(date);
     const id = persistedId ?? uniqueSnowflake(actualDate);
@@ -164,7 +153,7 @@ function inject(channelId: string, author: any, content: string, date: Date, per
         channelId,
         message: {
             attachments: [], components: [], embeds: [], mention_roles: [], mentions: [],
-            author: buildAuthor(author),
+            author: resolveAuthor(author),
             channel_id: channelId,
             content,
             edited_timestamp: null,
@@ -220,7 +209,7 @@ function injectCall(
         channelId,
         message: {
             attachments: [], components: [], embeds: [], mention_roles: [], mentions: [],
-            author: buildAuthor(caller),
+            author: resolveAuthor(caller),
             channel_id: channelId,
             content: "",
             edited_timestamp: null,
