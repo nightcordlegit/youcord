@@ -38,8 +38,28 @@ jobs:
           $pkg | ConvertTo-Json -Depth 10 | Set-Content "package.json"
           Write-Host "Root version set to $tag"
 
-      - name: Build Equicord renderer (standalone)
+      - name: Build standalone
         run: pnpm buildStandalone
+
+      - name: Build desktop app
+        run: pnpm buildDesktop
+
+      - name: Package standalone with electron-builder
+        shell: pwsh
+        run: |
+          npx electron-builder --config electron-builder.config.cjs --win --publish never
+
+      - name: Prepare portable build
+        shell: pwsh
+        run: |
+          $dir = Get-ChildItem -Path release -Directory | Where-Object { $_.Name -match "^win-unpacked$" } | Select-Object -First 1
+          if ($dir) {
+            $zipName = "YouCord-Portable.zip"
+            Compress-Archive -Path "$($dir.FullName)\*" -DestinationPath "release/$zipName" -Force
+            Write-Host "Portable build created: release/$zipName"
+          } else {
+            Write-Host "No win-unpacked directory found, skipping portable build"
+          }
 
       - name: Build browser extension
         run: pnpm buildWebStandalone
@@ -58,76 +78,12 @@ jobs:
             Copy-Item dist/Equicord.user.js release/extension/YouCord.user.js -Force
           }
 
-      - name: Package youcord-dist.zip
-        shell: pwsh
-        run: |
-          $staging = "youcord-dist-staging"
-          New-Item -ItemType Directory -Path $staging -Force | Out-Null
-
-          if (Test-Path "dist\desktop") {
-            Copy-Item "dist\desktop\*" "$staging\" -Recurse -Force
-          } elseif (Test-Path "dist") {
-            Copy-Item "dist\*" "$staging\" -Recurse -Force
-          }
-
-          if (Test-Path "ghost-server") {
-            Copy-Item "ghost-server" "$staging\ghost-server" -Recurse
-          }
-
-          if (-not (Test-Path "$staging\patcher.js")) {
-            Write-Error "BUILD ERROR: patcher.js missing from staging root"
-            exit 1
-          }
-
-          Compress-Archive -Path "$staging\*" -DestinationPath "youcord-dist.zip" -Force
-          Write-Host "youcord-dist.zip created ($($(Get-Item youcord-dist.zip).Length / 1MB) MB)"
-
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: "8.x"
-
-      - name: Build YouCord Installer
-        shell: pwsh
-        run: |
-          Push-Location installer-src
-          dotnet publish -c Release
-          Pop-Location
-          # Copy to expected upload location
-          New-Item -ItemType Directory -Force -Path release/installer | Out-Null
-          Copy-Item installer-src/bin/Release/net8.0-windows/win-x64/publish/YouCord-Installer.exe release/installer/YouCord-Installer.exe -Force
-          Write-Host "Installer built: $(Get-Item release/installer/YouCord-Installer.exe | Select-Object -ExpandProperty Length)"
-
       - name: Upload to Release
         uses: softprops/action-gh-release@v3
         with:
-          body: |
-            ## What's New in YouCord v1.22.2
-
-            ### 🌟 New Features
-            - **dmserveur plugin** by **@lunark3766-spec** — New plugin adding a header button, settings panel with translations, guild/channel selectors, portal dropdown, Groq API key check, and a local build updater
-            - **Web extension** is now included in releases — Chrome `.zip`, Firefox `.zip`, and userscript are built and uploaded automatically
-
-            ### 🐛 Bug Fixes
-            - **@lunark3766-spec**: Lazy-load guilds only on dropdown click to avoid corrupting Discord internal state
-            - **@lunark3766-spec**: Removed duplicate imports from merge conflict in dmserveur
-            - **@lunark3766-spec**: Fixed duplicate Electron import in updater.ts
-            - **@lunark3766-spec**: Replaced Telegram links with Discord invite; pinned puppeteer-core@25.3.0
-
-            ### ⬆️ Dependency Updates
-            - **@dependabot**: `diff` 8.0.4 → 9.0.0
-            - **@dependabot**: `puppeteer-core` 24.43.1 → 25.4.0
-            - **@dependabot**: `typescript-transform-paths` 3.5.6 → 4.0.0
-            - **@dependabot**: `@types/node` 22.13.13 → 26.1.1
-            - **@dependabot**: `eslint-plugin-simple-import-sort` 12.1.1 → 14.0.0
-            - **@dependabot**: `nanoid` 5.1.16 → 6.0.0
-            - **@dependabot**: `ts-patch` 3.3.0 → 4.0.1
-            - **@dependabot**: `actions/setup-dotnet` 4 → 6
-
-            Full changelog: [${{ github.repository }}/compare/v1.22.1...v1.22.2](https://github.com/${{ github.repository }}/compare/v1.22.1...v1.22.2)
           files: |
-            youcord-dist.zip
-            release/installer/YouCord-Installer.exe
+            release/YouCord-Setup-*.exe
+            release/YouCord-Portable.zip
             release/extension/YouCord-Chrome.zip
             release/extension/YouCord-Firefox.zip
             release/extension/YouCord.user.js
