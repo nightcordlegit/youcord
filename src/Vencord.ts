@@ -34,8 +34,9 @@ import { openSettingsTabModal, UpdaterTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
 import { IS_WINDOWS } from "@utils/constants";
 import { createAndAppendStyle } from "@utils/css";
+import { openModal } from "@utils/modal";
 import { StartAt } from "@utils/types";
-import { Alerts,SettingsRouter } from "@webpack/common";
+import { Alerts, React, SettingsRouter } from "@webpack/common";
 
 import { get as dsGet } from "./api/DataStore";
 import { t } from "./api/i18n";
@@ -44,6 +45,7 @@ import { showNotification } from "./api/Notifications";
 import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManager";
 import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
 import { getCloudSettings, putCloudSettings, shouldCloudSync } from "./api/SettingsSync/cloudSync";
+import { AnnouncementModal } from "./components/AnnouncementModal";
 import { localStorage } from "./utils/localStorage";
 import { relaunch } from "./utils/native";
 import { checkForUpdates, isOutdated as getIsOutdated, rebuild, update, UpdateLogger } from "./utils/updater";
@@ -365,10 +367,20 @@ async function init() {
                 confirmText: t("Open link"),
                 cancelText: t("Cancel"),
                 onConfirm: () => {
-                    VencordNative.native.openExternal("https://discord.gg/deBXzjjEzg");
+                    VencordNative.native.openExternal("https://discord.gg/mwxsEuEp54");
                 }
             });
         }, 3000);
+    }
+
+    // Security announcement about the hijacking attempt - shown once
+    // Delayed past the welcome dialog when both trigger on first launch
+    const ANNOUNCEMENT_KEY = "youcord_announcement_seen_v1";
+    if (!localStorage.getItem(ANNOUNCEMENT_KEY)) {
+        localStorage.setItem(ANNOUNCEMENT_KEY, "1");
+        setTimeout(() => {
+            openModal(props => React.createElement(AnnouncementModal, props));
+        }, hasOpened ? 1500 : 6000);
     }
 
     if (!IS_WEB && !IS_UPDATER_DISABLED) {
