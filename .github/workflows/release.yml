@@ -82,7 +82,7 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: |
-            release/YouCord-Setup-*.exe
+            release/YouCord Setup *.exe
             release/YouCord-Portable.zip
             release/extension/YouCord-Chrome.zip
             release/extension/YouCord-Firefox.zip
