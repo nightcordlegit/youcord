@@ -1256,7 +1256,6 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
     const boostLevel = data.boostMonths ?? -1;
     const customIds = data.customBadgeIds ?? [];
     const oldName = data.oldName ?? "";
-    const [shareEnabled, setShareEnabled] = React.useState(!!Settings.syncOwnCustomProfile);
     const [avatarDecorations, setAvatarDecorations] = React.useState<CollectibleChoice[]>(AVATAR_DECORATIONS);
     const [profileEffects, setProfileEffects] = React.useState<CollectibleChoice[]>(PROFILE_EFFECTS);
     const [nameplates, setNameplates] = React.useState<CollectibleChoice[]>([]);
@@ -1300,124 +1299,6 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
             .finally(() => { if (!cancelled) setCatalogLoading(false); });
         return () => { cancelled = true; };
     }, []);
-
-    async function toggleShareProfile(v: boolean) {
-        if (!PUBLIC_PROFILE_SYNC_AVAILABLE) {
-            Settings.syncOwnCustomProfile = false;
-            Settings.seeAllCustomProfile = false;
-            setShareEnabled(false);
-            return;
-        }
-        if (v) {
-            const dataToSync = { ...data };
-            delete dataToSync.username;
-            delete dataToSync.globalName;
-            delete dataToSync.avatar;
-            delete dataToSync.bio;
-            delete dataToSync.pronouns;
-            delete dataToSync.email;
-            delete dataToSync.phone;
-            delete dataToSync.copiedUserId;
-            delete dataToSync.nameplate;
-            delete dataToSync.profileFrame;
-            delete dataToSync.displayNameStyles;
-
-            try {
-                const oauthData = await beginDiscordOAuth();
-                const clientId = new URL(oauthData.url).searchParams.get("client_id") ?? "";
-                openModal((p: any) => <OAuth2AuthorizeModal
-                    {...p}
-                    scopes={oauthData.scopes}
-                    responseType="code"
-                    redirectUri={oauthData.redirectUri}
-                    permissions={0n}
-                    clientId={clientId}
-                    cancelCompletesFlow={false}
-                    callback={async ({ location }: { location: string; }) => {
-                        if (!location) {
-                            showNotification({
-                                title: "Custom Profile Sync",
-                                body: "Authorization was cancelled.",
-                            });
-                            return;
-                        }
-                        try {
-                            const res = await fetch(location, { headers: { Accept: "application/json" } });
-                            const json = await res.json();
-                            if (json?.token) {
-                                await storeToken(json.token);
-
-                                // Enable sync NOW that we have a token
-                                Settings.syncOwnCustomProfile = true;
-                                Settings.seeAllCustomProfile = true;
-                                setShareEnabled(true);
-
-                                // Save local data
-                                const currentData = { ...data };
-                                if (selectedAccountId === myId) {
-                                    allAccountsData[myId] = currentData;
-                                    allAccountsEnabled[myId] = true;
-                                    storedData = currentData;
-                                    isEnabled = true;
-                                    saveDataSync(storedData, true);
-                                    saveAllDataSync();
-                                    DataStore.set(DS_ALL_DATA, allAccountsData).catch(() => { });
-                                    DataStore.set(DS_ALL_ENABLED, allAccountsEnabled).catch(() => { });
-                                    cachedFakeUser = null;
-                                    cachedOriginalUser = null;
-                                    leCacheU = null;
-                                    leCacheI = null;
-                                    cacheDatesR = [];
-                                    cacheDatesF = [];
-                                    _dataVersion++;
-                                    forceAccountPanelRerender();
-                                }
-
-                                // Sync to server
-                                saveOwnPluginConfig("customProfile", json.token, { ...dataToSync, private: false }).then(() => {
-                                    publicProfilesCache.delete(myId);
-                                }).catch(e => {
-                                    console.error("[CustomProfile] Sync after enabling failed:", e);
-                                });
-
-                                showNotification({
-                                    title: "Custom Profile Sync",
-                                    body: "Profile sync enabled! Your custom profile is now shared.",
-                                });
-                            } else {
-                                showNotification({
-                                    title: "Custom Profile Sync",
-                                    body: "Authorization failed — no token received.",
-                                });
-                            }
-                        } catch (e) {
-                            console.error("[CustomProfile] OAuth callback error:", e);
-                            showNotification({
-                                title: "Custom Profile Sync",
-                                body: "Authorization failed. Please try again.",
-                            });
-                        }
-                    }}
-                />);
-            } catch (e) {
-                console.error("[CustomProfile] OAuth initiation failed:", e);
-                showNotification({
-                    title: "Custom Profile Sync",
-                    body: `Could not connect to server: ${e instanceof Error ? e.message : "Unknown error"}`,
-                });
-            }
-        } else {
-            Settings.syncOwnCustomProfile = false;
-            Settings.seeAllCustomProfile = false;
-            setShareEnabled(false);
-            getStoredToken().then(token => {
-                if (token) {
-                    saveOwnPluginConfig("customProfile", token, { private: true }).catch(() => { });
-                    publicProfilesCache.delete(myId);
-                }
-            });
-        }
-    }
 
     // Retrieve all connected accounts
     const accounts = React.useMemo(() => {
@@ -1642,32 +1523,28 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                 <ModalCloseButton onClick={rootProps.onClose} />
             </ModalHeader>
             <ModalContent className="yc-cp-scroll">
-                {PUBLIC_PROFILE_SYNC_AVAILABLE ? <Toggle
-                    label={t("Share my Custom Profile")}
-                    sublabel={t("Lets other YouCord users see your Custom Profile, and lets you see theirs")}
-                    checked={shareEnabled}
-                    onChange={toggleShareProfile}
-                /> : <div className="yc-cp-local-notice">
-                    <span>🔒</span>
-                    <div>
-                        <strong>Profil local</strong>
-                        <small>Les modifications restent uniquement sur cet ordinateur.</small>
-                    </div>
-                </div>}
-                {PUBLIC_PROFILE_SYNC_AVAILABLE && <div style={{
+                {PUBLIC_PROFILE_SYNC_AVAILABLE ? <div style={{
                     margin: "0 0 14px 0",
                     padding: "10px 14px",
-                    background: "rgba(250, 166, 26, 0.1)",
-                    border: "1px solid rgba(250, 166, 26, 0.4)",
+                    background: Settings.syncOwnCustomProfile ? "rgba(87, 242, 135, 0.1)" : "rgba(250, 166, 26, 0.1)",
+                    border: `1px solid ${Settings.syncOwnCustomProfile ? "rgba(87, 242, 135, 0.4)" : "rgba(250, 166, 26, 0.4)"}`,
                     borderRadius: 6,
                     display: "flex",
                     alignItems: "flex-start",
                     gap: 10,
                 }}>
-                    <span style={{ fontSize: 18, flexShrink: 0 }}>⚠️</span>
-                    <span style={{ color: "var(--text-warning, #faa61a)", fontSize: 13, lineHeight: 1.4 }}>
-                        {t("This requires Discord authorization. Once enabled, everyone using YouCord will be able to see your Custom Profile, and you will be able to see theirs.")}
+                    <span style={{ fontSize: 18, flexShrink: 0 }}>{Settings.syncOwnCustomProfile ? "✅" : "🔗"}</span>
+                    <span style={{ color: Settings.syncOwnCustomProfile ? "var(--text-positive, #57f287)" : "var(--text-warning, #faa61a)", fontSize: 13, lineHeight: 1.4 }}>
+                        {Settings.syncOwnCustomProfile
+                            ? t("Profile sync is active. Other YouCord users can see your Custom Profile.")
+                            : t("Enable Cloud Integration in Settings → Sync to share your Custom Profile with other users.")}
                     </span>
+                </div> : <div className="yc-cp-local-notice">
+                    <span>🔒</span>
+                    <div>
+                        <strong>Profil local</strong>
+                        <small>Les modifications restent uniquement sur cet ordinateur.</small>
+                    </div>
                 </div>}
                 <div className="yc-cp-nav">
                     <span className="yc-cp-nav-label">Catégories</span>

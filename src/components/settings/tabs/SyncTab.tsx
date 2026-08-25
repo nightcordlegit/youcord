@@ -72,6 +72,7 @@ function validateUrl(url: string) {
 }
 
 const cloudBackendOptions = [
+    { label: "YouCord Cloud", value: "https://api.youcord.fr" },
     { label: "Equicord Cloud", value: "https://cloud.equicord.org/" },
     { label: "Vencord Cloud", value: "https://api.vencord.dev/" }
 ];
@@ -256,13 +257,18 @@ function CloudIntegrationSection() {
 
             <FormSwitch
                 title={t("Enable Cloud Integration")}
-                description={t("Connect to the cloud backend for settings synchronization. This will request authorization if you haven't set up cloud integration yet.")}
+                description={t("Connect to the cloud backend for settings and profile synchronization. This will request Discord authorization.")}
                 value={isAuthenticated}
                 onChange={v => {
-                    if (v)
+                    if (v) {
+                        Settings.syncOwnCustomProfile = true;
+                        Settings.seeAllCustomProfile = true;
                         authorizeCloud();
-                    else
+                    } else {
+                        Settings.syncOwnCustomProfile = false;
+                        Settings.seeAllCustomProfile = false;
                         cloud.authenticated = v;
+                    }
                 }}
                 hideBorder
             />
