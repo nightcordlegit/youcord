@@ -38,28 +38,8 @@ jobs:
           $pkg | ConvertTo-Json -Depth 10 | Set-Content "package.json"
           Write-Host "Root version set to $tag"
 
-      - name: Build standalone
-        run: pnpm buildStandalone
-
-      - name: Build desktop app
-        run: pnpm buildDesktop
-
-      - name: Package standalone with electron-builder
-        shell: pwsh
-        run: |
-          npx electron-builder --config electron-builder.config.cjs --win --publish never
-
-      - name: Prepare portable build
-        shell: pwsh
-        run: |
-          $dir = Get-ChildItem -Path release -Directory | Where-Object { $_.Name -match "^win-unpacked$" } | Select-Object -First 1
-          if ($dir) {
-            $zipName = "YouCord-Portable.zip"
-            Compress-Archive -Path "$($dir.FullName)\*" -DestinationPath "release/$zipName" -Force
-            Write-Host "Portable build created: release/$zipName"
-          } else {
-            Write-Host "No win-unpacked directory found, skipping portable build"
-          }
+      - name: Build
+        run: pnpm build
 
       - name: Build browser extension
         run: pnpm buildWebStandalone
@@ -78,82 +58,50 @@ jobs:
             Copy-Item dist/Equicord.user.js release/extension/YouCord.user.js -Force
           }
 
+      - name: Package youcord-dist.zip
+        shell: pwsh
+        run: |
+          $staging = "youcord-dist-staging"
+          New-Item -ItemType Directory -Path $staging -Force | Out-Null
+
+          if (Test-Path "dist\desktop") {
+            Copy-Item "dist\desktop\*" "$staging\" -Recurse -Force
+          } elseif (Test-Path "dist") {
+            Copy-Item "dist\*" "$staging\" -Recurse -Force
+          }
+
+          if (-not (Test-Path "$staging\patcher.js")) {
+            Write-Error "BUILD ERROR: patcher.js missing from staging root"
+            exit 1
+          }
+
+          Compress-Archive -Path "$staging\*" -DestinationPath "youcord-dist.zip" -Force
+          Write-Host "youcord-dist.zip created ($($(Get-Item youcord-dist.zip).Length / 1MB) MB)"
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "8.x"
+
+      - name: Build YouCord Installer
+        shell: pwsh
+        run: |
+          Push-Location installer-src
+          dotnet publish -c Release
+          Pop-Location
+          # Copy to expected upload location
+          New-Item -ItemType Directory -Force -Path release/installer | Out-Null
+          Copy-Item installer-src/bin/Release/net8.0-windows/win-x64/publish/YouCord-Installer.exe release/installer/YouCord-Installer.exe -Force
+          Write-Host "Installer built: $(Get-Item release/installer/YouCord-Installer.exe | Select-Object -ExpandProperty Length)"
+
       - name: Upload to Release
         uses: softprops/action-gh-release@v3
         with:
           files: |
-            release/YouCord Setup *.exe
-            release/YouCord-Portable.zip
+            youcord-dist.zip
+            release/installer/YouCord-Installer.exe
             release/extension/YouCord-Chrome.zip
             release/extension/YouCord-Firefox.zip
             release/extension/YouCord.user.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build-mac:
-    needs: [build]
-    runs-on: macos-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: "22"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Sync version with tag
-        run: |
-          tag="${GITHUB_REF#refs/tags/v}"
-          node -e "
-            const pkg = require('./package.json');
-            pkg.version = '$tag';
-            require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2));
-          "
-          echo "Root version set to $tag"
-
-      - name: Build standalone
-        run: pnpm buildStandalone
-
-      - name: Build desktop app & package .app/.dmg
-        run: |
-          pnpm buildDesktop
-          for attempt in 1 2 3; do
-            if npx electron-builder --config electron-builder.config.cjs --mac --publish never; then
-              break
-            fi
-            if [ "$attempt" -eq 3 ]; then
-              echo "electron-builder failed after 3 attempts"
-              exit 1
-            fi
-            echo "electron-builder download failed; retrying in $((attempt * 15)) seconds..."
-            sleep $((attempt * 15))
-          done
-
-      - name: Upload macOS artifacts to Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          tag="${GITHUB_REF#refs/tags/}"
-          found=0
-          for f in release/*.dmg release/*.zip release/*.app.tar.gz; do
-            if [ -f "$f" ]; then
-              echo "Uploading $f..."
-              gh release upload "$tag" --clobber "$f" || echo "WARN: failed to upload $f (release may not exist yet)"
-              found=$((found+1))
-            fi
-          done
-          echo "Uploaded $found artifact(s)"
-          if [ "$found" -eq 0 ]; then
-            echo "WARN: no macOS artifacts found in release/"
-            ls -la release/ 2>/dev/null || echo "release/ does not exist"
-          fi

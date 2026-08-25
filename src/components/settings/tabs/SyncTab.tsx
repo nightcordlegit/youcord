@@ -73,8 +73,6 @@ function validateUrl(url: string) {
 
 const cloudBackendOptions = [
     { label: "YouCord Cloud", value: "https://api.youcord.fr" },
-    { label: "Equicord Cloud", value: "https://cloud.equicord.org/" },
-    { label: "Vencord Cloud", value: "https://api.vencord.dev/" }
 ];
 
 const syncDirectionOptions = [
@@ -261,12 +259,12 @@ function CloudIntegrationSection() {
                 value={isAuthenticated}
                 onChange={v => {
                     if (v) {
-                        Settings.syncOwnCustomProfile = true;
-                        Settings.seeAllCustomProfile = true;
+                        settings.syncOwnCustomProfile = true;
+                        settings.seeAllCustomProfile = true;
                         authorizeCloud();
                     } else {
-                        Settings.syncOwnCustomProfile = false;
-                        Settings.seeAllCustomProfile = false;
+                        settings.syncOwnCustomProfile = false;
+                        settings.seeAllCustomProfile = false;
                         cloud.authenticated = v;
                     }
                 }}

@@ -4,17 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { getApiBase } from "./OAuth2";
-
-// Enabled — connects to the YouCord server configured in Settings.cloud.url
+// Enabled — connects to the YouCord server
 export const PLUGIN_SYNC_AVAILABLE = true;
+
+const YOUCORD_API = "https://api.youcord.fr";
 
 export async function getOwnPluginConfig(pluginName: string, token: string) {
     if (!PLUGIN_SYNC_AVAILABLE) return null;
-    const apiBase = getApiBase();
-    if (!apiBase) return null;
 
-    const response = await fetch(`${apiBase}/api/sync/${encodeURIComponent(pluginName)}?token=${encodeURIComponent(token)}`);
+    const response = await fetch(`${YOUCORD_API}/api/sync/${encodeURIComponent(pluginName)}?token=${encodeURIComponent(token)}`);
     if (!response.ok) {
         throw new Error("Failed to load plugin config");
     }
@@ -23,13 +21,11 @@ export async function getOwnPluginConfig(pluginName: string, token: string) {
 
 export async function saveOwnPluginConfig(pluginName: string, token: string, settings: Record<string, unknown>) {
     if (!PLUGIN_SYNC_AVAILABLE) return null;
-    const apiBase = getApiBase();
-    if (!apiBase) return null;
 
     // private must be sent both at top-level and inside settings so the server
     // always treats this config as public (visible via /public endpoint).
     const isPrivate = settings.private === true;
-    const response = await fetch(`${apiBase}/api/sync/${encodeURIComponent(pluginName)}`, {
+    const response = await fetch(`${YOUCORD_API}/api/sync/${encodeURIComponent(pluginName)}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
@@ -51,11 +47,9 @@ export async function saveOwnPluginConfig(pluginName: string, token: string, set
 // No in-memory cache here — caching is handled by callers (e.g. publicProfilesCache in customProfile)
 export async function getPublicPluginConfig(pluginName: string, userId: string) {
     if (!PLUGIN_SYNC_AVAILABLE) return null;
-    const apiBase = getApiBase();
-    if (!apiBase) return null;
 
     try {
-        const response = await fetch(`${apiBase}/api/sync/${encodeURIComponent(pluginName)}/public?userId=${encodeURIComponent(userId)}`);
+        const response = await fetch(`${YOUCORD_API}/api/sync/${encodeURIComponent(pluginName)}/public?userId=${encodeURIComponent(userId)}`);
         if (!response.ok) return null;
         return await response.json();
     } catch (e) {

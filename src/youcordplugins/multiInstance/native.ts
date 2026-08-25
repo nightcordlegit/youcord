@@ -8,7 +8,7 @@ import { app, BrowserWindow, ipcMain,screen, session } from "electron";
 import { existsSync,mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 
-import { registerMediaPermissionsForSession } from "../../youcord/main/mediaPermissions";
+import { registerMediaPermissionsForSession } from "../../main/mediaPermissions";
 
 const openWindows = new Map<string, BrowserWindow>();
 

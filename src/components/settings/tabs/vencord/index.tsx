@@ -30,7 +30,7 @@ import { openModal } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { Avatar, React, Select, UserStore } from "@webpack/common";
 
-import { ContributeModal } from "../../../../youcord/renderer/components/ContributeModal";
+import { ContributeModal } from "./ContributeModal";
 import { openNotificationSettingsModal } from "./NotificationSettings";
 
 const cl = classNameFactory("vc-vencord-tab-");

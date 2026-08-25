@@ -3,7 +3,6 @@
   "private": "true",
   "version": "1.22.5",
   "description": "Everything Discord doesn't build, we create",
-  "main": "dist/js/main.js",
   "homepage": "https://github.com/nightcordlegit/youcord",
   "bugs": {
     "url": "https://github.com/nightcordlegit/youcord/issues"
@@ -16,19 +15,10 @@
   "author": "Equicord",
   "scripts": {
     "build": "pnpm depCheck && pnpm generatePluginJson && node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs",
-    "buildStandalone": "pnpm build --standalone",
-    "buildDesktop": "tsx scripts/build/buildDesktop.mts",
-    "package": "pnpm run buildDesktop && pnpm run buildStandalone && electron-builder --config electron-builder.config.cjs",
-    "release:checksums": "node scripts/generateChecksums.mjs",
-    "release:upload": "node scripts/generateChecksums.mjs && echo Upload with: gh release upload <tag> release/checksums.txt",
-    "release": "pnpm package && pnpm release:checksums",
-    "package:dir": "pnpm run buildDesktop && pnpm run buildStandalone && electron-builder --config electron-builder.config.cjs --dir",
     "buildWeb": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/buildWeb.mjs",
     "buildWebStandalone": "pnpm buildWeb --standalone",
     "buildReporter": "pnpm buildWebStandalone --reporter --skip-extension",
     "buildReporterDesktop": "pnpm build --reporter",
-    "start": "pnpm run buildDesktop && pnpm run buildStandalone && electron .",
-    "start:dev": "pnpm run buildDesktop --dev && pnpm run buildStandalone && electron .",
     "watch": "pnpm build --watch",
     "dev": "pnpm watch",
     "watchWeb": "pnpm buildWeb --watch",
@@ -44,9 +34,9 @@
     "lint-styles": "stylelint \"src/**/*.css\" --ignore-pattern src/userplugins",
     "lint-styles:fix": "stylelint \"src/**/*.css\" --ignore-pattern src/userplugins --fix",
     "lint:fix": "pnpm lint --fix",
-    "test": "pnpm buildStandalone && pnpm lint:fix && pnpm lint-styles:fix && pnpm lint-styles && pnpm generatePluginJson",
+    "test": "pnpm build && pnpm lint && pnpm lint-styles && pnpm generatePluginJson",
     "test:unit": "vitest run",
-    "testAll": "pnpm buildStandalone && pnpm testTsc && pnpm lint:fix && pnpm lint-styles && pnpm generatePluginJson",
+    "testAll": "pnpm build && pnpm testTsc && pnpm lint:fix && pnpm lint-styles && pnpm generatePluginJson",
     "testWeb": "pnpm lint:fix && pnpm buildWeb && pnpm testTsc",
     "testTsc": "tsc --noEmit",
     "depCheck": "node scripts/depCheck.mjs"
@@ -88,13 +78,8 @@
     "@types/react-dom": "^19.2.3",
     "@types/yazl": "^3.3.1",
     "@vencord/discord-types": "link:packages/discord-types",
-    "app-builder-lib": "^26.15.3",
-    "arrpc-bun": "^1.4.0",
     "diff": "^9.0.0",
-    "dotenv": "^17.4.2",
     "electron": "41.10.3",
-    "electron-builder": "^26.15.3",
-    "electron-updater": "^6.8.9",
     "esbuild": "^0.27.7",
     "eslint": "9.39.1",
     "eslint-import-resolver-alias": "^1.1.2",
@@ -108,10 +93,8 @@
     "minimatch": "^10.2.5",
     "moment": "^2.30.1",
     "puppeteer-core": "^25.4.0",
-    "rcedit": "^5.0.2",
     "source-map": "^0.8.0",
     "source-map-support": "^0.5.21",
-    "standalone-electron-types": "^41.2.1",
     "stylelint": "^16.26.1",
     "stylelint-config-standard": "^39.0.1",
     "ts-patch": "^4.0.1",
@@ -122,15 +105,10 @@
     "typescript-eslint": "^8.65.0",
     "typescript-transform-paths": "^4.0.0",
     "vitest": "^4.1.10",
-    "ws": "^8.21.1",
     "zip-local": "^0.3.5"
   },
   "packageManager": "pnpm@11.11.0",
   "engines": {
     "node": ">=18"
-  },
-  "build": {
-    "extends": null,
-    "configFile": "electron-builder.config.cjs"
   }
 }

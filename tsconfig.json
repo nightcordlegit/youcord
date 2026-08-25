@@ -62,54 +62,6 @@
             "@webpack/wreq.d": [
                 "./webpack/wreq.d"
             ],
-            "@equicord/types": [
-                "../packages/vencord-types/index"
-            ],
-            "@equicord/types/webpack": [
-                "../packages/vencord-types/webpack-types"
-            ],
-            "@equicord/types/webpack/common": [
-                "../packages/vencord-types/webpack-common"
-            ],
-            "@equicord/types/utils": [
-                "../packages/vencord-types/utils-types"
-            ],
-            "@equicord/types/utils/types": [
-                "../packages/vencord-types/utils-types/types"
-            ],
-            "@equicord/types/components": [
-                "../packages/vencord-types/components-types"
-            ],
-            "@equicord/types/api/*": [
-                "../packages/vencord-types/api/*"
-            ],
-            "@equicord/types/plugins/*": [
-                "../packages/vencord-types/plugins/*"
-            ],
-            "@YouCord/types": [
-                "../packages/vencord-types/index"
-            ],
-            "@YouCord/types/webpack": [
-                "../packages/vencord-types/webpack-types"
-            ],
-            "@YouCord/types/webpack/common": [
-                "../packages/vencord-types/webpack-common"
-            ],
-            "@YouCord/types/utils": [
-                "../packages/vencord-types/utils-types"
-            ],
-            "@YouCord/types/utils/types": [
-                "../packages/vencord-types/utils-types/types"
-            ],
-            "@YouCord/types/components": [
-                "../packages/vencord-types/components-types"
-            ],
-            "@YouCord/types/api/*": [
-                "../packages/vencord-types/api/*"
-            ],
-            "@YouCord/types/plugins/*": [
-                "../packages/vencord-types/plugins/*"
-            ],
             "@youcordplugins/*": [
                 "./youcordplugins/*"
             ],
@@ -118,16 +70,6 @@
             ],
             "@illegalcordplugins/*": [
                 "./illegalcordplugins/*"
-            ],
-            "main/*": [
-                "./youcord/main/*"
-            ],
-            "shared/*": [
-                "./youcord/shared/*",
-                "./shared/*"
-            ],
-            "renderer/*": [
-                "./youcord/renderer/*"
             ]
         },
         "plugins": [

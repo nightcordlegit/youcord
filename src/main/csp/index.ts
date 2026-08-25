@@ -71,6 +71,10 @@ export const CspPolicies: PolicyMap = {
     "soundcloud.com": CSPSrc,
     "*.soundcloud.com": CSPSrc,
 
+    // YouCord Cloud
+    "api.youcord.fr": CSPSrc,
+    "api.vencord.dev": CSPSrc,
+
     // hCaptcha (Discord captcha system)
     "hcaptcha.com": ImageScriptsAndCssSrc,
     "*.hcaptcha.com": ImageScriptsAndCssSrc,

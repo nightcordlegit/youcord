@@ -21,7 +21,7 @@ import electron, { app, BrowserWindowConstructorOptions, Menu, session } from "e
 import { existsSync as fsExistsSync, statSync as fsStatSync } from "original-fs";
 import { dirname, join } from "path";
 
-import { registerMediaPermissionsForSession } from "../youcord/main/mediaPermissions";
+import { registerMediaPermissionsForSession } from "./mediaPermissions";
 import { RendererSettings } from "./settings";
 import { patchTrayMenu } from "./trayMenu";
 import { IS_VANILLA } from "./utils/constants";

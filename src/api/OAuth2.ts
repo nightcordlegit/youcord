@@ -4,16 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Settings } from "@api/Settings";
-
 export const YOUCORD_OAUTH_AVAILABLE = true;
 
-/** Returns the YouCord server base URL from the user's cloud settings. */
+const YOUCORD_API = "https://api.youcord.fr";
+
 export function getApiBase(): string {
-    const url = Settings.cloud?.url;
-    if (!url) return "";
-    // Strip trailing slash
-    return url.replace(/\/+$/, "");
+    return YOUCORD_API;
 }
 
 import * as DataStore from "./DataStore";

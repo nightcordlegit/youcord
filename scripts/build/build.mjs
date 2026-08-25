@@ -173,59 +173,6 @@ const buildConfigs = ([
             IS_VESKTOP: "false",
             IS_EQUIBOP: "false"
         }
-    },
-
-    // Vencord Desktop main & renderer & preload
-    {
-        ...nodeCommonOpts,
-        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/main/index.ts")],
-        outfile: "dist/youcord/main.js",
-        footer: { js: "//# sourceURL=file:///VencordDesktopMain\n" + sourceMapFooter("main") },
-        sourcemap,
-        plugins: [
-            ...nodeCommonOpts.plugins,
-            globNativesPlugin
-        ],
-        define: {
-            ...defines,
-            IS_DISCORD_DESKTOP: "false",
-            IS_VESKTOP: "false",
-            IS_EQUIBOP: "true"
-        }
-    },
-    {
-        ...commonOpts,
-        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/Vencord.ts")],
-        outfile: "dist/youcord/renderer.js",
-        format: "iife",
-        target: ["esnext"],
-        footer: { js: "//# sourceURL=file:///VencordDesktopRenderer\n" + sourceMapFooter("renderer") },
-        globalName: "Vencord",
-        sourcemap,
-        plugins: [
-            globPlugins("equibop"),
-            globPluginMeta("equibop"),
-            ...commonRendererPlugins
-        ],
-        define: {
-            ...defines,
-            IS_DISCORD_DESKTOP: "false",
-            IS_VESKTOP: "false",
-            IS_EQUIBOP: "true"
-        }
-    },
-    {
-        ...nodeCommonOpts,
-        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/preload.ts")],
-        outfile: "dist/youcord/preload.js",
-        footer: { js: "//# sourceURL=file:///VencordPreload\n" + sourceMapFooter("preload") },
-        sourcemap,
-        define: {
-            ...defines,
-            IS_DISCORD_DESKTOP: "false",
-            IS_VESKTOP: "false",
-            IS_EQUIBOP: "true"
-        }
     }
 ]);
 
@@ -243,15 +190,7 @@ await Promise.all([
         name: "youcord",
         main: "patcher.js"
     })),
-    writeFile("dist/youcord/package.json", JSON.stringify({
-        name: "youcord",
-        main: "main.js"
-    })),
     writeFile("dist/desktop/build.json", buildInfo),
-    writeFile("dist/youcord/build.json", buildInfo),
 ]);
 
-await Promise.all([
-    createPackage("dist/desktop", "dist/desktop.asar"),
-    createPackage("dist/youcord", "dist/youcord.asar"),
-]);
+await createPackage("dist/desktop", "dist/desktop.asar");

@@ -24,7 +24,7 @@
 
 > **⚠️ Avertissement :** YouCord est et restera **100% gratuit**. Si vous avez payé pour obtenir cette application, vous avez été victime d'une arnaque. Nous ne demandons jamais d'argent pour l'accès à nos services. Rejoignez notre Discord officiel pour rester informé : [discord.gg/mwxsEuEp54](https://discord.gg/mwxsEuEp54)
 
-YouCord is a standalone Discord client built on Electron — not just an injector. It wraps Discord's web app in its own Electron shell with a custom splash screen, tray icon, auto-updater, and native OS integration. Forked from Equicord (which itself builds on Vencord), we stripped out obfuscation, cleaned things up, added our own improvements, and kept what works. No bloat, no nonsense.
+YouCord is a fork of Equicord, which itself builds on top of Vencord. It injects directly into your existing Discord Desktop client — no separate app, no bloat. We stripped out the obfuscation, cleaned things up, added our own improvements, and kept what works.
 
 ---
 
@@ -45,7 +45,7 @@ YouCord is a standalone Discord client built on Electron — not just an injecto
 
 ## What's in it
 
-* **Standalone Electron client** — runs as its own application with a custom splash screen, tray icon, and native window controls. No need to modify your Discord installation.
+* **Direct injection** — patches your existing Discord Desktop client in place. No separate application needed.
 * **Faster startup** — no obfuscation means the client loads noticeably quicker and sits lighter on your CPU and RAM.
 * **Auto-updates** — checks for updates in the background on launch and applies them silently.
 * **Plugin support** — compatible with the existing Vencord/Equicord plugin ecosystem (600+ plugins across three namespaces).
@@ -53,7 +53,7 @@ YouCord is a standalone Discord client built on Electron — not just an injecto
 * **Custom styling** — smoother UI, custom icons, and various quality-of-life improvements.
 * **Browser extension** — run YouCord as a web extension in Chrome, Firefox, and Edge.
 * **Web build** — a standalone web version for desktop browsers.
-* **Injection mode** — can also be injected into an existing Discord installation if preferred.
+* **Plugin dev tooling** — auto-generates plugin lists for Vencord, Equicord, and YouCord.
 
 ---
 
@@ -61,25 +61,34 @@ YouCord is a standalone Discord client built on Electron — not just an injecto
 
 | Platform | Support |
 |----------|---------|
-| **Windows** | ✅ Standalone app (NSIS installer + portable) |
-| **macOS** | ✅ Standalone app (DMG) |
-| **Linux** | ✅ Standalone app (AppImage + NixOS) |
+| **Windows** | ✅ Installer (`YouCord-Installer.exe`) and PowerShell script (`youcord-install.ps1`) |
+| **macOS** | ✅ Manual injection via `pnpm inject` |
+| **Linux** | ✅ Manual injection via `pnpm inject` |
 | **Browser** | ✅ Chrome, Firefox, Edge web extension |
 | **Web** | ✅ Standalone web build |
 
 ---
 
-## Installation
+## Installation (Windows)
 
-### Standalone app (recommended)
+### Option A — Installer (recommended)
 
-Download the latest release for your platform from the [Releases](https://github.com/nightcordlegit/youcord/releases/latest) page. Run the installer or portable build — no need to have Discord installed.
+1. Download **`YouCord-Installer.exe`** from the [Releases](https://github.com/nightcordlegit/youcord/releases/latest) page
+2. Run it, pick your Discord install, done.
 
-### Injection into Discord (alternative)
+### Option B — PowerShell script
 
-If you prefer to inject YouCord into an existing Discord installation:
+1. Download **`youcord-install.ps1`**
+2. Right-click → **Run with PowerShell**
+3. Follow the steps, restart Discord, done.
+
+### Option C — From source
 
 ```bash
+git clone https://github.com/nightcordlegit/youcord.git
+cd youcord
+pnpm install
+pnpm build
 pnpm inject
 ```
 
@@ -115,11 +124,8 @@ pnpm build
 ### Platform-specific builds
 
 ```bash
-# Standalone app (all platforms) — primary build
-pnpm buildStandalone
-
-# Desktop build (injection mode)
-pnpm buildDesktop
+# Desktop (injection build)
+pnpm build
 
 # Browser extension (Chrome, Firefox, Edge)
 pnpm buildWebStandalone
@@ -143,8 +149,8 @@ pnpm lint:fix
 # Watch for changes
 pnpm dev
 
-# Run locally
-pnpm start
+# Inject into Discord (after build)
+pnpm inject
 
 # Generate plugin JSON lists
 pnpm generatePluginJson
