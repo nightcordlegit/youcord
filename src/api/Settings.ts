@@ -164,7 +164,7 @@ const DefaultSettings: Settings = {
 
     cloud: {
         authenticated: false,
-        url: "https://cloud.equicord.org/",
+        url: "https://api.youcord.fr",
         settingsSync: false,
         settingsSyncVersion: 0
     },

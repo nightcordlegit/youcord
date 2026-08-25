@@ -4,15 +4,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { API_BASE } from "./OAuth2";
+import { getApiBase } from "./OAuth2";
 
-// The YouCord plugin-sync backend is not deployed yet. Keep this guard in the
-// shared API so no plugin can accidentally request /api/sync/* from Discord.
-export const PLUGIN_SYNC_AVAILABLE = false;
+// Enabled — connects to the YouCord server configured in Settings.cloud.url
+export const PLUGIN_SYNC_AVAILABLE = true;
 
 export async function getOwnPluginConfig(pluginName: string, token: string) {
     if (!PLUGIN_SYNC_AVAILABLE) return null;
-    const response = await fetch(`${API_BASE}/api/sync/${encodeURIComponent(pluginName)}?token=${encodeURIComponent(token)}`);
+    const apiBase = getApiBase();
+    if (!apiBase) return null;
+
+    const response = await fetch(`${apiBase}/api/sync/${encodeURIComponent(pluginName)}?token=${encodeURIComponent(token)}`);
     if (!response.ok) {
         throw new Error("Failed to load plugin config");
     }
@@ -21,10 +23,13 @@ export async function getOwnPluginConfig(pluginName: string, token: string) {
 
 export async function saveOwnPluginConfig(pluginName: string, token: string, settings: Record<string, unknown>) {
     if (!PLUGIN_SYNC_AVAILABLE) return null;
+    const apiBase = getApiBase();
+    if (!apiBase) return null;
+
     // private must be sent both at top-level and inside settings so the server
     // always treats this config as public (visible via /public endpoint).
     const isPrivate = settings.private === true;
-    const response = await fetch(`${API_BASE}/api/sync/${encodeURIComponent(pluginName)}`, {
+    const response = await fetch(`${apiBase}/api/sync/${encodeURIComponent(pluginName)}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
@@ -46,8 +51,11 @@ export async function saveOwnPluginConfig(pluginName: string, token: string, set
 // No in-memory cache here — caching is handled by callers (e.g. publicProfilesCache in customProfile)
 export async function getPublicPluginConfig(pluginName: string, userId: string) {
     if (!PLUGIN_SYNC_AVAILABLE) return null;
+    const apiBase = getApiBase();
+    if (!apiBase) return null;
+
     try {
-        const response = await fetch(`${API_BASE}/api/sync/${encodeURIComponent(pluginName)}/public?userId=${encodeURIComponent(userId)}`);
+        const response = await fetch(`${apiBase}/api/sync/${encodeURIComponent(pluginName)}/public?userId=${encodeURIComponent(userId)}`);
         if (!response.ok) return null;
         return await response.json();
     } catch (e) {

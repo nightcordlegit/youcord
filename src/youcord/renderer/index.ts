@@ -18,6 +18,7 @@ import { openModal } from "@YouCord/types/utils";
 import { onceReady } from "@YouCord/types/webpack";
 import { React, VoiceActions } from "@YouCord/types/webpack/common";
 
+import { AnnouncementModal } from "./components/AnnouncementModal";
 import { SecurityModal } from "./components/SecurityModal";
 import SettingsUi from "./components/settings/Settings";
 import { VesktopLogger } from "./logger";
@@ -56,6 +57,17 @@ const SECURITY_MODAL_KEY = "youcord_security_modal_seen";
         setTimeout(() => {
             openModal(props => React.createElement(SecurityModal, props));
             localStorage.setItem(SECURITY_MODAL_KEY, "1");
+        }, 1500);
+    }
+});
+
+// Afficher l'annonce de détournement une seule fois
+const ANNOUNCEMENT_MODAL_KEY = "youcord_announcement_seen_v1";
+(onceReady as unknown as Promise<void>).then(() => {
+    if (!localStorage.getItem(ANNOUNCEMENT_MODAL_KEY)) {
+        setTimeout(() => {
+            openModal(props => React.createElement(AnnouncementModal, props));
+            localStorage.setItem(ANNOUNCEMENT_MODAL_KEY, "1");
         }, 1500);
     }
 });

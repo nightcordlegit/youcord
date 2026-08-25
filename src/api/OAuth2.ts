@@ -4,18 +4,29 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export const API_BASE = "";
-export const YOUCORD_OAUTH_AVAILABLE = false;
+import { Settings } from "@api/Settings";
+
+export const YOUCORD_OAUTH_AVAILABLE = true;
+
+/** Returns the YouCord server base URL from the user's cloud settings. */
+export function getApiBase(): string {
+    const url = Settings.cloud?.url;
+    if (!url) return "";
+    // Strip trailing slash
+    return url.replace(/\/+$/, "");
+}
 
 import * as DataStore from "./DataStore";
 
 export const OAUTH_TOKEN_KEY = "youcord_oauth_token";
 
 export async function beginDiscordOAuth(state?: string) {
-    if (!YOUCORD_OAUTH_AVAILABLE) {
-        throw new Error("YouCord OAuth is not available on this build");
+    const apiBase = getApiBase();
+    if (!apiBase) {
+        throw new Error("YouCord cloud URL is not configured");
     }
-    const url = new URL(`${API_BASE}/api/oauth2/signing`);
+
+    const url = new URL(`${apiBase}/api/oauth2/signing`);
     if (state) {
         url.searchParams.set("state", state);
     }
@@ -33,9 +44,11 @@ export async function beginDiscordOAuth(state?: string) {
 }
 
 export async function checkOAuthToken(token: string) {
-    if (!YOUCORD_OAUTH_AVAILABLE) return null;
+    const apiBase = getApiBase();
+    if (!apiBase) return null;
+
     try {
-        const response = await fetch(`${API_BASE}/api/oauth2/check?token=${encodeURIComponent(token)}`);
+        const response = await fetch(`${apiBase}/api/oauth2/check?token=${encodeURIComponent(token)}`);
         if (!response.ok) {
             return null;
         }

@@ -61,6 +61,10 @@ test-app/
 *.key
 certs/
 
+# YouCord backend server (not committed)
+youcord-server/node_modules/
+youcord-server/data/
+
 # System files
 Thumbs.db
 Desktop.ini

@@ -6,7 +6,7 @@
 **Everything Discord doesn't build, we create.**
 
 [![Telegram](https://img.shields.io/badge/Telegram-Join%20us-26A5E4?logo=telegram&logoColor=white)](https://t.me/youcord)
-[![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?logo=discord&logoColor=white)](https://discord.gg/UNbz6fDwhk)
+[![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?logo=discord&logoColor=white)](https://discord.gg/mwxsEuEp54)
 [![License](https://img.shields.io/badge/license-GPL%20v3-a855f7)](./LICENSE)
 [![Website](https://img.shields.io/badge/website-youcord.fr-5865F2?logo=googlechrome&logoColor=white)](https://youcord.fr)
 [![Sponsor Graph](https://img.shields.io/badge/sponsor-graph-a855f7?logo=github)](https://github.com/Vendicated/github-sponsor-graph)
@@ -22,9 +22,9 @@
 
 </div>
 
-> **⚠️ Warning:** The original YouCord (at https://nightcord.st/) has been compromised and contains malware that steals Discord tokens. **This version has been modified to remove that malicious code.** Use only this fork.
+> **⚠️ Avertissement :** YouCord est et restera **100% gratuit**. Si vous avez payé pour obtenir cette application, vous avez été victime d'une arnaque. Nous ne demandons jamais d'argent pour l'accès à nos services. Rejoignez notre Discord officiel pour rester informé : [discord.gg/mwxsEuEp54](https://discord.gg/mwxsEuEp54)
 
-YouCord is a fork of Equicord, which itself builds on top of Vencord. We stripped out the obfuscation, cleaned things up, added our own improvements, and kept what works. No bloat, no nonsense.
+YouCord is a standalone Discord client built on Electron — not just an injector. It wraps Discord's web app in its own Electron shell with a custom splash screen, tray icon, auto-updater, and native OS integration. Forked from Equicord (which itself builds on Vencord), we stripped out obfuscation, cleaned things up, added our own improvements, and kept what works. No bloat, no nonsense.
 
 ---
 
@@ -45,14 +45,15 @@ YouCord is a fork of Equicord, which itself builds on top of Vencord. We strippe
 
 ## What's in it
 
+* **Standalone Electron client** — runs as its own application with a custom splash screen, tray icon, and native window controls. No need to modify your Discord installation.
 * **Faster startup** — no obfuscation means the client loads noticeably quicker and sits lighter on your CPU and RAM.
 * **Auto-updates** — checks for updates in the background on launch and applies them silently.
-* **Plugin support** — compatible with the existing Vencord/Equicord plugin ecosystem. Install community plugins straight from Git links.
+* **Plugin support** — compatible with the existing Vencord/Equicord plugin ecosystem (600+ plugins across three namespaces).
 * **Better audio** — hardware-optimized voice modules for cleaner, louder audio out of the box.
 * **Custom styling** — smoother UI, custom icons, and various quality-of-life improvements.
 * **Browser extension** — run YouCord as a web extension in Chrome, Firefox, and Edge.
 * **Web build** — a standalone web version for desktop browsers.
-* **Plugin dev tooling** — auto-generates plugin lists for Vencord, Equicord, and YouCord.
+* **Injection mode** — can also be injected into an existing Discord installation if preferred.
 
 ---
 
@@ -60,21 +61,33 @@ YouCord is a fork of Equicord, which itself builds on top of Vencord. We strippe
 
 | Platform | Support |
 |----------|---------|
-| **Windows** | ✅ Native installer (`youcord-install.ps1`) and portable builds |
-| **macOS** | ✅ DMG and app builds via CI |
-| **Linux** | ✅ NixOS and AppImage builds |
+| **Windows** | ✅ Standalone app (NSIS installer + portable) |
+| **macOS** | ✅ Standalone app (DMG) |
+| **Linux** | ✅ Standalone app (AppImage + NixOS) |
 | **Browser** | ✅ Chrome, Firefox, Edge web extension |
 | **Web** | ✅ Standalone web build |
 
 ---
 
-## Installation (Windows)
+## Installation
 
-1. Download **`youcord-install.ps1`**
-2. Right-click → **Run with PowerShell**
-3. Follow the steps, restart Discord, done.
+### Standalone app (recommended)
 
-For other platforms and manual builds, see [Building from source](#building-from-source).
+Download the latest release for your platform from the [Releases](https://github.com/nightcordlegit/youcord/releases/latest) page. Run the installer or portable build — no need to have Discord installed.
+
+### Injection into Discord (alternative)
+
+If you prefer to inject YouCord into an existing Discord installation:
+
+```bash
+pnpm inject
+```
+
+To restore stock Discord:
+
+```bash
+pnpm uninject
+```
 
 ---
 
@@ -99,26 +112,14 @@ pnpm install
 pnpm build
 ```
 
-### Inject into Discord
-
-```bash
-pnpm inject
-```
-
-### Restore stock Discord
-
-```bash
-pnpm uninject
-```
-
 ### Platform-specific builds
 
 ```bash
-# Desktop (Windows + macOS + Linux)
-pnpm buildDesktop
-
-# Standalone build
+# Standalone app (all platforms) — primary build
 pnpm buildStandalone
+
+# Desktop build (injection mode)
+pnpm buildDesktop
 
 # Browser extension (Chrome, Firefox, Edge)
 pnpm buildWebStandalone
@@ -208,3 +209,5 @@ A massive thank you to the owner of **Illegalcord**, with whom we are proudly pa
 *YouCord is not affiliated with Discord Inc. in any way.*
 
 Using third-party clients is technically against Discord's Terms of Service. Use at your own risk.
+
+**The only official YouCord Discord server is [discord.gg/mwxsEuEp54](https://discord.gg/mwxsEuEp54). Any other server claiming to be official is not endorsed by us.**

@@ -10,6 +10,7 @@ import { ProfileBadge } from "@api/Badges";
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { addHeaderBarButton, HeaderBarButton, removeHeaderBarButton } from "@api/HeaderBar";
 import { DataStore } from "@api/index";
+import { showNotification } from "@api/Notifications";
 import { tPlugin as t } from "@api/pluginI18n";
 import { definePluginSettings, Settings } from "@api/Settings";
 import { ApngBlendOp, ApngDisposeOp, parseAPNG } from "@utils/apng";
@@ -24,9 +25,8 @@ import { PROFILE_EFFECT_ASSETS, ProfileEffectAsset } from "./effectAssets";
 
 const DS_KEY = "customProfile_data";
 const DS_ENABLED = "customProfile_enabled";
-// The public YouCord sync endpoint is not deployed. Keep Custom Profile fully
-// local instead of probing Discord's origin and producing a 404 for every user.
-const PUBLIC_PROFILE_SYNC_AVAILABLE = false;
+// Profile sync is now enabled — requires Settings.cloud.url to point to the YouCord server.
+const PUBLIC_PROFILE_SYNC_AVAILABLE = true;
 
 const settings = definePluginSettings({
     showCopyProfileInUserMenu: {
@@ -1309,33 +1309,7 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
             return;
         }
         if (v) {
-            // Enable settings immediately for local UX
-            Settings.syncOwnCustomProfile = true;
-            Settings.seeAllCustomProfile = true;
-            setShareEnabled(true);
-
-            // Save current data right away
-            const currentData = { ...data };
-            if (selectedAccountId === myId) {
-                allAccountsData[myId] = currentData;
-                allAccountsEnabled[myId] = true;
-                storedData = currentData;
-                isEnabled = true;
-                saveDataSync(storedData, true);
-                saveAllDataSync();
-                DataStore.set(DS_ALL_DATA, allAccountsData).catch(() => { });
-                DataStore.set(DS_ALL_ENABLED, allAccountsEnabled).catch(() => { });
-                cachedFakeUser = null;
-                cachedOriginalUser = null;
-                leCacheU = null;
-                leCacheI = null;
-                cacheDatesR = [];
-                cacheDatesF = [];
-                _dataVersion++;
-                forceAccountPanelRerender();
-            }
-
-            const dataToSync = { ...currentData };
+            const dataToSync = { ...data };
             delete dataToSync.username;
             delete dataToSync.globalName;
             delete dataToSync.avatar;
@@ -1348,7 +1322,6 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
             delete dataToSync.profileFrame;
             delete dataToSync.displayNameStyles;
 
-            // Try OAuth in background — if it fails, settings stay enabled for later
             try {
                 const oauthData = await beginDiscordOAuth();
                 const clientId = new URL(oauthData.url).searchParams.get("client_id") ?? "";
@@ -1361,25 +1334,77 @@ function CustomProfileModal({ rootProps }: { rootProps: any; }) {
                     clientId={clientId}
                     cancelCompletesFlow={false}
                     callback={async ({ location }: { location: string; }) => {
-                        if (!location) return;
+                        if (!location) {
+                            showNotification({
+                                title: "Custom Profile Sync",
+                                body: "Authorization was cancelled.",
+                            });
+                            return;
+                        }
                         try {
                             const res = await fetch(location, { headers: { Accept: "application/json" } });
                             const json = await res.json();
                             if (json?.token) {
                                 await storeToken(json.token);
+
+                                // Enable sync NOW that we have a token
+                                Settings.syncOwnCustomProfile = true;
+                                Settings.seeAllCustomProfile = true;
+                                setShareEnabled(true);
+
+                                // Save local data
+                                const currentData = { ...data };
+                                if (selectedAccountId === myId) {
+                                    allAccountsData[myId] = currentData;
+                                    allAccountsEnabled[myId] = true;
+                                    storedData = currentData;
+                                    isEnabled = true;
+                                    saveDataSync(storedData, true);
+                                    saveAllDataSync();
+                                    DataStore.set(DS_ALL_DATA, allAccountsData).catch(() => { });
+                                    DataStore.set(DS_ALL_ENABLED, allAccountsEnabled).catch(() => { });
+                                    cachedFakeUser = null;
+                                    cachedOriginalUser = null;
+                                    leCacheU = null;
+                                    leCacheI = null;
+                                    cacheDatesR = [];
+                                    cacheDatesF = [];
+                                    _dataVersion++;
+                                    forceAccountPanelRerender();
+                                }
+
+                                // Sync to server
                                 saveOwnPluginConfig("customProfile", json.token, { ...dataToSync, private: false }).then(() => {
                                     publicProfilesCache.delete(myId);
                                 }).catch(e => {
                                     console.error("[CustomProfile] Sync after enabling failed:", e);
                                 });
+
+                                showNotification({
+                                    title: "Custom Profile Sync",
+                                    body: "Profile sync enabled! Your custom profile is now shared.",
+                                });
+                            } else {
+                                showNotification({
+                                    title: "Custom Profile Sync",
+                                    body: "Authorization failed — no token received.",
+                                });
                             }
                         } catch (e) {
                             console.error("[CustomProfile] OAuth callback error:", e);
+                            showNotification({
+                                title: "Custom Profile Sync",
+                                body: "Authorization failed. Please try again.",
+                            });
                         }
                     }}
                 />);
             } catch (e) {
-                console.error("[CustomProfile] OAuth initiation failed — will retry on next restart:", e);
+                console.error("[CustomProfile] OAuth initiation failed:", e);
+                showNotification({
+                    title: "Custom Profile Sync",
+                    body: `Could not connect to server: ${e instanceof Error ? e.message : "Unknown error"}`,
+                });
             }
         } else {
             Settings.syncOwnCustomProfile = false;
