@@ -1,7 +1,7 @@
 {
   "name": "youcord",
   "private": "true",
-  "version": "1.22.5",
+  "version": "1.23.0",
   "description": "Everything Discord doesn't build, we create",
   "homepage": "https://github.com/nightcordlegit/youcord",
   "bugs": {
