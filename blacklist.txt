@@ -1,5 +1,0 @@
-macOsButtons
-cursorMacOS
-multiInstance
-soundcloudPlayer
-youtubePlayer
